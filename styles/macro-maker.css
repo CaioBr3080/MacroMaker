@@ -1,0 +1,362 @@
+.macro-maker .window-content {
+  padding: 0;
+  overflow: hidden;
+}
+
+.macro-maker-shell {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  height: 100%;
+  min-height: 580px;
+  color: var(--color-text-primary);
+}
+
+.macro-maker-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  overflow: auto;
+  border-right: 1px solid var(--color-border-light-primary);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.macro-maker-sidebar header,
+.macro-maker-toolbar,
+.macro-maker-actions,
+.macro-maker-add-step,
+.macro-maker-editor-nav,
+.macro-maker-step-header,
+.macro-maker-json-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.macro-maker-sidebar header,
+.macro-maker-toolbar {
+  justify-content: space-between;
+}
+
+.macro-maker-sidebar h2,
+.macro-maker-toolbar h1,
+.macro-maker-toolbar p,
+.macro-maker-add-step h2 {
+  margin: 0;
+}
+
+.macro-maker-projects,
+.macro-maker-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.macro-maker-projects button {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  width: 100%;
+  min-height: 38px;
+  text-align: left;
+}
+
+.macro-maker-projects img {
+  width: 24px;
+  height: 24px;
+  border: 0;
+}
+
+.macro-maker-projects .active button {
+  border-color: var(--color-border-highlight);
+  box-shadow: 0 0 6px var(--color-shadow-highlight);
+}
+
+.macro-maker-projects .empty,
+.macro-maker-steps > .empty {
+  padding: 1rem;
+  opacity: 0.7;
+  font-style: italic;
+  text-align: center;
+}
+
+.macro-maker-editor {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.macro-maker-toolbar p {
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
+
+.macro-maker-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.macro-maker-actions .primary {
+  border-color: #5ca85c;
+}
+
+.macro-maker-editor-nav {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border-light-primary);
+}
+
+.macro-maker-editor-nav .spacer,
+.macro-maker-add-step .spacer {
+  flex: 1;
+}
+
+.macro-maker-editor-nav [data-action="show-tab"].active {
+  border-color: var(--color-border-highlight);
+  box-shadow: inset 0 -2px 0 var(--color-border-highlight);
+}
+
+.macro-maker-panel {
+  min-height: 0;
+  overflow: auto;
+}
+
+.macro-maker-panel[hidden] {
+  display: none;
+}
+
+.macro-maker-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.25rem;
+}
+
+.macro-maker-project-fields,
+.macro-maker-step-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem 0.75rem;
+}
+
+.macro-maker-project-fields {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 5px;
+}
+
+.macro-maker-project-fields label,
+.macro-maker-step-fields > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.macro-maker-project-fields .wide {
+  grid-column: span 1;
+}
+
+.macro-maker-project-fields .full,
+.macro-maker-step-fields .full {
+  grid-column: 1 / -1;
+}
+
+.macro-maker-project-fields .checkbox-field {
+  flex-direction: row;
+  align-items: center;
+  align-self: end;
+  min-height: 32px;
+}
+
+.macro-maker-project-fields input,
+.macro-maker-project-fields select,
+.macro-maker-project-fields textarea,
+.macro-maker-step-fields input,
+.macro-maker-step-fields select {
+  width: 100%;
+}
+
+.macro-maker-step-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.macro-maker-add-step {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0.45rem 0;
+  background: var(--color-cool-5, rgba(30, 30, 30, 0.92));
+}
+
+.macro-maker-add-step select {
+  width: 180px;
+}
+
+.macro-maker-step {
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.12);
+  transition: opacity 120ms ease, border-color 120ms ease;
+}
+
+.macro-maker-step.disabled {
+  opacity: 0.55;
+}
+
+.macro-maker-step.drag-over {
+  border-color: var(--color-border-highlight);
+  box-shadow: 0 0 6px var(--color-shadow-highlight);
+}
+
+.macro-maker-step-header {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-border-light-primary);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.macro-maker-step-header .drag-handle {
+  cursor: grab;
+  opacity: 0.65;
+}
+
+.macro-maker-step-header .step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.28);
+  font-weight: 700;
+}
+
+.macro-maker-step-header .step-type {
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  background: rgba(90, 120, 170, 0.25);
+  font-size: 0.78rem;
+}
+
+.macro-maker-step-header .step-enabled {
+  display: flex;
+  align-items: center;
+}
+
+.macro-maker-step-header .step-label {
+  flex: 1;
+  min-width: 120px;
+}
+
+.macro-maker-step-header .step-actions {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.macro-maker-step-header .step-actions button {
+  width: 28px;
+  min-width: 28px;
+  padding: 0;
+}
+
+.macro-maker-step-fields {
+  padding: 0.7rem;
+}
+
+.macro-maker-step-fields .file-field > span {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.macro-maker-step-fields .file-field button {
+  flex: 0 0 36px;
+}
+
+.macro-maker-step-fields .checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.macro-maker-step-fields .checkbox-grid label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+}
+
+.macro-maker-step-fields .checkbox-grid input {
+  width: auto;
+}
+
+.macro-maker-json {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.macro-maker-json-note {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #4c78a8;
+  border-radius: 4px;
+  background: rgba(76, 120, 168, 0.12);
+}
+
+.macro-maker-json-note button {
+  margin-left: auto;
+}
+
+.macro-maker-json textarea {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  resize: none;
+  padding: 0.85rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.36);
+  color: #e6e6e6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  tab-size: 2;
+}
+
+.macro-maker .invalid {
+  border-color: #d33 !important;
+  box-shadow: 0 0 0 1px #d33 !important;
+}
+
+.macro-maker-launcher {
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 800px) {
+  .macro-maker-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .macro-maker-sidebar {
+    max-height: 160px;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border-light-primary);
+  }
+
+  .macro-maker-project-fields,
+  .macro-maker-step-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .macro-maker-step-fields .checkbox-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

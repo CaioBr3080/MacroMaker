@@ -1,0 +1,56 @@
+{
+  "id": "macro-maker",
+  "title": "Macro Maker",
+  "description": "Construtor visual e executor de macros com Sequencer para Foundry VTT.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "authors": [
+    {
+      "name": "Caio Alexandre"
+    }
+  ],
+  "esmodules": [
+    "src/main.js"
+  ],
+  "styles": [
+    "styles/macro-maker.css"
+  ],
+  "languages": [
+    {
+      "lang": "pt-BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt-BR.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "relationships": {
+    "requires": [
+      {
+        "id": "sequencer",
+        "type": "module",
+        "compatibility": {
+          "minimum": "3.6.0"
+        }
+      }
+    ],
+    "recommends": [
+      {
+        "id": "jb2a_patreon",
+        "type": "module",
+        "reason": "Biblioteca recomendada de animações, mas não obrigatória."
+      }
+    ]
+  },
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "license": "LICENSE",
+  "readme": "README.md"
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/macro-maker/project.schema.json",
+  "title": "Macro Maker Project",
+  "type": "object",
+  "required": ["schemaVersion", "name", "targeting", "steps"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "icon": { "type": "string" },
+    "targeting": {
+      "type": "object",
+      "required": ["source", "mode"],
+      "properties": {
+        "source": { "enum": ["controlled", "none"] },
+        "mode": { "enum": ["currentTargets", "controlled", "none"] },
+        "minTargets": { "type": "integer", "minimum": 0 },
+        "maxTargets": { "type": "integer", "minimum": 0 },
+        "range": { "type": ["number", "null"] },
+        "blockOutOfRange": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "variables": { "type": "object" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "enum": ["animation", "sound", "wait", "attack", "damage", "menu", "removePersistent"]
+          },
+          "label": { "type": "string" },
+          "enabled": { "type": "boolean" },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type"]
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "metadata": { "type": "object" }
+  },
+  "additionalProperties": true
+}

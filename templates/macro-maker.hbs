@@ -1,0 +1,227 @@
+<div class="macro-maker-shell">
+  <aside class="macro-maker-sidebar">
+    <header>
+      <h2><i class="fas fa-wand-magic-sparkles"></i> Projetos</h2>
+      <button type="button" data-action="new"><i class="fas fa-plus"></i> Novo</button>
+    </header>
+
+    <ol class="macro-maker-projects">
+      {{#each projects}}
+        <li class="{{#if active}}active{{/if}}">
+          <button type="button" data-action="load" data-uuid="{{uuid}}" title="Abrir {{name}}">
+            <img src="{{img}}" alt="">
+            <span>{{name}}</span>
+            {{#unless canEdit}}<i class="fas fa-eye" title="Somente leitura"></i>{{/unless}}
+          </button>
+        </li>
+      {{else}}
+        <li class="empty">Nenhum projeto ainda.</li>
+      {{/each}}
+    </ol>
+  </aside>
+
+  <main class="macro-maker-editor">
+    <header class="macro-maker-toolbar">
+      <div>
+        <h1>{{project.name}}</h1>
+        <p>Projeto-fonte salvo nas flags do Macro.</p>
+      </div>
+      <div class="macro-maker-actions">
+        <button type="button" data-action="duplicate" {{#unless hasMacro}}disabled{{/unless}}>
+          <i class="fas fa-copy"></i> Duplicar
+        </button>
+        <button type="button" data-action="run"><i class="fas fa-play"></i> Executar</button>
+        <button type="button" data-action="save" class="primary"><i class="fas fa-save"></i> Salvar</button>
+      </div>
+    </header>
+
+    <nav class="macro-maker-editor-nav" role="tablist" aria-label="Modo do editor">
+      <button type="button" data-action="show-tab" data-tab="visual" role="tab">
+        <i class="fas fa-layer-group"></i> Visual
+      </button>
+      <button type="button" data-action="show-tab" data-tab="json" role="tab">
+        <i class="fas fa-code"></i> JSON avançado
+      </button>
+      <span class="spacer"></span>
+      <button type="button" data-action="undo" title="Desfazer" {{#unless canUndo}}disabled{{/unless}}>
+        <i class="fas fa-rotate-left"></i>
+      </button>
+      <button type="button" data-action="redo" title="Refazer" {{#unless canRedo}}disabled{{/unless}}>
+        <i class="fas fa-rotate-right"></i>
+      </button>
+    </nav>
+
+    <section class="macro-maker-panel macro-maker-visual" data-editor-panel="visual">
+      <fieldset class="macro-maker-project-fields">
+        <legend>Projeto</legend>
+        <label class="wide">Nome
+          <input type="text" value="{{project.name}}" data-project-path="name">
+        </label>
+        <label class="wide">Ícone
+          <input type="text" value="{{project.icon}}" data-project-path="icon">
+        </label>
+        <label class="full">Descrição
+          <textarea rows="2" data-project-path="description">{{project.description}}</textarea>
+        </label>
+      </fieldset>
+
+      <fieldset class="macro-maker-project-fields">
+        <legend>Seleção e alcance</legend>
+        <label>Origem
+          <select data-project-path="targeting.source" data-value="{{project.targeting.source}}">
+            <option value="controlled">Token controlado</option>
+            <option value="none">Sem origem</option>
+          </select>
+        </label>
+        <label>Alvos
+          <select data-project-path="targeting.mode" data-value="{{project.targeting.mode}}">
+            <option value="currentTargets">Alvos marcados (T)</option>
+            <option value="controlled">Outros controlados</option>
+            <option value="none">Sem alvos</option>
+          </select>
+        </label>
+        <label>Mínimo
+          <input type="number" min="0" value="{{project.targeting.minTargets}}" data-project-path="targeting.minTargets" data-value-type="number">
+        </label>
+        <label>Máximo
+          <input type="number" min="0" value="{{project.targeting.maxTargets}}" data-project-path="targeting.maxTargets" data-value-type="number">
+        </label>
+        <label>Alcance
+          <input type="number" min="0" step="any" value="{{project.targeting.range}}" placeholder="Sem limite" data-project-path="targeting.range" data-value-type="number-null">
+        </label>
+        <label class="checkbox-field">
+          <input type="checkbox" {{#if project.targeting.blockOutOfRange}}checked{{/if}} data-project-path="targeting.blockOutOfRange" data-value-type="boolean">
+          Bloquear fora do alcance
+        </label>
+      </fieldset>
+
+      <section class="macro-maker-step-builder">
+        <header class="macro-maker-add-step">
+          <h2>Etapas</h2>
+          <span class="spacer"></span>
+          <label for="macro-maker-step-type">Adicionar</label>
+          <select id="macro-maker-step-type" name="newStepType">
+            {{#each stepTypes}}<option value="{{type}}">{{label}}</option>{{/each}}
+          </select>
+          <button type="button" data-action="add-step"><i class="fas fa-plus"></i> Adicionar</button>
+        </header>
+
+        <ol class="macro-maker-steps">
+          {{#each steps}}
+            <li class="macro-maker-step {{#unless isEnabled}}disabled{{/unless}}" data-step-index="{{index}}" draggable="true">
+              <header class="macro-maker-step-header">
+                <i class="fas fa-grip-vertical drag-handle" title="Arraste para reordenar"></i>
+                <span class="step-number">{{number}}</span>
+                <span class="step-type">{{type}}</span>
+                <label class="step-enabled" title="Etapa habilitada">
+                  <input type="checkbox" {{#if isEnabled}}checked{{/if}} data-step-index="{{index}}" data-step-path="enabled" data-value-type="boolean">
+                </label>
+                <input class="step-label" type="text" value="{{label}}" aria-label="Rótulo da etapa" data-step-index="{{index}}" data-step-path="label">
+                <div class="step-actions">
+                  <button type="button" data-action="move-step" data-index="{{index}}" data-offset="-1" title="Mover para cima" {{#if isFirst}}disabled{{/if}}><i class="fas fa-arrow-up"></i></button>
+                  <button type="button" data-action="move-step" data-index="{{index}}" data-offset="1" title="Mover para baixo" {{#if isLast}}disabled{{/if}}><i class="fas fa-arrow-down"></i></button>
+                  <button type="button" data-action="duplicate-step" data-index="{{index}}" title="Duplicar"><i class="fas fa-copy"></i></button>
+                  <button type="button" data-action="delete-step" data-index="{{index}}" title="Excluir"><i class="fas fa-trash"></i></button>
+                </div>
+              </header>
+
+              <div class="macro-maker-step-fields">
+                <label>Condição
+                  <select data-condition-type data-step-index="{{index}}" data-value="{{conditionType}}">
+                    <option value="always">Sempre</option>
+                    <option value="critical">Crítico</option>
+                    <option value="notCritical">Não crítico</option>
+                    <option value="hit">Acerto</option>
+                    <option value="miss">Erro</option>
+                  </select>
+                </label>
+
+                {{#if isAnimation}}
+                  <label class="file-field full">Arquivo ou chave Sequencer
+                    <span><input type="text" value="{{file}}" data-step-index="{{index}}" data-step-path="file"><button type="button" data-action="browse-file" data-index="{{index}}" data-file-type="video" title="Procurar arquivo"><i class="fas fa-folder-open"></i></button></span>
+                  </label>
+                  <label>Origem
+                    <select data-step-index="{{index}}" data-step-path="source" data-value="{{source}}"><option value="source">Executante</option><option value="target">Alvo</option></select>
+                  </label>
+                  <label>Destino
+                    <select data-step-index="{{index}}" data-step-path="target" data-value="{{target}}"><option value="target">Alvo</option><option value="source">Executante</option></select>
+                  </label>
+                  <label>Escala <input type="number" step="0.1" value="{{scale}}" data-step-index="{{index}}" data-step-path="scale" data-value-type="optional-number"></label>
+                  <label>Escala ao objeto <input type="number" step="0.1" value="{{scaleToObject}}" data-step-index="{{index}}" data-step-path="scaleToObject" data-value-type="optional-number"></label>
+                  <label>Opacidade <input type="number" min="0" max="1" step="0.05" value="{{opacity}}" data-step-index="{{index}}" data-step-path="opacity" data-value-type="optional-number"></label>
+                  <label>Cor <input type="text" value="{{tint}}" placeholder="#ffffff" data-step-index="{{index}}" data-step-path="tint"></label>
+                  <label>Rotação <input type="number" step="1" value="{{rotation}}" data-step-index="{{index}}" data-step-path="rotation" data-value-type="optional-number"></label>
+                  <label>Velocidade <input type="number" min="0.01" step="0.1" value="{{playbackRate}}" data-step-index="{{index}}" data-step-path="playbackRate" data-value-type="optional-number"></label>
+                  <label>Fade in (ms) <input type="number" min="0" value="{{fadeIn}}" data-step-index="{{index}}" data-step-path="fadeIn" data-value-type="optional-number"></label>
+                  <label>Fade out (ms) <input type="number" min="0" value="{{fadeOut}}" data-step-index="{{index}}" data-step-path="fadeOut" data-value-type="optional-number"></label>
+                  <label>Esticar após distância <input type="number" min="0" step="any" value="{{distanceBehavior.stretchAfter}}" data-step-index="{{index}}" data-step-path="distanceBehavior.stretchAfter" data-value-type="optional-number"></label>
+                  <label>Nome persistente <input type="text" value="{{name}}" data-step-index="{{index}}" data-step-path="name"></label>
+                  <div class="checkbox-grid full">
+                    <label><input type="checkbox" {{#if attachTo}}checked{{/if}} data-step-index="{{index}}" data-step-path="attachTo" data-value-type="boolean"> Anexar à origem</label>
+                    <label><input type="checkbox" {{#if stretchTo}}checked{{/if}} data-step-index="{{index}}" data-step-path="stretchTo" data-value-type="boolean"> Esticar ao destino</label>
+                    <label><input type="checkbox" {{#if belowTokens}}checked{{/if}} data-step-index="{{index}}" data-step-path="belowTokens" data-value-type="boolean"> Abaixo dos tokens</label>
+                    <label><input type="checkbox" {{#if randomRotation}}checked{{/if}} data-step-index="{{index}}" data-step-path="randomRotation" data-value-type="boolean"> Rotação aleatória</label>
+                    <label><input type="checkbox" {{#if mirrorX}}checked{{/if}} data-step-index="{{index}}" data-step-path="mirrorX" data-value-type="boolean"> Espelhar X</label>
+                    <label><input type="checkbox" {{#if mirrorY}}checked{{/if}} data-step-index="{{index}}" data-step-path="mirrorY" data-value-type="boolean"> Espelhar Y</label>
+                    <label><input type="checkbox" {{#if persist}}checked{{/if}} data-step-index="{{index}}" data-step-path="persist" data-value-type="boolean"> Persistente</label>
+                  </div>
+                {{/if}}
+
+                {{#if isSound}}
+                  <label class="file-field full">Arquivo de áudio
+                    <span><input type="text" value="{{file}}" data-step-index="{{index}}" data-step-path="file"><button type="button" data-action="browse-file" data-index="{{index}}" data-file-type="audio"><i class="fas fa-folder-open"></i></button></span>
+                  </label>
+                  <label>Volume <input type="number" min="0" max="1" step="0.05" value="{{volume}}" data-step-index="{{index}}" data-step-path="volume" data-value-type="optional-number"></label>
+                  <label>Fade in (ms) <input type="number" min="0" value="{{fadeIn}}" data-step-index="{{index}}" data-step-path="fadeIn" data-value-type="optional-number"></label>
+                  <label>Fade out (ms) <input type="number" min="0" value="{{fadeOut}}" data-step-index="{{index}}" data-step-path="fadeOut" data-value-type="optional-number"></label>
+                {{/if}}
+
+                {{#if isWait}}
+                  <label>Espera (ms) <input type="number" min="0" value="{{ms}}" data-step-index="{{index}}" data-step-path="ms" data-value-type="number"></label>
+                {{/if}}
+
+                {{#if isAttack}}
+                  <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
+                  <label>Crítico a partir de <input type="number" value="{{criticalThreshold}}" data-step-index="{{index}}" data-step-path="criticalThreshold" data-value-type="number"></label>
+                  <label>Defesa opcional <input type="number" value="{{defense}}" data-step-index="{{index}}" data-step-path="defense" data-value-type="optional-number"></label>
+                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                {{/if}}
+
+                {{#if isDamage}}
+                  <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
+                  <label>Fórmula crítica <input type="text" value="{{criticalFormula}}" data-step-index="{{index}}" data-step-path="criticalFormula"></label>
+                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                {{/if}}
+
+                {{#if isMenu}}
+                  <label>Título <input type="text" value="{{title}}" data-step-index="{{index}}" data-step-path="title"></label>
+                  <label>Variável <input type="text" value="{{variable}}" data-step-index="{{index}}" data-step-path="variable"></label>
+                  <label>Primeira opção <input type="text" value="{{options.0.label}}" data-step-index="{{index}}" data-step-path="options.0.label"></label>
+                  <label>Valor <input type="text" value="{{options.0.value}}" data-step-index="{{index}}" data-step-path="options.0.value"></label>
+                {{/if}}
+
+                {{#if isRemovePersistent}}
+                  <label>Objeto
+                    <select data-step-index="{{index}}" data-step-path="object" data-value="{{object}}"><option value="target">Alvo</option><option value="source">Executante</option></select>
+                  </label>
+                  <label>Nome <input type="text" value="{{name}}" data-step-index="{{index}}" data-step-path="name"></label>
+                {{/if}}
+              </div>
+            </li>
+          {{else}}
+            <li class="empty">Adicione uma etapa para começar.</li>
+          {{/each}}
+        </ol>
+      </section>
+    </section>
+
+    <section class="macro-maker-panel macro-maker-json" data-editor-panel="json" hidden>
+      <div class="macro-maker-json-note">
+        <i class="fas fa-circle-info"></i>
+        Alterações válidas feitas aqui aparecem no editor visual sem remover propriedades desconhecidas.
+        <button type="button" data-action="format-json"><i class="fas fa-align-left"></i> Validar e formatar</button>
+      </div>
+      <textarea name="projectJson" spellcheck="false" aria-label="JSON do projeto">{{projectJson}}</textarea>
+    </section>
+  </main>
+</div>

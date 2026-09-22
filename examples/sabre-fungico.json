@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "name": "Sabre Fúngico",
+  "description": "Exemplo de ataque com crítico, som e efeito persistente.",
+  "icon": "icons/weapons/swords/sword-guard-purple.webp",
+  "targeting": {
+    "source": "controlled",
+    "mode": "currentTargets",
+    "minTargets": 1,
+    "maxTargets": 1,
+    "range": 2,
+    "blockOutOfRange": true
+  },
+  "variables": {},
+  "steps": [
+    {
+      "type": "attack",
+      "label": "Ataque",
+      "formula": "4d20kh + 15",
+      "criticalThreshold": 17,
+      "flavor": "Sabre Fúngico — Ataque"
+    },
+    {
+      "type": "animation",
+      "label": "Golpe",
+      "file": "jb2a.sword.melee.01.green",
+      "source": "source",
+      "target": "target",
+      "stretchTo": true,
+      "scale": 1.2,
+      "opacity": 1
+    },
+    {
+      "type": "wait",
+      "label": "Pausa de impacto",
+      "ms": 500
+    },
+    {
+      "type": "sound",
+      "label": "Impacto",
+      "file": "sounds/impacto.ogg",
+      "volume": 0.8
+    },
+    {
+      "type": "animation",
+      "label": "Esporos no alvo",
+      "file": "jb2a.explosion.04.green",
+      "source": "target",
+      "attachTo": true,
+      "scaleToObject": 1.5,
+      "persist": true,
+      "name": "esporos"
+    },
+    {
+      "type": "animation",
+      "label": "Explosão crítica",
+      "file": "jb2a.explosion.08.green",
+      "source": "target",
+      "scaleToObject": 2,
+      "conditions": [
+        { "type": "critical" }
+      ]
+    },
+    {
+      "type": "damage",
+      "label": "Dano",
+      "formula": "3d10 + 8",
+      "criticalFormula": "6d10 + 8"
+    }
+  ],
+  "metadata": {
+    "createdBy": null,
+    "createdAt": 0,
+    "updatedAt": 0
+  }
+}
