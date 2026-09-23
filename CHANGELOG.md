@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.1 - 2026-09-22
+
+- Corrigido o ID da aba para ocupar o placeholder da sidebar do Foundry, evitando conteúdo solto no canvas e deslocamento das outras abas.
+- Estilos da navegação interna do editor separados da classe adicionada automaticamente pelo Foundry à aba Macro Maker.
+- Contido o layout interno da aba para respeitar a largura e a altura disponíveis.
+
 ## 0.2.0 - 2026-09-22
 
 - Validação e normalização de projetos extraídas para uma classe reutilizável.

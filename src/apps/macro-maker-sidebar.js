@@ -8,7 +8,8 @@ export class MacroMakerSidebar extends HandlebarsApplicationMixin(AbstractSideba
   static tabName = MODULE_ID;
 
   static DEFAULT_OPTIONS = {
-    id: "macro-maker-sidebar",
+    // Match the sidebar placeholder; another ID appends the panel to document.body.
+    id: "{id}",
     classes: ["macro-maker-sidebar-tab"],
     window: {
       title: "Macro Maker",

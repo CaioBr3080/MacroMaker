@@ -11,7 +11,7 @@
   color: var(--color-text-primary);
 }
 
-.macro-maker-sidebar {
+.macro-maker-editor-sidebar {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -21,7 +21,7 @@
   background: rgba(0, 0, 0, 0.16);
 }
 
-.macro-maker-sidebar header,
+.macro-maker-editor-sidebar header,
 .macro-maker-toolbar,
 .macro-maker-actions,
 .macro-maker-add-step,
@@ -33,12 +33,12 @@
   gap: 0.5rem;
 }
 
-.macro-maker-sidebar header,
+.macro-maker-editor-sidebar header,
 .macro-maker-toolbar {
   justify-content: space-between;
 }
 
-.macro-maker-sidebar h2,
+.macro-maker-editor-sidebar h2,
 .macro-maker-toolbar h1,
 .macro-maker-toolbar p,
 .macro-maker-add-step h2 {
@@ -504,6 +504,10 @@
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 0.65rem;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
   padding: 0.75rem;
 }
 
@@ -579,6 +583,12 @@
 
 .macro-maker-sidebar-header {
   justify-content: space-between;
+  min-width: 0;
+}
+
+.macro-maker-sidebar-header > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .macro-maker-sidebar-header h2,
@@ -616,6 +626,7 @@
 
 .macro-maker-sidebar-projects .project-name {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-align: left;
   text-overflow: ellipsis;
@@ -704,7 +715,7 @@
     grid-template-columns: 1fr;
   }
 
-  .macro-maker-sidebar {
+  .macro-maker-editor-sidebar {
     max-height: 160px;
     border-right: 0;
     border-bottom: 1px solid var(--color-border-light-primary);
