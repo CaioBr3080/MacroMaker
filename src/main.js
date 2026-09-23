@@ -25,6 +25,13 @@ Hooks.once("init", () => {
     type: Object,
     default: {}
   });
+  game.settings.register(MODULE_ID, "collapsedFolders", {
+    name: "Pastas recolhidas do Macro Maker",
+    scope: "client",
+    config: false,
+    type: Object,
+    default: {}
+  });
   game.settings.register(MODULE_ID, "customTemplates", {
     name: "Templates personalizados do Macro Maker",
     scope: "world",

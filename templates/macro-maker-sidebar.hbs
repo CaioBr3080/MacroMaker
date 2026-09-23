@@ -5,17 +5,53 @@
       <p>Automações visuais</p>
     </div>
     <div class="macro-maker-sidebar-actions">
-      {{#if isGM}}<button type="button" data-action="new-folder" title="Criar pasta de Macros e definir permissões"><i class="fas fa-folder-plus"></i></button>{{/if}}
       <button type="button" data-action="new" title="Criar projeto"><i class="fas fa-plus"></i></button>
     </div>
   </header>
+
+  {{#if isGM}}
+    <details class="macro-maker-sidebar-folder-create">
+      <summary><i class="fas fa-folder-plus"></i> Nova pasta</summary>
+      <div class="macro-maker-folder-create-fields">
+        <label>Nome
+          <input type="text" name="folderName" placeholder="Ex.: Magias do grupo" required>
+        </label>
+        <label>Dentro de
+          <select name="parentFolderId">
+            <option value="">Pasta raiz</option>
+            {{#each folderChoices}}<option value="{{id}}">{{name}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Disponibilizar para
+          <select name="folderUserId">
+            <option value="">Somente GM</option>
+            <option value="*">Todos os jogadores</option>
+            {{#each users}}<option value="{{id}}">{{name}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Nível de acesso
+          <select name="folderPermission">
+            <option value="3">Dono — pode organizar e editar</option>
+            <option value="2">Observador — pode abrir e executar</option>
+          </select>
+        </label>
+      </div>
+      <button type="button" data-action="create-folder"><i class="fas fa-check"></i> Criar pasta</button>
+    </details>
+  {{/if}}
 
   <ol class="macro-maker-sidebar-projects">
     {{#each sidebarEntries}}
       {{#if isFolder}}
         <li class="macro-maker-sidebar-folder" style="--macro-maker-indent: {{indent}}px">
-          <i class="fas fa-folder" aria-hidden="true"></i><span>{{name}}</span>
-          {{#if canManageFolder}}<button type="button" data-action="configure-folder" data-folder-id="{{id}}" title="Configurar pasta e proprietários"><i class="fas fa-gear"></i></button>{{/if}}
+          {{#if hasChildren}}
+            <button type="button" class="macro-maker-folder-toggle" data-action="toggle-folder" data-folder-id="{{id}}" aria-expanded="{{#if collapsed}}false{{else}}true{{/if}}" title="{{#if collapsed}}Abrir pasta{{else}}Fechar pasta{{/if}}">
+              <i class="fas fa-chevron-{{#if collapsed}}right{{else}}down{{/if}}" aria-hidden="true"></i>
+            </button>
+          {{else}}<i class="macro-maker-folder-toggle-spacer" aria-hidden="true"></i>{{/if}}
+          <i class="fas fa-folder{{#unless collapsed}}-open{{/unless}}" aria-hidden="true"></i>
+          <span title="{{name}}">{{name}}</span>
+          {{#if canManageFolder}}<button type="button" data-action="configure-folder" data-folder-id="{{id}}" title="Configurar permissões e proprietários"><i class="fas fa-gear"></i></button>{{/if}}
         </li>
       {{else}}
         <li class="macro-maker-sidebar-project" style="--macro-maker-indent: {{indent}}px">
@@ -27,7 +63,7 @@
         </li>
       {{/if}}
     {{else}}
-      <li class="empty">Nenhum projeto. Crie sua primeira automação.</li>
+      <li class="empty">Nenhum projeto ou pasta. Crie sua primeira automação.</li>
     {{/each}}
   </ol>
 

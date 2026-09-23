@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.9 - 2026-09-23
+
+- A árvore de pastas da aba Macro Maker agora permite abrir e fechar cada pasta, lembrando a escolha por usuário.
+- O GM cria pastas e subpastas diretamente pela aba, já escolhendo o destino, o jogador (ou todos) e o nível de acesso; a engrenagem continua abrindo a configuração completa da pasta.
 ## 0.9.8 - 2026-09-23
 
 - A aba lateral do Macro Maker agora organiza projetos em uma árvore de pastas e subpastas visível aos jogadores; o GM cria e configura proprietários/permissões pela própria aba.
