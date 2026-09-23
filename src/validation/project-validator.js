@@ -366,6 +366,12 @@ export class ProjectValidator {
         else if (typeof option.label !== "string" || !option.label.trim()) {
           issues.push({ path: `${path}.options.${index}.label`, message: "A opção precisa de um rótulo." });
         }
+        if (isRecord(option) && option.column != null && option.column !== "") {
+          const column = Number(option.column);
+          if (!Number.isInteger(column) || column < 1 || column > 6) {
+            issues.push({ path: path + ".options." + index + ".column", message: "A coluna precisa ser um número inteiro entre 1 e 6." });
+          } else option.column = column;
+        }
       });
     }
     if (step.selection != null && !["single", "multiple"].includes(step.selection)) {

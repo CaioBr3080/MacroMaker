@@ -344,13 +344,13 @@
 }
 
 .macro-maker-step-fields[hidden] { display: none; }
-.macro-maker label { position: relative; }
+.macro-maker label { position: relative; padding-right: 22px; }
 .macro-maker-help {
   display: inline-grid;
   place-items: center;
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 0.15rem;
+  top: 0.1rem;
   width: 15px;
   height: 15px;
   border: 1px solid currentColor;
@@ -493,7 +493,7 @@
 }
 
 .macro-maker-menu-option {
-  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) auto;
 }
 
 .macro-maker-branch-lanes {
@@ -794,4 +794,50 @@
   .macro-maker-roll-part {
     grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
   }
+}
+
+.macro-maker-menu-settings {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem 0.75rem;
+  margin: 0;
+  padding: 0.65rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+}
+.macro-maker-menu-settings legend { padding: 0 0.3rem; font-weight: 700; }
+.macro-maker-menu-settings label,
+.macro-maker-menu-option label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  font-size: 0.82rem;
+}
+.macro-maker-menu-settings .full { grid-column: 1 / -1; }
+.macro-maker-menu-option { align-items: end; }
+.macro-maker-menu-editor > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.macro-maker-menu-editor > header small { opacity: 0.72; }
+.macro-maker-menu-option .file-field span { display: flex; gap: 0.3rem; }
+.macro-maker-menu-option .file-field input { min-width: 0; }
+.macro-maker-menu-option .file-field button,
+.macro-maker-menu-option > button { flex: 0 0 32px; width: 32px; min-width: 32px; }
+.macro-maker-menu-help {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-left: 3px solid var(--color-border-highlight);
+  background: rgba(76, 120, 168, 0.12);
+  font-size: 0.84rem;
+}
+@media (max-width: 800px) {
+  .macro-maker-menu-settings,
+  .macro-maker-menu-option { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .macro-maker-menu-option > button { grid-column: 1 / -1; }
 }

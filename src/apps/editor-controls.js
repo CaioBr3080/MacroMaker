@@ -82,7 +82,7 @@ export const FIELD_HELP = {
   typeLabel: "Rótulo do componente de cura. Os componentes são somados na mesma rolagem.",
   title: "Título apresentado ao jogador no menu de escolha.",
   selection: "Única salva um valor; múltipla salva uma lista com as opções escolhidas.",
-  columns: "Número de colunas do menu visual, entre 1 e 6.",
+  columns: "Número de colunas do menu visual, entre 1 e 6. A posição de cada opção pode ser definida no campo Coluna.",
   cancelBehavior: "Define se cancelar o menu interrompe a macro, usa o valor padrão ou continua sem atribuir uma escolha.",
   defaultValue: "Valor atribuído à variável quando o menu é cancelado com a opção Usar padrão.",
   image: "Caminho de imagem no servidor Foundry para ilustrar o menu ou uma opção.",

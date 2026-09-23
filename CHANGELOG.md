@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.5 - 2026-09-23
+
+- Menus reorganizados com seletor de imagem para o menu e para cada opção, coluna explícita por opção e instruções para usar a escolha em condições de ramificação.
+- Seletor RGB disponível também no estilo do nome do usuário; ícones de ajuda reposicionados para não cobrir os campos.
+- Seleção de tokens no canvas converte clique em alvo e preserva o token atacante controlado pelo mestre.
+
 ## 0.9.4 - 2026-09-23
 
 - Salvamento visual sincroniza diretamente as textareas antes de validar, preservando espaços no início, no fim, repetidos e quebras de linha em descrições e mensagens.

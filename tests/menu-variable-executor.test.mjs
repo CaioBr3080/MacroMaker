@@ -31,6 +31,28 @@ test("menu visual escapa HTML e preserva valores tipados", async (t) => {
   assert.match(rendered, /&lt;script&gt;/);
 });
 
+test("menu respeita a coluna explícita de cada opção", async (t) => {
+  let rendered = "";
+  globalThis.Dialog = {
+    wait: async (config) => {
+      rendered = config.content;
+      return null;
+    }
+  };
+  t.after(() => delete globalThis.Dialog);
+
+  await MenuExecutor.execute({
+    variable: "choice",
+    columns: 3,
+    options: [
+      { label: "A", value: "a", column: 3 },
+      { label: "B", value: "b" }
+    ]
+  }, { project: { name: "Teste" }, variables: {} });
+
+  assert.match(rendered, /grid-column:3/);
+  assert.doesNotMatch(rendered, /grid-column:7/);
+});
 test("cancelamento pode usar padrão e variáveis não vazam entre contextos", async (t) => {
   globalThis.Dialog = { wait: async () => null };
   t.after(() => delete globalThis.Dialog);

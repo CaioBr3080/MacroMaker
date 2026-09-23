@@ -396,23 +396,37 @@
                 {{/if}}
 
                 {{#if isMenu}}
-                  <label>Título <input type="text" value="{{title}}" data-step-index="{{index}}" data-step-path="title"></label>
-                  <label>Variável <input type="text" value="{{variable}}" data-step-index="{{index}}" data-step-path="variable"></label>
-                  <label>Seleção <select data-step-index="{{index}}" data-step-path="selection" data-value="{{selection}}"><option value="single">Única</option><option value="multiple">Múltipla</option></select></label>
-                  <label>Colunas <input type="number" min="1" max="6" value="{{columns}}" data-step-index="{{index}}" data-step-path="columns" data-value-type="number"></label>
-                  <label>Ao cancelar <select data-step-index="{{index}}" data-step-path="cancelBehavior" data-value="{{cancelBehavior}}"><option value="abort">Abortar macro</option><option value="default">Usar padrão</option><option value="continue">Continuar sem atribuir</option></select></label>
-                  <label>Valor padrão <input type="text" value="{{defaultValue}}" data-step-index="{{index}}" data-step-path="defaultValue" data-value-type="optional-string"></label>
-                  <label class="full">Descrição <input type="text" value="{{description}}" data-step-index="{{index}}" data-step-path="description"></label>
-                  <label class="full">Imagem do menu <input type="text" value="{{image}}" data-step-index="{{index}}" data-step-path="image"></label>
+                  <fieldset class="macro-maker-menu-settings full">
+                    <legend>Configuração do menu</legend>
+                    <label>Título <input type="text" value="{{title}}" data-step-index="{{index}}" data-step-path="title"></label>
+                    <label>Variável de saída <input type="text" value="{{variable}}" data-step-index="{{index}}" data-step-path="variable" placeholder="choice"></label>
+                    <label>Seleção
+                      <select data-step-index="{{index}}" data-step-path="selection" data-value="{{selection}}"><option value="single">Uma opção</option><option value="multiple">Várias opções</option></select>
+                    </label>
+                    <label>Colunas <input type="number" min="1" max="6" value="{{columns}}" data-step-index="{{index}}" data-step-path="columns" data-value-type="number"></label>
+                    <label>Ao cancelar
+                      <select data-step-index="{{index}}" data-step-path="cancelBehavior" data-value="{{cancelBehavior}}"><option value="abort">Abortar macro</option><option value="default">Usar padrão</option><option value="continue">Continuar sem atribuir</option></select>
+                    </label>
+                    <label>Valor padrão <input type="text" value="{{defaultValue}}" data-step-index="{{index}}" data-step-path="defaultValue" data-value-type="optional-string"></label>
+                    <label class="full">Descrição do menu <textarea rows="2" data-step-index="{{index}}" data-step-path="description">{{description}}</textarea></label>
+                    <label class="full file-field">Imagem do menu
+                      <span><input type="text" value="{{image}}" data-step-index="{{index}}" data-step-path="image"><button type="button" data-action="browse-file" data-index="{{index}}" data-step-field="image" data-file-type="image" title="Escolher imagem do menu"><i class="fas fa-folder-open"></i></button></span>
+                    </label>
+                  </fieldset>
+                  <p class="macro-maker-menu-help full"><strong>Como ligar a uma condição:</strong> este menu grava a escolha em <code>{{variable}}</code>. Para executar etapas diferentes, coloque uma etapa <strong>Ramificação</strong> depois dele e escolha a condição <strong>Opção de menu</strong>, usando essa variável na chave e o valor da opção no campo Valor.</p>
                   <div class="macro-maker-menu-editor full">
+                    <header><strong>Opções do menu</strong><small>Defina rótulo, valor e imagem. Coluna vazia usa o preenchimento automático.</small></header>
                     {{#each options}}
                       <div class="macro-maker-menu-option">
-                        <input type="text" value="{{label}}" placeholder="Rótulo" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.label">
-                        <input type="text" value="{{value}}" placeholder="Valor" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.value">
-                        <input type="text" value="{{description}}" placeholder="Descrição" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.description">
-                        <input type="text" value="{{image}}" placeholder="Imagem" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.image">
-                        <input type="text" value="{{icon}}" placeholder="Ícone Font Awesome" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.icon">
-                        <button type="button" data-action="delete-menu-option" data-index="{{../index}}" data-option-index="{{optionIndex}}"><i class="fas fa-trash"></i></button>
+                        <label>Rótulo <input type="text" value="{{label}}" placeholder="Ex.: Ataque forte" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.label"></label>
+                        <label>Valor <input type="text" value="{{value}}" placeholder="Ex.: forte" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.value"></label>
+                        <label>Descrição <input type="text" value="{{description}}" placeholder="Texto opcional" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.description"></label>
+                        <label class="file-field">Imagem
+                          <span><input type="text" value="{{image}}" placeholder="icons/..." data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.image"><button type="button" data-action="browse-file" data-index="{{../index}}" data-step-field="options.{{optionIndex}}.image" data-file-type="image" title="Escolher imagem da opção"><i class="fas fa-folder-open"></i></button></span>
+                        </label>
+                        <label>Ícone <input type="text" value="{{icon}}" placeholder="fas fa-fire" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.icon"></label>
+                        <label>Coluna <input type="number" min="1" max="6" value="{{column}}" placeholder="Automática" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.column" data-value-type="optional-number"></label>
+                        <button type="button" data-action="delete-menu-option" data-index="{{../index}}" data-option-index="{{optionIndex}}" title="Remover opção"><i class="fas fa-trash"></i></button>
                       </div>
                     {{/each}}
                     <button type="button" data-action="add-menu-option" data-index="{{index}}"><i class="fas fa-plus"></i> Adicionar opção</button>

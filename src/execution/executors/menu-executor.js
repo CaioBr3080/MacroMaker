@@ -8,15 +8,22 @@ function selectedIndexes(root) {
   return value.map(Number);
 }
 
+function optionColumn(value, columns) {
+  const column = Number(value);
+  return Number.isInteger(column) && column >= 1 && column <= columns ? column : null;
+}
+
 export class MenuExecutor {
   static async execute(step, context) {
+    const columns = Math.min(6, Math.max(1, Number(step.columns ?? 1)));
     const options = (step.options ?? []).map((option, index) => ({
       index,
       value: option.value,
       label: interpolate(option.label, context.variables, { escape: true }),
       description: interpolate(option.description, context.variables, { escape: true }),
       image: escapeHtml(option.image ?? ""),
-      icon: escapeHtml(option.icon ?? "")
+      icon: escapeHtml(option.icon ?? ""),
+      column: optionColumn(option.column, columns)
     }));
     if (!options.length) throw new Error("A etapa de menu não possui opções.");
 
@@ -25,13 +32,12 @@ export class MenuExecutor {
       ?.filter?.((value) => value !== undefined) ?? []);
     if (!multiple && defaults.size === 0) defaults.add(options[0].value);
     const inputType = multiple ? "checkbox" : "radio";
-    const columns = Math.min(6, Math.max(1, Number(step.columns ?? 1)));
     const content = `
       <form class="macro-maker-menu">
         ${step.description ? `<p>${interpolate(step.description, context.variables, { escape: true })}</p>` : ""}
         ${step.image ? `<img class="macro-maker-menu-image" src="${escapeHtml(step.image)}" alt="">` : ""}
         <div class="macro-maker-menu-options" style="--macro-maker-menu-columns:${columns}">
-          ${options.map((option) => `<label class="macro-maker-menu-card">
+          ${options.map((option) => `<label class="macro-maker-menu-card"${option.column ? ` style="grid-column:${option.column}"` : ""}>
             <input type="${inputType}" name="choice" value="${option.index}" ${defaults.has(option.value) ? "checked" : ""}>
             ${option.image ? `<img src="${option.image}" alt="">` : ""}
             <strong>${option.icon ? `<i class="${option.icon}"></i> ` : ""}${option.label}</strong>

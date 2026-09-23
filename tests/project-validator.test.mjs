@@ -32,6 +32,22 @@ test("preserva espaços nas bordas e no meio de descrições e mensagens", () =>
   assert.equal(project.steps[0].flavor, "  texto com  dois espaços  ");
 });
 
+test("valida e normaliza a coluna opcional das opções do menu", () => {
+  const project = ProjectValidator.normalize({
+    name: "Menu",
+    variables: {},
+    steps: [{
+      type: "menu",
+      options: [{ label: "A", value: "a", column: "2" }]
+    }]
+  });
+  assert.equal(project.steps[0].options[0].column, 2);
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Menu",
+    variables: {},
+    steps: [{ type: "menu", options: [{ label: "A", value: "a", column: 7 }] }]
+  }), ProjectValidationError);
+});
 test("normaliza o projeto sem remover propriedades desconhecidas", () => {
   const project = ProjectValidator.normalize({
     name: "  Projeto de teste  ",
