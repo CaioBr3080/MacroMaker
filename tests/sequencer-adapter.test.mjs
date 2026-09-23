@@ -66,7 +66,7 @@ test("encadeia animação persistente com a assinatura atual do Sequencer", asyn
   const target = { id: "target" };
   const context = {
     macro: { id: "macro-id" },
-    location: (reference) => reference === "source" ? source : target,
+    resolveLocation: (reference) => reference === "source" ? source : target,
     distanceTo: () => 3
   };
 
@@ -125,7 +125,7 @@ test("remove somente o persistente nomeado no objeto escolhido", async (t) => {
 
   await SequencerAdapter.removePersistent({ object: "target", name: "aura" }, {
     macro: { id: "macro-id" },
-    location: () => target
+    resolveLocation: () => target
   });
 
   assert.deepEqual(calls.at(-1), ["manager", "endEffects", {

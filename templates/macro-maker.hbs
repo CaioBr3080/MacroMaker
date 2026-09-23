@@ -77,7 +77,20 @@
           <select data-project-path="targeting.mode" data-value="{{project.targeting.mode}}">
             <option value="currentTargets">Alvos marcados (T)</option>
             <option value="controlled">Outros controlados</option>
+            <option value="token">Escolher tokens no canvas</option>
+            <option value="point">Escolher ponto</option>
+            <option value="circle">Área circular</option>
+            <option value="cone">Cone</option>
+            <option value="line">Linha</option>
+            <option value="template">Template medido selecionado</option>
             <option value="none">Sem alvos</option>
+          </select>
+        </label>
+        <label>Filtro
+          <select data-project-path="targeting.filter" data-value="{{project.targeting.filter}}">
+            <option value="all">Todos</option>
+            <option value="ally">Aliados</option>
+            <option value="enemy">Inimigos</option>
           </select>
         </label>
         <label>Mínimo
@@ -88,6 +101,15 @@
         </label>
         <label>Alcance
           <input type="number" min="0" step="any" value="{{project.targeting.range}}" placeholder="Sem limite" data-project-path="targeting.range" data-value-type="number-null">
+        </label>
+        <label>Raio (círculo/cone)
+          <input type="number" min="0.1" step="any" value="{{project.targeting.radius}}" data-project-path="targeting.radius" data-value-type="number">
+        </label>
+        <label>Ângulo do cone
+          <input type="number" min="1" max="360" step="any" value="{{project.targeting.angle}}" data-project-path="targeting.angle" data-value-type="number">
+        </label>
+        <label>Largura da linha
+          <input type="number" min="0.1" step="any" value="{{project.targeting.width}}" data-project-path="targeting.width" data-value-type="number">
         </label>
         <label class="checkbox-field">
           <input type="checkbox" {{#if project.targeting.blockOutOfRange}}checked{{/if}} data-project-path="targeting.blockOutOfRange" data-value-type="boolean">
@@ -136,15 +158,29 @@
                   </select>
                 </label>
 
+                <label>Evento
+                  <select data-step-index="{{index}}" data-step-path="event" data-value="{{event}}" data-value-type="optional-string">
+                    <option value="">Fluxo principal</option>
+                    <option value="onStart">Ao iniciar</option>
+                    <option value="onTarget">Ao definir alvos</option>
+                    <option value="onAttack">Após ataque</option>
+                    <option value="onHit">Ao acertar</option>
+                    <option value="onMiss">Ao errar</option>
+                    <option value="onCritical">No crítico</option>
+                    <option value="onDamage">Após dano</option>
+                    <option value="onEnd">Ao finalizar</option>
+                  </select>
+                </label>
+
                 {{#if isAnimation}}
                   <label class="file-field full">Arquivo ou chave Sequencer
                     <span><input type="text" value="{{file}}" data-step-index="{{index}}" data-step-path="file"><button type="button" data-action="browse-file" data-index="{{index}}" data-file-type="video" title="Procurar arquivo"><i class="fas fa-folder-open"></i></button></span>
                   </label>
                   <label>Origem
-                    <select data-step-index="{{index}}" data-step-path="source" data-value="{{source}}"><option value="source">Executante</option><option value="target">Alvo</option></select>
+                    <select data-step-index="{{index}}" data-step-path="source" data-value="{{source}}"><option value="source">Executante</option><option value="target">Alvo</option><option value="location">Ponto escolhido</option><option value="template">Template</option></select>
                   </label>
                   <label>Destino
-                    <select data-step-index="{{index}}" data-step-path="target" data-value="{{target}}"><option value="target">Alvo</option><option value="source">Executante</option></select>
+                    <select data-step-index="{{index}}" data-step-path="target" data-value="{{target}}"><option value="target">Alvo</option><option value="source">Executante</option><option value="location">Ponto escolhido</option><option value="template">Template</option></select>
                   </label>
                   <label>Escala <input type="number" step="0.1" value="{{scale}}" data-step-index="{{index}}" data-step-path="scale" data-value-type="optional-number"></label>
                   <label>Escala ao objeto <input type="number" step="0.1" value="{{scaleToObject}}" data-step-index="{{index}}" data-step-path="scaleToObject" data-value-type="optional-number"></label>
@@ -183,13 +219,82 @@
                 {{#if isAttack}}
                   <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
                   <label>Crítico a partir de <input type="number" value="{{criticalThreshold}}" data-step-index="{{index}}" data-step-path="criticalThreshold" data-value-type="number"></label>
+                  <label>Margem crítica <input type="number" min="0" value="{{criticalMargin}}" placeholder="Opcional" data-step-index="{{index}}" data-step-path="criticalMargin" data-value-type="optional-number"></label>
                   <label>Defesa opcional <input type="number" value="{{defense}}" data-step-index="{{index}}" data-step-path="defense" data-value-type="optional-number"></label>
+                  <label>Chave de defesa <input type="text" value="{{defenseKey}}" placeholder="Ex.: ac" data-step-index="{{index}}" data-step-path="defenseKey"></label>
+                  <label>Acerto
+                    <select data-step-index="{{index}}" data-step-path="hitMode" data-value="{{hitMode}}">
+                      <option value="auto">Automático por defesa</option>
+                      <option value="manual">Confirmar manualmente</option>
+                    </select>
+                  </label>
+                  <label>Visibilidade
+                    <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}">
+                      <option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option>
+                    </select>
+                  </label>
+                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                {{/if}}
+
+                {{#if isTest}}
+                  <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
+                  <label>Crítico a partir de <input type="number" value="{{criticalThreshold}}" data-step-index="{{index}}" data-step-path="criticalThreshold" data-value-type="number"></label>
+                  <label>Margem crítica <input type="number" min="0" value="{{criticalMargin}}" placeholder="Opcional" data-step-index="{{index}}" data-step-path="criticalMargin" data-value-type="optional-number"></label>
+                  <label>Visibilidade
+                    <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
+                  </label>
                   <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
                 {{/if}}
 
                 {{#if isDamage}}
+                  {{#if parts}}
+                    {{#each parts}}
+                      <div class="macro-maker-roll-part full">
+                        <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{../index}}" data-step-path="parts.{{partIndex}}.formula"></label>
+                        <label>Tipo <input type="text" value="{{type}}" data-step-index="{{../index}}" data-step-path="parts.{{partIndex}}.type"></label>
+                        <label>Fórmula crítica <input type="text" value="{{criticalFormula}}" data-step-index="{{../index}}" data-step-path="parts.{{partIndex}}.criticalFormula"></label>
+                        <label>Multiplicador crítico <input type="number" min="1" step="any" value="{{criticalMultiplier}}" data-step-index="{{../index}}" data-step-path="parts.{{partIndex}}.criticalMultiplier" data-value-type="optional-number"></label>
+                        <button type="button" data-action="delete-part" data-index="{{../index}}" data-part-index="{{partIndex}}" title="Remover componente"><i class="fas fa-trash"></i></button>
+                      </div>
+                    {{/each}}
+                  {{else}}
+                    <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
+                    <label>Tipo <input type="text" value="{{damageType}}" data-step-index="{{index}}" data-step-path="damageType"></label>
+                    <label>Fórmula crítica <input type="text" value="{{criticalFormula}}" data-step-index="{{index}}" data-step-path="criticalFormula"></label>
+                    <label>Multiplicador crítico <input type="number" min="1" step="any" value="{{criticalMultiplier}}" data-step-index="{{index}}" data-step-path="criticalMultiplier" data-value-type="optional-number"></label>
+                  {{/if}}
+                  <label>Visibilidade
+                    <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
+                  </label>
+                  <button type="button" data-action="add-part" data-index="{{index}}" data-kind="damage"><i class="fas fa-plus"></i> Componente de dano</button>
+                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                {{/if}}
+
+                {{#if isHealing}}
+                  {{#if parts}}
+                    {{#each parts}}
+                      <div class="macro-maker-roll-part full">
+                        <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{../index}}" data-step-path="parts.{{partIndex}}.formula"></label>
+                        <label>Tipo <input type="text" value="{{type}}" data-step-index="{{../index}}" data-step-path="parts.{{partIndex}}.type"></label>
+                        <button type="button" data-action="delete-part" data-index="{{../index}}" data-part-index="{{partIndex}}" title="Remover componente"><i class="fas fa-trash"></i></button>
+                      </div>
+                    {{/each}}
+                  {{else}}
+                    <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
+                    <label>Tipo <input type="text" value="{{typeLabel}}" data-step-index="{{index}}" data-step-path="typeLabel"></label>
+                  {{/if}}
+                  <label>Visibilidade
+                    <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
+                  </label>
+                  <button type="button" data-action="add-part" data-index="{{index}}" data-kind="healing"><i class="fas fa-plus"></i> Componente de cura</button>
+                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                {{/if}}
+
+                {{#if isRoll}}
                   <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
-                  <label>Fórmula crítica <input type="text" value="{{criticalFormula}}" data-step-index="{{index}}" data-step-path="criticalFormula"></label>
+                  <label>Visibilidade
+                    <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
+                  </label>
                   <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
                 {{/if}}
 

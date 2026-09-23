@@ -1,4 +1,4 @@
-import { SCHEMA_VERSION, TARGET_MODES } from "../constants.js";
+import { SCHEMA_VERSION, TARGET_FILTERS, TARGET_MODES } from "../constants.js";
 
 export function createDefaultProject(overrides = {}) {
   return foundry.utils.mergeObject({
@@ -9,10 +9,14 @@ export function createDefaultProject(overrides = {}) {
     targeting: {
       source: "controlled",
       mode: TARGET_MODES.CURRENT_TARGETS,
+      filter: TARGET_FILTERS.ALL,
       minTargets: 1,
       maxTargets: 1,
       range: null,
-      blockOutOfRange: false
+      blockOutOfRange: false,
+      radius: 3,
+      angle: 90,
+      width: 1
     },
     variables: {},
     steps: [],

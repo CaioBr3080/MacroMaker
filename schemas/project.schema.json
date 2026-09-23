@@ -14,11 +14,15 @@
       "required": ["source", "mode"],
       "properties": {
         "source": { "enum": ["controlled", "none"] },
-        "mode": { "enum": ["currentTargets", "controlled", "none"] },
+        "mode": { "enum": ["currentTargets", "controlled", "token", "point", "circle", "cone", "line", "template", "none"] },
+        "filter": { "enum": ["all", "ally", "enemy"] },
         "minTargets": { "type": "integer", "minimum": 0 },
         "maxTargets": { "type": "integer", "minimum": 0 },
         "range": { "type": ["number", "null"] },
-        "blockOutOfRange": { "type": "boolean" }
+        "blockOutOfRange": { "type": "boolean" },
+        "radius": { "type": "number", "exclusiveMinimum": 0 },
+        "angle": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
+        "width": { "type": "number", "exclusiveMinimum": 0 }
       },
       "additionalProperties": true
     },
@@ -30,10 +34,36 @@
         "required": ["type"],
         "properties": {
           "type": {
-            "enum": ["animation", "sound", "wait", "attack", "damage", "menu", "removePersistent"]
+            "enum": ["animation", "sound", "wait", "attack", "test", "damage", "healing", "roll", "menu", "removePersistent"]
           },
           "label": { "type": "string" },
           "enabled": { "type": "boolean" },
+          "formula": { "type": "string" },
+          "criticalFormula": { "type": "string" },
+          "criticalThreshold": { "type": "number", "minimum": 1 },
+          "criticalMargin": { "type": "number", "minimum": 0 },
+          "criticalMultiplier": { "type": "number", "minimum": 1 },
+          "defense": { "type": "number" },
+          "defenseKey": { "type": "string" },
+          "hitMode": { "enum": ["auto", "manual"] },
+          "rollMode": { "enum": ["publicroll", "gmroll", "blindroll", "selfroll"] },
+          "event": { "enum": ["onStart", "onTarget", "onAttack", "onHit", "onMiss", "onCritical", "onDamage", "onEnd"] },
+          "parts": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["formula"],
+              "properties": {
+                "formula": { "type": "string", "minLength": 1 },
+                "criticalFormula": { "type": "string" },
+                "criticalMultiplier": { "type": "number", "minimum": 1 },
+                "type": { "type": "string" },
+                "flavor": { "type": "string" }
+              },
+              "additionalProperties": true
+            }
+          },
           "conditions": {
             "type": "array",
             "items": {

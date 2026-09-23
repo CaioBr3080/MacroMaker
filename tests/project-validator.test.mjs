@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { ProjectValidationError, ProjectValidator } from "../src/validation/project-validator.js";
 import { StepRegistry } from "../src/execution/step-registry.js";
+import { createCoreStepRegistry } from "../src/execution/core-step-registry.js";
 
 function registry() {
   return new StepRegistry().register("custom", {
@@ -81,4 +82,32 @@ test("não altera o objeto fornecido pelo chamador", () => {
   assert.equal(input.name, "  Original  ");
   assert.equal(input.targeting.minTargets, undefined);
   assert.equal(normalized.name, "Original");
+});
+
+test("normaliza opções de rolagem e componentes de dano", () => {
+  const normalized = ProjectValidator.normalize({
+    name: "Combate",
+    targeting: { source: "none", mode: "none" },
+    steps: [
+      { type: "attack", formula: "1d20", defense: "17", rollMode: "gmroll" },
+      { type: "damage", parts: [{ formula: "1d6", type: "fogo", criticalMultiplier: "2" }] }
+    ]
+  }, { stepRegistry: createCoreStepRegistry() });
+
+  assert.equal(normalized.steps[0].defense, 17);
+  assert.equal(normalized.steps[1].parts[0].criticalMultiplier, 2);
+});
+
+test("rejeita fórmulas, eventos e modos de rolagem inválidos", () => {
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Inválido",
+    targeting: { source: "none", mode: "none" },
+    steps: [{ type: "attack", formula: "", event: "onUnknown", rollMode: "secret" }]
+  }, { stepRegistry: createCoreStepRegistry() }), (error) => {
+    const paths = error.issues.map((issue) => issue.path);
+    assert.ok(paths.includes("steps.0.formula"));
+    assert.ok(paths.includes("steps.0.event"));
+    assert.ok(paths.includes("steps.0.rollMode"));
+    return true;
+  });
 });

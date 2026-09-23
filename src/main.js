@@ -1,9 +1,15 @@
 import { MODULE_ID } from "./constants.js";
 import { MacroMakerAPI } from "./api.js";
 import { MacroMakerApp } from "./apps/macro-maker-app.js";
+import { MacroMakerSidebar } from "./apps/macro-maker-sidebar.js";
 
 Hooks.once("init", () => {
   console.info("Macro Maker | inicializando");
+  CONFIG.ui[MODULE_ID] = MacroMakerSidebar;
+  CONFIG.ui.sidebar.TABS[MODULE_ID] = {
+    icon: "fas fa-wand-magic-sparkles",
+    tooltip: "Macro Maker"
+  };
   game.settings.register(MODULE_ID, "debug", {
     name: "Modo de depuração",
     hint: "Exibe informações extras no console.",

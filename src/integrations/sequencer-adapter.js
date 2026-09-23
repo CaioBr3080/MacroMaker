@@ -9,8 +9,8 @@ export class SequencerAdapter {
 
   static async playAnimation(step, context) {
     this.assertReady();
-    const source = context.location(step.source ?? "source");
-    const target = context.location(step.target ?? "target");
+    const source = context.resolveLocation(step.source ?? "source");
+    const target = context.resolveLocation(step.target ?? "target");
     const effectName = step.name
       ? `${MODULE_ID}.${context.macro.id}.${step.name}`
       : undefined;
@@ -58,7 +58,7 @@ export class SequencerAdapter {
 
   static async removePersistent(step, context) {
     this.assertReady();
-    const object = context.location(step.object ?? "target");
+    const object = context.resolveLocation(step.object ?? "target");
     const name = step.name ? `${MODULE_ID}.${context.macro.id}.${step.name}` : undefined;
     await Sequencer.EffectManager.endEffects({ object, name });
   }

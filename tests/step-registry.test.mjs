@@ -41,7 +41,10 @@ test("o registro principal contém todos os tipos do schema v1", () => {
     "sound",
     "wait",
     "attack",
+    "test",
     "damage",
+    "healing",
+    "roll",
     "menu",
     "removePersistent"
   ]);

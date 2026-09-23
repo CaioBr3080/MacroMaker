@@ -1,6 +1,6 @@
 # Changelog
 
-## Não publicado
+## 0.2.0 - 2026-09-22
 
 - Validação e normalização de projetos extraídas para uma classe reutilizável.
 - Registro extensível de tipos de etapa exposto em `game.macroMaker.steps`.
@@ -16,6 +16,16 @@
 - Testes de integração simulada para animação, som e remoção de persistentes.
 - Macros criados por jogadores agora concedem OWNER explicitamente ao autor.
 - Criação e duplicação normalizam metadados sem alterar o objeto fornecido.
+- Interface principal migrada para `ApplicationV2` e aba nativa adicionada à sidebar do Foundry V13.
+- Fallback no diretório de Macros mantido para acesso ao editor.
+- Seleção por token, ponto, círculo, cone, linha e template medido, com cancelamento seguro.
+- Filtros de relação, limites de alvo, alcance em unidades da cena e visualização no canvas.
+- Etapas distintas de ataque, teste, dano, cura e rolagem genérica.
+- Críticos por dado natural ativo, margem, fórmula alternativa e multiplicador.
+- Adaptadores extensíveis de sistema para Defesa e resistências, além de confirmação manual de acerto.
+- Eventos de execução e etapas associadas a início, alvo, ataque, acerto, erro, crítico, dano e fim.
+- Múltiplos componentes tipados de dano/cura e modos de rolagem do Foundry.
+- Testes unitários de geometria, targeting, rolagens, eventos e adaptadores; 33 testes no total.
 
 ## 0.1.0
 

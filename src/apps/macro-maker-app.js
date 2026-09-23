@@ -1,10 +1,10 @@
-import { TARGET_MODES } from "../constants.js";
 import { createDefaultProject } from "../data/default-project.js";
 import { createCoreStepRegistry } from "../execution/core-step-registry.js";
 import { ProjectRepository } from "../services/project-repository.js";
 import { ProjectValidationError, ProjectValidator } from "../validation/project-validator.js";
 import { ProjectHistory } from "./project-history.js";
 
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const DELETE_VALUE = Symbol("delete-value");
 
 function clone(value) {
@@ -24,32 +24,56 @@ function setPath(object, path, value) {
   else cursor[last] = value;
 }
 
-export class MacroMakerApp extends Application {
+export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "macro-maker-app",
+    classes: ["macro-maker"],
+    position: { width: 1040, height: 800 },
+    window: {
+      title: "Macro Maker",
+      icon: "fas fa-wand-magic-sparkles",
+      resizable: true
+    },
+    actions: {
+      new: this.#onNew,
+      load: this.#onLoad,
+      save: this.#onSave,
+      run: this.#onRun,
+      duplicate: this.#onDuplicate,
+      "add-step": this.#onAddStep,
+      "format-json": this.#onFormatJson,
+      "show-tab": this.#onShowTab,
+      undo: this.#onUndo,
+      redo: this.#onRedo,
+      "move-step": this.#onMoveStep,
+      "duplicate-step": this.#onDuplicateStep,
+      "delete-step": this.#onDeleteStep,
+      "browse-file": this.#onBrowseFile,
+      "add-part": this.#onAddPart,
+      "delete-part": this.#onDeletePart
+    }
+  };
+
+  static PARTS = {
+    main: {
+      template: "modules/macro-maker/templates/macro-maker.hbs",
+      scrollable: [".macro-maker-visual", ".macro-maker-json"]
+    }
+  };
+
   constructor(options = {}) {
-    super(options);
-    this.stepRegistry = options.stepRegistry ?? createCoreStepRegistry();
-    this.macroUuid = options.uuid ?? null;
+    const { uuid, stepRegistry, ...applicationOptions } = options;
+    super(applicationOptions);
+    this.stepRegistry = stepRegistry ?? createCoreStepRegistry();
+    this.macroUuid = uuid ?? null;
     this.loadedUuid = null;
     this.project = createDefaultProject();
     this.history = new ProjectHistory(this.project);
     this.activeTab = "visual";
   }
 
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "macro-maker-app",
-      title: "Macro Maker",
-      template: "modules/macro-maker/templates/macro-maker.hbs",
-      classes: ["macro-maker", "sheet"],
-      width: 1040,
-      height: 800,
-      resizable: true,
-      closeOnSubmit: false,
-      submitOnChange: false
-    });
-  }
-
-  async getData() {
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
     if (this.macroUuid && this.loadedUuid !== this.macroUuid) {
       const { project } = await ProjectRepository.get(this.macroUuid);
       this.project = ProjectValidator.normalize(project, { stepRegistry: this.stepRegistry });
@@ -57,21 +81,27 @@ export class MacroMakerApp extends Application {
       this.history.reset(this.project);
     }
 
-    return {
+    return foundry.utils.mergeObject(context, {
       project: this.project,
       steps: (this.project.steps ?? []).map((step, index, steps) => ({
         ...step,
+        parts: (step.parts ?? []).map((part, partIndex) => ({ ...part, partIndex })),
         index,
         number: index + 1,
         isFirst: index === 0,
         isLast: index === steps.length - 1,
         isEnabled: step.enabled !== false,
         conditionType: step.conditions?.[0]?.type ?? "always",
+        rollMode: step.rollMode ?? this.project.rollMode ?? "publicroll",
+        hitMode: step.hitMode ?? "auto",
         isAnimation: step.type === "animation",
         isSound: step.type === "sound",
         isWait: step.type === "wait",
         isAttack: step.type === "attack",
+        isTest: step.type === "test",
         isDamage: step.type === "damage",
+        isHealing: step.type === "healing",
+        isRoll: step.type === "roll",
         isMenu: step.type === "menu",
         isRemovePersistent: step.type === "removePersistent"
       })),
@@ -85,47 +115,54 @@ export class MacroMakerApp extends Application {
         active: macro.uuid === this.macroUuid
       })),
       stepTypes: this.stepRegistry.list().map(({ type, label }) => ({ type, label })),
-      targetModes: Object.values(TARGET_MODES),
       canUndo: this.history.canUndo,
       canRedo: this.history.canRedo
-    };
+    }, { inplace: false });
   }
 
-  activateListeners(html) {
-    super.activateListeners(html);
-    html.find("[data-action='new']").on("click", () => this.#newProject());
-    html.find("[data-action='load']").on("click", (event) => this.#loadProject(event));
-    html.find("[data-action='save']").on("click", () => this.#save());
-    html.find("[data-action='run']").on("click", () => this.#run());
-    html.find("[data-action='duplicate']").on("click", () => this.#duplicate());
-    html.find("[data-action='add-step']").on("click", () => this.#addStep());
-    html.find("[data-action='format-json']").on("click", () => this.#formatJson());
-    html.find("[data-action='show-tab']").on("click", (event) => this.#showTab(event));
-    html.find("[data-action='undo']").on("click", () => this.#restoreHistory("undo"));
-    html.find("[data-action='redo']").on("click", () => this.#restoreHistory("redo"));
-    html.find("[data-action='move-step']").on("click", (event) => this.#moveStep(event));
-    html.find("[data-action='duplicate-step']").on("click", (event) => this.#duplicateStep(event));
-    html.find("[data-action='delete-step']").on("click", (event) => this.#deleteStep(event));
-    html.find("[data-action='browse-file']").on("click", (event) => this.#browseFile(event));
-    html.find("[data-project-path], [data-step-path], [data-condition-type]")
-      .on("change", (event) => this.#applyControlChange(event));
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    this.element.querySelectorAll("[data-project-path], [data-step-path], [data-condition-type]")
+      .forEach((element) => element.addEventListener("change", (event) => this.#applyControlChange(event)));
 
-    html.find("[data-step-index][draggable='true']")
-      .on("dragstart", (event) => this.#dragStart(event))
-      .on("dragover", (event) => this.#dragOver(event))
-      .on("dragleave", (event) => event.currentTarget.classList.remove("drag-over"))
-      .on("drop", (event) => this.#dropStep(event));
+    this.element.querySelectorAll("[data-step-index][draggable='true']").forEach((element) => {
+      element.addEventListener("dragstart", (event) => this.#dragStart(event));
+      element.addEventListener("dragover", (event) => this.#dragOver(event));
+      element.addEventListener("dragleave", (event) => event.currentTarget.classList.remove("drag-over"));
+      element.addEventListener("drop", (event) => this.#dropStep(event));
+    });
 
     this.#populateSelects();
     this.#applyActiveTab();
   }
 
+  static #onNew() { return this.#newProject(); }
+  static #onLoad(_event, target) { return this.#loadProject(target); }
+  static #onSave() { return this.#save(); }
+  static #onRun() { return this.#run(); }
+  static #onDuplicate() { return this.#duplicate(); }
+  static #onAddStep() { return this.#addStep(); }
+  static #onFormatJson() { return this.#formatJson(); }
+  static #onShowTab(_event, target) { return this.#showTab(target); }
+  static #onUndo() { return this.#restoreHistory("undo"); }
+  static #onRedo() { return this.#restoreHistory("redo"); }
+  static #onMoveStep(_event, target) { return this.#moveStep(target); }
+  static #onDuplicateStep(_event, target) { return this.#duplicateStep(target); }
+  static #onDeleteStep(_event, target) { return this.#deleteStep(target); }
+  static #onBrowseFile(_event, target) { return this.#browseFile(target); }
+  static #onAddPart(_event, target) { return this.#addPart(target); }
+  static #onDeletePart(_event, target) { return this.#deletePart(target); }
+
+  #query(selector) {
+    return this.element?.querySelector(selector) ?? null;
+  }
+
   #editor() {
-    return this.element.find("textarea[name='projectJson']");
+    return this.#query("textarea[name='projectJson']");
   }
 
   #readRawEditor() {
-    const raw = this.#editor().val();
+    const raw = this.#editor()?.value;
     return raw == null ? clone(this.project) : JSON.parse(raw);
   }
 
@@ -136,16 +173,17 @@ export class MacroMakerApp extends Application {
   #commit(project, { render = false } = {}) {
     this.project = clone(project);
     this.history.commit(this.project);
-    this.#editor().val(JSON.stringify(this.project, null, 2));
+    const editor = this.#editor();
+    if (editor) editor.value = JSON.stringify(this.project, null, 2);
     this.#updateHistoryControls();
-    if (render) this.render(true);
+    if (render) return this.render();
   }
 
   #mutate(callback, { render = true } = {}) {
     try {
       const project = this.#readRawEditor();
       callback(project);
-      this.#commit(project, { render });
+      return this.#commit(project, { render });
     } catch (error) {
       this.#reportError("alterar o projeto", error);
     }
@@ -156,13 +194,13 @@ export class MacroMakerApp extends Application {
     this.loadedUuid = null;
     this.project = createDefaultProject();
     this.history.reset(this.project);
-    await this.render(true);
+    await this.render();
   }
 
-  async #loadProject(event) {
-    this.macroUuid = event.currentTarget.dataset.uuid;
+  async #loadProject(target) {
+    this.macroUuid = target.dataset.uuid;
     this.loadedUuid = null;
-    await this.render(true);
+    await this.render();
   }
 
   async #save() {
@@ -181,7 +219,8 @@ export class MacroMakerApp extends Application {
       this.history.commit(project);
       this.loadedUuid = this.macroUuid;
       ui.notifications.info(`Macro Maker: ${project.name} salvo.`);
-      await this.render(true);
+      await this.render();
+      ui["macro-maker"]?.render?.();
       return true;
     } catch (error) {
       this.#showValidationErrors(error);
@@ -206,21 +245,23 @@ export class MacroMakerApp extends Application {
       const copy = await ProjectRepository.duplicate(macro);
       this.macroUuid = copy.uuid;
       this.loadedUuid = null;
-      await this.render(true);
+      await this.render();
+      ui["macro-maker"]?.render?.();
     } catch (error) {
       this.#reportError("duplicar", error);
     }
   }
 
   #addStep() {
-    const type = this.element.find("select[name='newStepType']").val();
-    this.#mutate((project) => project.steps.push(this.stepRegistry.create(type)));
+    const type = this.#query("select[name='newStepType']")?.value;
+    if (!type) return;
+    return this.#mutate((project) => project.steps.push(this.stepRegistry.create(type)));
   }
 
-  #moveStep(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    const offset = Number(event.currentTarget.dataset.offset);
-    this.#mutate((project) => {
+  #moveStep(target) {
+    const index = Number(target.dataset.index);
+    const offset = Number(target.dataset.offset);
+    return this.#mutate((project) => {
       const destination = index + offset;
       if (destination < 0 || destination >= project.steps.length) return;
       const [step] = project.steps.splice(index, 1);
@@ -228,18 +269,42 @@ export class MacroMakerApp extends Application {
     });
   }
 
-  #duplicateStep(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    this.#mutate((project) => {
+  #duplicateStep(target) {
+    const index = Number(target.dataset.index);
+    return this.#mutate((project) => {
       const copy = clone(project.steps[index]);
       copy.label = `${copy.label || copy.type} (cópia)`;
       project.steps.splice(index + 1, 0, copy);
     });
   }
 
-  #deleteStep(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    this.#mutate((project) => project.steps.splice(index, 1));
+  #deleteStep(target) {
+    const index = Number(target.dataset.index);
+    return this.#mutate((project) => project.steps.splice(index, 1));
+  }
+
+  #addPart(target) {
+    const index = Number(target.dataset.index);
+    const kind = target.dataset.kind;
+    return this.#mutate((project) => {
+      const step = project.steps[index];
+      step.parts ??= [{
+        formula: step.formula ?? (kind === "healing" ? "1d8" : "1d6"),
+        type: kind === "healing" ? "cura" : (step.damageType ?? "")
+      }];
+      step.parts.push({ formula: kind === "healing" ? "1d8" : "1d6", type: "" });
+    });
+  }
+
+  #deletePart(target) {
+    const index = Number(target.dataset.index);
+    const partIndex = Number(target.dataset.partIndex);
+    return this.#mutate((project) => {
+      const parts = project.steps[index]?.parts;
+      if (!parts || !Number.isInteger(partIndex)) return;
+      parts.splice(partIndex, 1);
+      if (!parts.length) delete project.steps[index].parts;
+    });
   }
 
   #formatJson() {
@@ -252,13 +317,17 @@ export class MacroMakerApp extends Application {
     }
   }
 
-  #showTab(event) {
+  async #showTab(target) {
     try {
-      if (this.activeTab === "json") {
+      const nextTab = target.dataset.tab;
+      if (this.activeTab === "json" && nextTab !== "json") {
         const project = this.#readEditor();
-        this.#commit(project, { render: true });
+        this.#commit(project);
+        this.activeTab = nextTab;
+        await this.render();
+        return;
       }
-      this.activeTab = event.currentTarget.dataset.tab;
+      this.activeTab = nextTab;
       this.#applyActiveTab();
     } catch (error) {
       this.#showValidationErrors(error);
@@ -267,18 +336,21 @@ export class MacroMakerApp extends Application {
   }
 
   #applyActiveTab() {
-    this.element.find("[data-editor-panel]").attr("hidden", true);
-    this.element.find(`[data-editor-panel='${this.activeTab}']`).removeAttr("hidden");
-    this.element.find("[data-action='show-tab']").removeClass("active").attr("aria-selected", "false");
-    this.element.find(`[data-action='show-tab'][data-tab='${this.activeTab}']`)
-      .addClass("active").attr("aria-selected", "true");
+    this.element.querySelectorAll("[data-editor-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.editorPanel !== this.activeTab;
+    });
+    this.element.querySelectorAll("[data-action='show-tab']").forEach((button) => {
+      const active = button.dataset.tab === this.activeTab;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
   }
 
   #restoreHistory(direction) {
     const project = this.history[direction]();
     if (!project) return;
     this.project = project;
-    this.render(true);
+    return this.render();
   }
 
   #applyControlChange(event) {
@@ -296,7 +368,8 @@ export class MacroMakerApp extends Application {
     }, { render: false });
 
     if (element.dataset.projectPath === "name") {
-      this.element.find(".macro-maker-toolbar h1").text(element.value || "Projeto sem nome");
+      const heading = this.#query(".macro-maker-toolbar h1");
+      if (heading) heading.textContent = element.value || "Projeto sem nome";
     }
     if (element.dataset.stepPath === "enabled") {
       element.closest(".macro-maker-step")?.classList.toggle("disabled", !element.checked);
@@ -306,6 +379,7 @@ export class MacroMakerApp extends Application {
   #controlValue(element) {
     const type = element.dataset.valueType ?? "string";
     if (type === "boolean") return element.checked;
+    if (type === "optional-string") return element.value === "" ? DELETE_VALUE : element.value;
     if (["number", "optional-number", "number-null"].includes(type)) {
       if (element.value === "") return type === "number-null" ? null : DELETE_VALUE;
       const value = Number(element.value);
@@ -315,32 +389,34 @@ export class MacroMakerApp extends Application {
   }
 
   #populateSelects() {
-    this.element.find("select[data-value]").each((_index, element) => {
+    this.element.querySelectorAll("select[data-value]").forEach((element) => {
       element.value = element.dataset.value;
     });
   }
 
   #updateHistoryControls() {
-    this.element.find("[data-action='undo']").prop("disabled", !this.history.canUndo);
-    this.element.find("[data-action='redo']").prop("disabled", !this.history.canRedo);
+    const undo = this.#query("[data-action='undo']");
+    const redo = this.#query("[data-action='redo']");
+    if (undo) undo.disabled = !this.history.canUndo;
+    if (redo) redo.disabled = !this.history.canRedo;
   }
 
   #dragStart(event) {
-    event.originalEvent.dataTransfer.effectAllowed = "move";
-    event.originalEvent.dataTransfer.setData("text/plain", event.currentTarget.dataset.stepIndex);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", event.currentTarget.dataset.stepIndex);
   }
 
   #dragOver(event) {
     event.preventDefault();
-    event.originalEvent.dataTransfer.dropEffect = "move";
+    event.dataTransfer.dropEffect = "move";
     event.currentTarget.classList.add("drag-over");
   }
 
   #dropStep(event) {
     event.preventDefault();
     event.currentTarget.classList.remove("drag-over");
-    const from = Number(event.originalEvent.dataTransfer.getData("text/plain"));
-    let to = Number(event.currentTarget.dataset.stepIndex);
+    const from = Number(event.dataTransfer.getData("text/plain"));
+    const to = Number(event.currentTarget.dataset.stepIndex);
     if (!Number.isInteger(from) || !Number.isInteger(to) || from === to) return;
     this.#mutate((project) => {
       const [step] = project.steps.splice(from, 1);
@@ -348,9 +424,9 @@ export class MacroMakerApp extends Application {
     });
   }
 
-  #browseFile(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    const type = event.currentTarget.dataset.fileType ?? "video";
+  #browseFile(target) {
+    const index = Number(target.dataset.index);
+    const type = target.dataset.fileType ?? "video";
     const FilePickerClass = globalThis.FilePicker ?? globalThis.foundry?.applications?.apps?.FilePicker;
     if (!FilePickerClass) return ui.notifications.error("O seletor de arquivos do Foundry não está disponível.");
     const current = this.project.steps[index]?.file ?? "";
@@ -368,13 +444,20 @@ export class MacroMakerApp extends Application {
   }
 
   #clearValidationErrors() {
-    this.element.find(".invalid").removeClass("invalid").removeAttr("title");
+    this.element.querySelectorAll(".invalid").forEach((element) => {
+      element.classList.remove("invalid");
+      element.removeAttribute("title");
+    });
   }
 
   #showValidationErrors(error) {
     this.#clearValidationErrors();
     if (!(error instanceof ProjectValidationError)) {
-      if (error instanceof SyntaxError) this.#editor().addClass("invalid").attr("title", error.message);
+      if (error instanceof SyntaxError) {
+        const editor = this.#editor();
+        editor?.classList.add("invalid");
+        if (editor) editor.title = error.message;
+      }
       return;
     }
     for (const issue of error.issues) {
@@ -382,7 +465,10 @@ export class MacroMakerApp extends Application {
       const selector = stepMatch
         ? `[data-step-index='${stepMatch[1]}'][data-step-path='${stepMatch[2]}']`
         : `[data-project-path='${issue.path}']`;
-      this.element.find(selector).addClass("invalid").attr("title", issue.message);
+      this.element.querySelectorAll(selector).forEach((element) => {
+        element.classList.add("invalid");
+        element.title = issue.message;
+      });
     }
   }
 

@@ -40,17 +40,47 @@ export function createCoreStepRegistry() {
   registry.register(STEP_TYPES.ATTACK, {
     label: "Ataque",
     icon: "fas fa-dice-d20",
-    defaults: { label: "Ataque", formula: "1d20", criticalThreshold: 20 },
+    defaults: {
+      label: "Ataque",
+      formula: "1d20",
+      criticalThreshold: 20,
+      hitMode: "auto",
+      rollMode: "publicroll"
+    },
     schema: {},
     execute: (step, context) => RollExecutor.attack(step, context)
+  });
+
+  registry.register(STEP_TYPES.TEST, {
+    label: "Teste",
+    icon: "fas fa-dice-d20",
+    defaults: { label: "Teste", formula: "1d20", criticalThreshold: 20, rollMode: "publicroll" },
+    schema: {},
+    execute: (step, context) => RollExecutor.test(step, context)
   });
 
   registry.register(STEP_TYPES.DAMAGE, {
     label: "Dano",
     icon: "fas fa-burst",
-    defaults: { label: "Dano", formula: "1d6", criticalFormula: "2d6" },
+    defaults: { label: "Dano", formula: "1d6", criticalFormula: "2d6", rollMode: "publicroll" },
     schema: {},
     execute: (step, context) => RollExecutor.damage(step, context)
+  });
+
+  registry.register(STEP_TYPES.HEALING, {
+    label: "Cura",
+    icon: "fas fa-heart",
+    defaults: { label: "Cura", formula: "1d8", rollMode: "publicroll" },
+    schema: {},
+    execute: (step, context) => RollExecutor.healing(step, context)
+  });
+
+  registry.register(STEP_TYPES.ROLL, {
+    label: "Rolagem genérica",
+    icon: "fas fa-dice",
+    defaults: { label: "Rolagem", formula: "1d20", rollMode: "publicroll" },
+    schema: {},
+    execute: (step, context) => RollExecutor.generic(step, context)
   });
 
   registry.register(STEP_TYPES.MENU, {

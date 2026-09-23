@@ -1,45 +1,63 @@
 import { TARGET_MODES } from "../constants.js";
+import { TargetingService } from "../targeting/targeting-service.js";
 
 export class ExecutionContext {
-  constructor(project, macro) {
+  constructor(project, macro, { targetingService = TargetingService, systemRegistry = null } = {}) {
     this.project = project;
     this.macro = macro;
+    this.targetingService = targetingService;
+    this.systems = systemRegistry;
     this.source = null;
     this.targets = [];
     this.target = null;
+    this.location = null;
+    this.template = null;
     this.variables = foundry.utils.deepClone(project.variables ?? {});
     this.attack = null;
+    this.damage = null;
+    this.healing = null;
+    this.rolls = [];
     this.hit = null;
     this.critical = false;
     this.lastRoll = null;
+    this.lastResult = null;
+    this.cancelled = false;
+    this.executionId = foundry.utils.randomID();
   }
 
   async initialize() {
-    this.source = canvas.tokens.controlled[0] ?? null;
-    const mode = this.project.targeting?.mode ?? TARGET_MODES.CURRENT_TARGETS;
-
-    if (mode === TARGET_MODES.CURRENT_TARGETS) this.targets = [...game.user.targets];
-    if (mode === TARGET_MODES.CONTROLLED) this.targets = [...canvas.tokens.controlled].slice(1);
-    if (mode === TARGET_MODES.NONE) this.targets = [];
-    this.target = this.targets[0] ?? null;
-
+    const targeting = this.project.targeting ?? {};
+    this.source = targeting.source === "none" ? null : canvas.tokens.controlled[0] ?? null;
     this.#validateSource();
+    const result = await this.targetingService.resolve(targeting, { source: this.source });
+    if (result.cancelled) {
+      this.cancelled = true;
+      return this;
+    }
+    this.targets = result.targets;
+    this.target = this.targets[0] ?? null;
+    this.location = result.location;
+    this.template = result.template;
+
     this.#validateTargets();
     this.#validateRange();
     return this;
   }
 
-  distanceTo(target = this.target) {
+  distanceTo(target = this.target ?? this.location) {
     if (!this.source || !target) return null;
+    const destination = target.center ?? target;
     return canvas.grid.measurePath([
       this.source.center,
-      target.center
+      destination
     ]).distance;
   }
 
-  location(reference) {
+  resolveLocation(reference) {
     if (reference === "source") return this.source;
     if (reference === "target") return this.target;
+    if (reference === "location") return this.location;
+    if (reference === "template") return this.template;
     return null;
   }
 
@@ -52,14 +70,19 @@ export class ExecutionContext {
   #validateTargets() {
     const min = Number(this.project.targeting?.minTargets ?? 0);
     const max = Number(this.project.targeting?.maxTargets ?? Infinity);
-    if (this.targets.length < min) throw new Error(`Selecione pelo menos ${min} alvo(s).`);
-    if (this.targets.length > max) throw new Error(`Selecione no máximo ${max} alvo(s).`);
+    const count = this.project.targeting?.mode === TARGET_MODES.POINT && this.location ? 1 : this.targets.length;
+    if (count < min) throw new Error(`Selecione pelo menos ${min} alvo(s).`);
+    if (count > max) throw new Error(`Selecione no máximo ${max} alvo(s).`);
   }
 
   #validateRange() {
-    const range = Number(this.project.targeting?.range);
-    if (!this.project.targeting?.blockOutOfRange || !Number.isFinite(range) || !this.target) return;
-    const distance = this.distanceTo();
-    if (distance > range) throw new Error(`Alvo fora do alcance (${distance} > ${range}).`);
+    const configuredRange = this.project.targeting?.range;
+    const range = Number(configuredRange);
+    if (!this.project.targeting?.blockOutOfRange || configuredRange == null || !Number.isFinite(range)) return;
+    const destinations = this.targets.length ? this.targets : this.location ? [this.location] : [];
+    const invalid = destinations
+      .map((target) => ({ target, distance: this.distanceTo(target) }))
+      .find(({ distance }) => distance != null && distance > range);
+    if (invalid) throw new Error(`Alvo fora do alcance (${invalid.distance} > ${range}).`);
   }
 }

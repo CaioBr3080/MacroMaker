@@ -1,0 +1,28 @@
+<section class="macro-maker-sidebar-content">
+  <header class="macro-maker-sidebar-header">
+    <div>
+      <h2><i class="fas fa-wand-magic-sparkles"></i> Macro Maker</h2>
+      <p>Automações visuais</p>
+    </div>
+    <button type="button" data-action="new" title="Criar projeto">
+      <i class="fas fa-plus"></i>
+    </button>
+  </header>
+
+  <ol class="macro-maker-sidebar-projects">
+    {{#each projects}}
+      <li>
+        <img src="{{img}}" alt="">
+        <button type="button" class="project-name" data-action="open" data-uuid="{{uuid}}" title="Editar {{name}}">
+          {{name}}
+        </button>
+        <button type="button" data-action="run" data-uuid="{{uuid}}" title="Executar {{name}}">
+          <i class="fas fa-play"></i>
+        </button>
+        {{#unless canEdit}}<i class="fas fa-eye" title="Somente leitura"></i>{{/unless}}
+      </li>
+    {{else}}
+      <li class="empty">Nenhum projeto. Crie sua primeira automação.</li>
+    {{/each}}
+  </ol>
+</section>
