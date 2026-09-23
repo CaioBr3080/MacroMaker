@@ -94,6 +94,14 @@ npm run check
 npm test
 ```
 
+Para gerar o ZIP instalável do módulo:
+
+```bash
+npm run package
+```
+
+O pacote é recriado em `out/macro-maker.zip`. A pasta `out/` contém apenas artefatos locais e não é versionada.
+
 ## Limites conhecidos
 
 - A integração de Defesa, resistências e HP percentual depende de adaptadores registrados por sistema; sem adaptador, use Defesa numérica ou confirmação manual. Itens, efeitos e tags têm fallback genérico.

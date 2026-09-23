@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "check": "node scripts/check.mjs",
+    "package": "node scripts/package.mjs",
     "test": "node --test"
   }
 }
