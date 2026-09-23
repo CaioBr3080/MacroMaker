@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { RollExecutor } from "../src/execution/executors/roll-executor.js";
+import { messageFlavor, speakerConfig } from "../src/utils/message-style.js";
 
 class MockRoll {
   static messages = [];
@@ -135,4 +136,13 @@ test("variáveis numéricas são ligadas às fórmulas e estilos são aplicados 
   assert.equal(execution.lastRoll.data.FOR, 4);
   assert.match(MockRoll.messages[0].data.flavor, /font-weight:bold/);
   assert.match(MockRoll.messages[0].data.flavor, /Força 4/);
+});
+
+test("o nome do usuário recebe complemento sem perder o alias original", () => {
+  assert.deepEqual(speakerConfig({ speakerAppend: "Aldine destrói com sua lâmina", speakerStyle: { bold: true, align: "center" } }, {}), {
+    append: "Aldine destrói com sua lâmina",
+    css: "white-space:pre-wrap;font-weight:bold;text-align:center"
+  });
+  assert.equal(messageFlavor({ flavor: "  Aldine  destrói\ncom sua lâmina" }, ""),
+    '<div style="white-space:pre-wrap">  Aldine  destrói\ncom sua lâmina</div>');
 });

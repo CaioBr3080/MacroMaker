@@ -68,6 +68,28 @@ Hooks.on("renderMacroConfig", (app, html) => {
   root.querySelector("footer")?.prepend(button);
 });
 
+Hooks.on("renderChatMessageHTML", (message, html) => {
+  const root = html instanceof HTMLElement ? html : html?.[0];
+  const speaker = message.flags?.[MODULE_ID]?.speaker;
+  const sender = root?.querySelector?.(".message-sender");
+  if (!speaker || !sender) return;
+
+  const append = String(speaker.append ?? "");
+  if (append) {
+    const current = sender.textContent ?? "";
+    // Accept either only the suffix (" destrói...") or a complete phrase
+    // ("Aldine destrói...") without replacing the original speaker alias.
+    const trimmed = append.trimStart();
+    const alias = current.trimEnd();
+    const suffix = alias && trimmed.toLocaleLowerCase().startsWith(alias.toLocaleLowerCase())
+      ? trimmed.slice(alias.length)
+      : append;
+    sender.append(document.createTextNode(suffix));
+  }
+
+  if (speaker.css) sender.style.cssText += `;${speaker.css}`;
+});
+
 Hooks.on("preDeleteToken", (document) => game.macroMaker?.persistents?.cleanupDocument(document));
 Hooks.on("preDeleteScene", (document) => game.macroMaker?.persistents?.cleanupDocument(document));
 Hooks.on("sequencerEffectManagerReady", () => ui[MODULE_ID]?.render?.());

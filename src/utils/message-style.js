@@ -7,7 +7,7 @@ export const MESSAGE_FONTS = {
 
 export function messageStyleCSS(style = {}) {
   style ??= {};
-  const rules = [];
+  const rules = ["white-space:pre-wrap"];
   if (Object.hasOwn(MESSAGE_FONTS, style.font)) rules.push(`font-family:${style.font}`);
   const size = Number(style.size);
   if (Number.isFinite(size) && size >= 8 && size <= 72) rules.push(`font-size:${size}px`);
@@ -21,7 +21,18 @@ export function messageStyleCSS(style = {}) {
 
 export function messageFlavor(step, fallback, variables = {}) {
   const text = interpolate(step.flavor || fallback, variables);
-  // Existing HTML flavors remain compatible until formatting is explicitly used.
-  if (!step.messageStyle) return text;
-  return `<div style="${messageStyleCSS(step.messageStyle)}">${escapeHtml(text).replace(/\n/g, "<br>")}</div>`;
+  const hasStyle = step.messageStyle && Object.keys(step.messageStyle).length > 0;
+  // Keep legacy HTML flavors intact when no formatting or whitespace preservation is needed.
+  if (!hasStyle && !/[\n\r]| {2,}|\t|^\s|\s$/.test(text)) return text;
+  const content = hasStyle ? escapeHtml(text) : text;
+  return `<div style="${messageStyleCSS(step.messageStyle ?? {})}">${content}</div>`;
+}
+
+export function speakerConfig(step, variables = {}) {
+  const style = step.speakerStyle ?? {};
+  const append = interpolate(step.speakerAppend ?? "", variables);
+  return {
+    append,
+    css: messageStyleCSS(style)
+  };
 }

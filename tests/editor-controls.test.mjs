@@ -62,8 +62,8 @@ test("formatação usa apenas estilos permitidos e escapa o conteúdo formatado"
   const html = messageFlavor({ flavor: "FOR {{variables.FOR}}\n<img src=x onerror=alert(1)>", messageStyle: style }, "", { FOR: 4 });
   assert.match(html, /font-family:Georgia/);
   assert.match(html, /font-size:18px/);
-  assert.match(html, /FOR 4<br>&lt;img/);
+  assert.match(html, /FOR 4\n&lt;img/);
   assert.doesNotMatch(html, /<img/);
-  assert.equal(messageStyleCSS({ font: "x;position:fixed", color: "red;display:none", size: 999, bold: "true" }), "");
+  assert.equal(messageStyleCSS({ font: "x;position:fixed", color: "red;display:none", size: 999, bold: "true" }), "white-space:pre-wrap");
   assert.equal(messageFlavor({ flavor: "<b>Legado</b>" }, ""), "<b>Legado</b>");
 });

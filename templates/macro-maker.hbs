@@ -468,6 +468,20 @@
                     <label><input type="checkbox" {{#if messageStyle.italic}}checked{{/if}} data-step-index="{{index}}" data-step-path="messageStyle.italic" data-value-type="boolean"> Itálico</label>
                     <label><input type="checkbox" {{#if messageStyle.underline}}checked{{/if}} data-step-index="{{index}}" data-step-path="messageStyle.underline" data-value-type="boolean"> Sublinhado</label>
                     <div class="macro-maker-message-preview full" data-message-preview="{{index}}" aria-label="Prévia da mensagem"></div>
+                    <fieldset class="macro-maker-speaker-style full">
+                      <legend>Nome do usuário no chat</legend>
+                      <label class="full">Complemento após o nome
+                        <textarea rows="2" data-step-index="{{index}}" data-step-path="speakerAppend" placeholder="Aldine destrói com sua lâmina">{{speakerAppend}}</textarea>
+                      </label>
+                      <p class="full macro-maker-help-note">Isso preserva o nome original do token e anexa o texto. Você pode digitar a frase completa (ex.: “Aldine destrói com sua lâmina”) ou apenas o complemento (ex.: “ — destrói com sua lâmina”).</p>
+                      <label>Fonte <select data-step-index="{{index}}" data-step-path="speakerStyle.font" data-value="{{speakerStyle.font}}">{{#each ../messageFonts}}<option value="{{value}}">{{label}}</option>{{/each}}</select></label>
+                      <label>Tamanho (px) <input type="number" min="8" max="72" value="{{speakerStyle.size}}" data-step-index="{{index}}" data-step-path="speakerStyle.size" data-value-type="optional-number"></label>
+                      <label>Cor <input type="text" placeholder="#ffffff" value="{{speakerStyle.color}}" data-step-index="{{index}}" data-step-path="speakerStyle.color" data-value-type="optional-string"></label>
+                      <label>Alinhamento <select data-step-index="{{index}}" data-step-path="speakerStyle.align" data-value="{{speakerStyle.align}}"><option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option></select></label>
+                      <label><input type="checkbox" {{#if speakerStyle.bold}}checked{{/if}} data-step-index="{{index}}" data-step-path="speakerStyle.bold" data-value-type="boolean"> Negrito</label>
+                      <label><input type="checkbox" {{#if speakerStyle.italic}}checked{{/if}} data-step-index="{{index}}" data-step-path="speakerStyle.italic" data-value-type="boolean"> Itálico</label>
+                      <label><input type="checkbox" {{#if speakerStyle.underline}}checked{{/if}} data-step-index="{{index}}" data-step-path="speakerStyle.underline" data-value-type="boolean"> Sublinhado</label>
+                    </fieldset>
                   </fieldset>
                 {{/if}}
 

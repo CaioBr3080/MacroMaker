@@ -2,7 +2,8 @@ import { ROLL_MODES } from "../../constants.js";
 import { ManualHitResolver } from "../manual-hit-resolver.js";
 import { RollAnalysis } from "../roll-analysis.js";
 import { resolveFormulaVariables } from "../../utils/formula-variables.js";
-import { messageFlavor } from "../../utils/message-style.js";
+import { messageFlavor, speakerConfig } from "../../utils/message-style.js";
+import { MODULE_ID } from "../../constants.js";
 import { escapeHtml, interpolate } from "../../utils/safe-values.js";
 
 export class RollExecutor {
@@ -167,10 +168,14 @@ export class RollExecutor {
   static async #toMessage(roll, step, context, fallbackLabel, details = "", flags = {}) {
     const rollMode = step.rollMode ?? context.project.rollMode ?? "publicroll";
     if (!ROLL_MODES.includes(rollMode)) throw new Error(`Modo de rolagem inválido: ${rollMode}.`);
+    const moduleFlags = {
+      ...(flags[MODULE_ID] ?? {}),
+      speaker: speakerConfig(step, context.variables)
+    };
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ token: context.source?.document }),
       flavor: messageFlavor(step, `${context.project.name} — ${fallbackLabel}`, context.variables) + details,
-      flags
+      flags: { ...flags, [MODULE_ID]: moduleFlags }
     }, { rollMode });
   }
 }

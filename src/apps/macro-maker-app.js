@@ -159,6 +159,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         displayLabel: step.label || this.stepRegistry.get(step.type)?.label || step.type,
         isRollStep: ["attack", "test", "damage", "healing", "roll"].includes(step.type),
         messageStyle: { font: "inherit", size: 14, align: "left", ...step.messageStyle },
+        speakerStyle: { font: "inherit", size: 14, align: "left", ...step.speakerStyle },
         parts: (step.parts ?? []).map((part, partIndex) => ({ ...part, partIndex })),
         options: (step.options ?? []).map((option, optionIndex) => ({ ...option, optionIndex })),
         conditionNodes: (step.conditions ?? []).flatMap((condition, conditionIndex) => flattenConditions(condition, `conditions.${conditionIndex}`)),

@@ -123,6 +123,8 @@ export const FIELD_HELP = {
   volume: "Volume entre 0 (mudo) e 1 (máximo). Ex.: 0.5 = metade.",
   stretchAfter: "Estica a animação quando a distância exceder esse valor, nas unidades da cena.",
   flavor: "Texto da mensagem no chat. Use os controles abaixo para fonte, tamanho, cor e estilo. Variáveis no texto: {{variables.FOR}}.",
+  speakerAppend: "Complemento que acompanha o nome do usuário no chat. Digite só o final ( — destrói com sua lâmina) ou a frase completa (Aldine destrói com sua lâmina); o nome original nunca é substituído.",
+  speakerStyle: "Estilo visual aplicado somente ao nome e ao complemento do usuário no cabeçalho da mensagem.",
   durationSeconds: "Limita a duração em segundos. Vazio usa a duração do arquivo/persistência.",
   durationRounds: "Duração em rodadas, convertidas para segundos pela configuração de combate.",
   persist: "Mantém o efeito após a animação. Pode ser encerrado pela aba de persistentes ou por uma etapa de remoção.",

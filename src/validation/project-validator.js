@@ -255,18 +255,22 @@ export class ProjectValidator {
     const rollTypes = [STEP_TYPES.ATTACK, STEP_TYPES.TEST, STEP_TYPES.DAMAGE, STEP_TYPES.HEALING, STEP_TYPES.ROLL];
     if (!rollTypes.includes(step.type)) return;
 
-    if (step.messageStyle != null) {
-      if (!isRecord(step.messageStyle)) issues.push({ path: `${path}.messageStyle`, message: "A formatação da mensagem precisa ser um objeto." });
+    for (const styleName of ["messageStyle", "speakerStyle"]) {
+      const style = step[styleName];
+      if (style == null) continue;
+      if (!isRecord(style)) issues.push({ path: `${path}.${styleName}`, message: `A formatação ${styleName} precisa ser um objeto.` });
       else {
-        const style = step.messageStyle;
-        if (style.font != null && !Object.hasOwn(MESSAGE_FONTS, style.font)) issues.push({ path: `${path}.messageStyle.font`, message: "Fonte de mensagem inválida." });
-        if (style.color != null && !/^#[0-9a-f]{6}$/i.test(style.color)) issues.push({ path: `${path}.messageStyle.color`, message: "Use uma cor no formato #RRGGBB." });
-        this.#normalizeOptionalNumber(style, "size", `${path}.messageStyle.size`, issues, { minimum: 8, maximum: 72 });
-        if (style.align != null && !["left", "center", "right"].includes(style.align)) issues.push({ path: `${path}.messageStyle.align`, message: "Alinhamento inválido." });
+        if (style.font != null && !Object.hasOwn(MESSAGE_FONTS, style.font)) issues.push({ path: `${path}.${styleName}.font`, message: "Fonte de mensagem inválida." });
+        if (style.color != null && !/^#[0-9a-f]{6}$/i.test(style.color)) issues.push({ path: `${path}.${styleName}.color`, message: "Use uma cor no formato #RRGGBB." });
+        this.#normalizeOptionalNumber(style, "size", `${path}.${styleName}.size`, issues, { minimum: 8, maximum: 72 });
+        if (style.align != null && !["left", "center", "right"].includes(style.align)) issues.push({ path: `${path}.${styleName}.align`, message: "Alinhamento inválido." });
         for (const key of ["bold", "italic", "underline"]) {
-          if (style[key] != null && typeof style[key] !== "boolean") issues.push({ path: `${path}.messageStyle.${key}`, message: "O estilo precisa ser booleano." });
+          if (style[key] != null && typeof style[key] !== "boolean") issues.push({ path: `${path}.${styleName}.${key}`, message: "O estilo precisa ser booleano." });
         }
       }
+    }
+    if (step.speakerAppend != null && typeof step.speakerAppend !== "string") {
+      issues.push({ path: `${path}.speakerAppend`, message: "O complemento do nome precisa ser texto." });
     }
 
     if (step.type === STEP_TYPES.ATTACK && step.hitMode != null && !["auto", "manual"].includes(step.hitMode)) {

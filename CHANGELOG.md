@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.3 - 2026-09-23
+
+- Mensagens formatadas preservam espaços repetidos, espaços nas bordas e quebras de linha.
+- O nome do usuário pode receber um complemento livre e estilo próprio sem substituir o alias original; frases completas como `Aldine destrói com sua lâmina` são aceitas.
+- O complemento do nome e sua formatação são enviados como dados do Macro Maker para continuar funcionando após salvar e reabrir a mensagem.
+
 ## 0.9.2 - 2026-09-23
 
 - Campos de geometria e alcance ficam cinza quando não se aplicam ao método escolhido, preservando seus valores.

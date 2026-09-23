@@ -66,6 +66,20 @@
             },
             "additionalProperties": true
           },
+          "speakerAppend": { "type": "string" },
+          "speakerStyle": {
+            "type": "object",
+            "properties": {
+              "font": { "enum": ["inherit", "Arial", "Georgia", "Verdana", "Courier New", "Times New Roman"] },
+              "size": { "type": "number", "minimum": 8, "maximum": 72 },
+              "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+              "align": { "enum": ["left", "center", "right"] },
+              "bold": { "type": "boolean" },
+              "italic": { "type": "boolean" },
+              "underline": { "type": "boolean" }
+            },
+            "additionalProperties": true
+          },
           "criticalFormula": { "type": "string" },
           "criticalThreshold": { "type": "number", "minimum": 1 },
           "criticalMargin": { "type": "number", "minimum": 0 },
