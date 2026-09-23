@@ -4,6 +4,7 @@ import { RollExecutor } from "../src/execution/executors/roll-executor.js";
 
 class MockRoll {
   static messages = [];
+  static evaluations = [];
 
   constructor(formula, data) {
     this.formula = formula;
@@ -14,7 +15,15 @@ class MockRoll {
       : [];
   }
 
-  async evaluate() { return this; }
+  async evaluate() { MockRoll.evaluations.push(this.formula); this._evaluated = true; return this; }
+
+  static fromTerms([pool]) {
+    const roll = new this(`{${pool.rolls.map((part) => part.formula).join(",")}}`);
+    roll.total = pool.rolls.reduce((total, part) => total + part.total, 0);
+    roll._evaluated = pool.rolls.every((part) => part._evaluated);
+    roll.parts = pool.rolls;
+    return roll;
+  }
 
   async toMessage(data, options) {
     MockRoll.messages.push({ formula: this.formula, data, options });
@@ -63,7 +72,10 @@ test("dano crítico aceita múltiplos componentes e fórmulas alternativas", asy
   globalThis.CONFIG = { Dice: { rolls: [MockRoll] } };
   globalThis.ChatMessage = { getSpeaker: () => ({}) };
   MockRoll.messages = [];
+  MockRoll.evaluations = [];
+  globalThis.foundry = { dice: { terms: { PoolTerm: { fromRolls: (rolls) => ({ rolls }) } } } };
   t.after(() => {
+    delete globalThis.foundry;
     delete globalThis.CONFIG;
     delete globalThis.ChatMessage;
   });
@@ -80,10 +92,47 @@ test("dano crítico aceita múltiplos componentes e fórmulas alternativas", asy
     rollMode: "publicroll"
   }, execution);
 
-  assert.deepEqual(MockRoll.messages.map((message) => message.formula), ["2d6", "(1d8) * 2"]);
+  assert.equal(MockRoll.messages.length, 1);
+  assert.deepEqual(MockRoll.evaluations, ["2d6", "(1d8) * 2"]);
+  assert.equal(MockRoll.messages[0].formula, "{2d6,(1d8) * 2}");
+  assert.match(MockRoll.messages[0].data.flavor, /corte/);
+  assert.match(MockRoll.messages[0].data.flavor, /fogo/);
+  assert.match(MockRoll.messages[0].data.flavor, /Total após resistências: 8/);
+  assert.equal(MockRoll.messages[0].data.flags["macro-maker"].parts.length, 2);
   assert.equal(result.parts.length, 2);
   assert.equal(result.total, 8);
   assert.equal(result.parts[1].rawTotal, 6);
   assert.equal(result.parts[1].resistance, 2);
   assert.equal(execution.variables.damage.total, 8);
+  assert.equal(execution.lastRoll.total, 10);
+  assert.equal(execution.variables.lastRoll.total, 8);
+});
+
+test("duas etapas de dano geram duas mensagens e cura agrupa componentes", async (t) => {
+  globalThis.CONFIG = { Dice: { rolls: [MockRoll] } };
+  globalThis.ChatMessage = { getSpeaker: () => ({}) };
+  globalThis.foundry = { dice: { terms: { PoolTerm: { fromRolls: (rolls) => ({ rolls }) } } } };
+  t.after(() => { delete globalThis.CONFIG; delete globalThis.ChatMessage; delete globalThis.foundry; });
+  MockRoll.messages = [];
+  await RollExecutor.damage({ formula: "1d6", damageType: "corte" }, context());
+  await RollExecutor.damage({ formula: "1d8", damageType: "fogo" }, context());
+  assert.equal(MockRoll.messages.length, 2);
+  MockRoll.messages = [];
+  const result = await RollExecutor.healing({ parts: [{ formula: "1d6" }, { formula: "1d8" }], rollMode: "blindroll" }, context());
+  assert.equal(MockRoll.messages.length, 1);
+  assert.equal(MockRoll.messages[0].options.rollMode, "blindroll");
+  assert.equal(result.total, 10);
+});
+
+test("variáveis numéricas são ligadas às fórmulas e estilos são aplicados ao chat", async (t) => {
+  globalThis.CONFIG = { Dice: { rolls: [MockRoll] } };
+  globalThis.ChatMessage = { getSpeaker: () => ({}) };
+  t.after(() => { delete globalThis.CONFIG; delete globalThis.ChatMessage; });
+  MockRoll.messages = [];
+  const execution = context({ variables: { FOR: 4 } });
+  await RollExecutor.generic({ formula: "1d20 + FOR", flavor: "Força {{variables.FOR}}", messageStyle: { bold: true, color: "#ff0000" } }, execution);
+  assert.equal(execution.lastRoll.formula, "1d20 + @FOR");
+  assert.equal(execution.lastRoll.data.FOR, 4);
+  assert.match(MockRoll.messages[0].data.flavor, /font-weight:bold/);
+  assert.match(MockRoll.messages[0].data.flavor, /Força 4/);
 });

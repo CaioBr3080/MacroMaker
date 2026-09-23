@@ -72,6 +72,16 @@ macro-maker/
 
 ## Modelo de dados
 
+### Controles do editor
+
+- **Variáveis do projeto:** adicione uma variável, renomeie para `FOR`, escolha Número e informe `4`. Use `1d20 + FOR` (ou `1d20 + @FOR`) na fórmula. Basta alterar o valor de FOR e salvar para atualizar as próximas execuções. Os nomes diferenciam maiúsculas de minúsculas. Renomear/excluir uma variável exige atualizar suas referências. OWNER pode editar; campos bloqueados pelo GM continuam protegidos.
+- **Dano e cura:** componentes dentro da mesma etapa aparecem em uma única rolagem, com total e discriminação dos tipos. Crie outra etapa se quiser uma segunda rolagem. Resistências são indicadas separadamente do total bruto dos dados; o módulo não altera HP automaticamente.
+- **Mensagens:** o texto aceita várias linhas. Os controles de formatação alteram a mensagem inteira e mostram uma prévia. No texto, use `{{variables.FOR}}` para mostrar o valor de uma variável.
+- **Etapas:** use a seta de recolher para deixar só o cabeçalho. Edite o número para mudar a posição; Enter ou sair do campo confirma. A lista lateral permite navegar pela sequência sem expandir todos os cartões.
+- **Distâncias:** os campos cinza não se aplicam ao método selecionado. Seus valores são mantidos para quando você voltar àquele método. Passe o mouse sobre `?` para consultar exemplos e unidades.
+- **Imagens e cores:** o botão de pasta ao lado da imagem do Macro abre o seletor do Foundry. Cores aceitam o seletor RGB e valores `#RRGGBB`.
+- **Compartilhamento:** Todos aplica o acesso selecionado a todos, incluindo usuários offline e futuros. Não alterar atribuição preserva permissões existentes. Pastas mostram o caminho completo; Raiz remove a pasta do Macro.
+
 O Macro Document contém duas partes:
 
 ```js

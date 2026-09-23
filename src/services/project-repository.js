@@ -12,6 +12,17 @@ function lockedFields(project) {
   return (Array.isArray(value) ? value : String(value).split(",")).map((path) => path.trim()).filter(Boolean);
 }
 
+function assignOwnership(ownership, userId, level) {
+  if (![0, 2, 3].includes(Number(level))) throw new Error("Nível de acesso inválido.");
+  const result = { ...ownership };
+  if (userId === "*") {
+    result.default = Number(level);
+    for (const id of Object.keys(result)) result[id] = Number(level);
+    for (const user of game.users?.contents ?? game.users?.values?.() ?? []) result[user.id] = Number(level);
+  } else result[userId] = Number(level);
+  return result;
+}
+
 export class ProjectRepository {
   static list() {
     return game.macros.contents
@@ -50,12 +61,13 @@ export class ProjectRepository {
     project.metadata.createdAt = now;
     project.metadata.updatedAt = now;
     project.metadata.updatedBy = game.user.id;
-    const projectOwnership = ownership ?? {
+    let projectOwnership = ownership ? foundry.utils.deepClone(ownership) : {
       default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
       [game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
     };
     const assignment = project.sharing?.userId;
-    if (assignment) projectOwnership[assignment] = Number(project.sharing?.level ?? CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
+    if (assignment && game.user.isGM) projectOwnership = assignOwnership(projectOwnership, assignment,
+      project.sharing?.level ?? CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
     folder ??= project.sharing?.folderId || null;
 
     const macro = await Macro.create({
@@ -99,7 +111,8 @@ export class ProjectRepository {
         update.folder = project.sharing.folderId || null;
       }
       const userId = project.sharing?.userId;
-      if (userId) update.ownership = { ...ownershipData(macro), [userId]: Number(project.sharing?.level ?? CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) };
+      if (userId) update.ownership = assignOwnership(ownershipData(macro), userId,
+        project.sharing?.level ?? CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
     }
     return macro.update(update);
   }
@@ -112,11 +125,10 @@ export class ProjectRepository {
     project.metadata.createdBy = game.user.id;
     project.metadata.createdAt = Date.now();
     project.metadata.updatedAt = Date.now();
-    const ownership = {
+    const ownership = assignOwnership({
       default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
-      [game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER,
-      [userId]: level
-    };
+      [game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+    }, game.user.isGM ? userId : game.user.id, level);
     return this.create(project, { folder: macro.folder?.id ?? null, ownership });
   }
 
@@ -128,10 +140,9 @@ export class ProjectRepository {
 
   static async assign(uuid, userId, level) {
     if (!game.user.isGM) throw new Error("Somente o GM pode atribuir projetos.");
-    const user = game.users.get(userId);
-    if (!user) throw new Error("Usuário não encontrado.");
+    if (userId !== "*" && !game.users.get(userId)) throw new Error("Usuário não encontrado.");
     const { macro } = await this.get(uuid);
-    const ownership = { ...ownershipData(macro), [userId]: Number(level) };
+    const ownership = assignOwnership(ownershipData(macro), userId, level);
     await macro.update({ ownership });
     return macro;
   }

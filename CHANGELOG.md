@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.9.2 - 2026-09-23
+
+- Campos de geometria e alcance ficam cinza quando não se aplicam ao método escolhido, preservando seus valores.
+- Seletor de imagem do Macro com miniaturas e pastas de Macros organizadas pelo caminho completo.
+- Atribuição Todos aplica o nível de acesso aos usuários atuais e futuros; escolher Raiz remove a pasta atual.
+- Ajuda (?) nos campos, incluindo exemplos de velocidade, fórmulas, unidades e persistência.
+- Seção de variáveis com nome, tipo e valor; fórmulas aceitam FOR ou @FOR para uma variável numérica FOR.
+- Formatação da mensagem com fonte, tamanho, cor RGB, negrito, itálico, sublinhado, alinhamento e prévia.
+- Componentes de dano/cura da mesma etapa são agrupados em uma única rolagem e mensagem, preservando tipos, críticos e resistências individuais, sem rerrolar dados.
+- Etapas podem ser minimizadas, movidas pelo número e localizadas pela sequência compacta na lateral.
+- Seletor RGB para cores de animação e mensagem, com edição hexadecimal opcional.
+- Testes de regressão para os controles do editor, rolagens agrupadas, variáveis e atribuições.
+
 ## 0.9.1 - 2026-09-22
 
 - Corrigido o ID da aba para ocupar o placeholder da sidebar do Foundry, evitando conteúdo solto no canvas e deslocamento das outras abas.

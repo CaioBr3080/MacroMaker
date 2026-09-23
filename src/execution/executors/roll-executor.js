@@ -1,6 +1,9 @@
 import { ROLL_MODES } from "../../constants.js";
 import { ManualHitResolver } from "../manual-hit-resolver.js";
 import { RollAnalysis } from "../roll-analysis.js";
+import { resolveFormulaVariables } from "../../utils/formula-variables.js";
+import { messageFlavor } from "../../utils/message-style.js";
+import { escapeHtml, interpolate } from "../../utils/safe-values.js";
 
 export class RollExecutor {
   static async attack(step, context) {
@@ -34,15 +37,15 @@ export class RollExecutor {
   static async damage(step, context) {
     const parts = this.#parts(step, context.critical);
     const results = [];
+    const rolls = [];
     for (const part of parts) {
       const roll = await this.#evaluate(part.formula, context);
+      rolls.push(roll);
       const rawTotal = Number(roll.total);
       const resistance = part.type
         ? await context.systems?.getResistance(context.target, part.type, { step, part, context }) ?? null
         : null;
       const total = Number.isFinite(resistance) ? Math.max(0, rawTotal - resistance) : rawTotal;
-      await this.#toMessage(roll, { ...step, flavor: part.flavor ?? step.flavor }, context,
-        `Dano${part.type ? ` (${part.type})` : ""}${context.critical ? " Crítico" : ""}`);
       results.push(this.#record(context, "damagePart", roll, {
         type: part.type ?? null,
         rawTotal,
@@ -58,16 +61,17 @@ export class RollExecutor {
     context.damage = summary;
     context.lastResult = summary;
     context.variables.damage = summary;
+    await this.#componentMessage(rolls, results, parts, step, context, summary, `Dano${context.critical ? " Crítico" : ""}`);
     return summary;
   }
 
   static async healing(step, context) {
     const parts = step.parts?.length ? step.parts : [{ formula: step.formula, type: step.typeLabel ?? null }];
     const results = [];
+    const rolls = [];
     for (const part of parts) {
       const roll = await this.#evaluate(part.formula, context);
-      await this.#toMessage(roll, { ...step, flavor: part.flavor ?? step.flavor }, context,
-        `Cura${part.type ? ` (${part.type})` : ""}`);
+      rolls.push(roll);
       results.push(this.#record(context, "healingPart", roll, { type: part.type ?? null }));
     }
     const summary = {
@@ -78,7 +82,33 @@ export class RollExecutor {
     context.healing = summary;
     context.lastResult = summary;
     context.variables.healing = summary;
+    await this.#componentMessage(rolls, results, parts, step, context, summary, "Cura");
     return summary;
+  }
+
+  static async #componentMessage(rolls, results, parts, step, context, summary, label) {
+    let combined = rolls[0];
+    if (rolls.length > 1) {
+      const PoolClass = foundry.dice.terms.PoolTerm;
+      const RollClass = globalThis.CONFIG?.Dice?.rolls?.[0] ?? globalThis.Roll;
+      // Reuse evaluated dice: never evaluate or reroll the components a second time.
+      combined = RollClass.fromTerms([PoolClass.fromRolls(rolls)]);
+    }
+    summary.rawTotal = Number(combined.total);
+    summary.formula = combined.formula;
+    context.lastRoll = combined;
+    context.variables.lastRoll = { kind: summary.kind, formula: summary.formula, total: summary.total };
+    const lines = results.map((result, index) => {
+      const type = escapeHtml(result.type || label);
+      const formula = escapeHtml(result.formula);
+      const resistance = Number.isFinite(result.resistance) ? `; resistência ${result.resistance}; final ${result.total}` : "";
+      const note = parts[index].flavor ? ` — ${escapeHtml(interpolate(parts[index].flavor, context.variables))}` : "";
+      return `<li>${type}: ${formula} = ${result.rawTotal ?? result.total}${resistance}${note}</li>`;
+    }).join("");
+    const details = `<ul class="macro-maker-roll-components">${lines}</ul><p><strong>Total${summary.total !== summary.rawTotal ? " após resistências" : ""}: ${summary.total}</strong></p>`;
+    await this.#toMessage(combined, step, context, label, details, {
+      "macro-maker": { kind: summary.kind, total: summary.total, rawTotal: summary.rawTotal, parts: results }
+    });
   }
 
   static async #simpleRoll(step, context, kind, label) {
@@ -94,7 +124,7 @@ export class RollExecutor {
     if (typeof formula !== "string" || !formula.trim()) throw new Error("A fórmula da rolagem está vazia.");
     const RollClass = globalThis.CONFIG?.Dice?.rolls?.[0] ?? globalThis.Roll;
     if (!RollClass) throw new Error("A classe de rolagem do Foundry não está disponível.");
-    return new RollClass(formula, context.variables).evaluate();
+    return new RollClass(resolveFormulaVariables(formula, context.variables), context.variables).evaluate();
   }
 
   static async #resolveDefense(step, context) {
@@ -134,12 +164,13 @@ export class RollExecutor {
     return result;
   }
 
-  static async #toMessage(roll, step, context, fallbackLabel) {
+  static async #toMessage(roll, step, context, fallbackLabel, details = "", flags = {}) {
     const rollMode = step.rollMode ?? context.project.rollMode ?? "publicroll";
     if (!ROLL_MODES.includes(rollMode)) throw new Error(`Modo de rolagem inválido: ${rollMode}.`);
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ token: context.source?.document }),
-      flavor: step.flavor || `${context.project.name} — ${fallbackLabel}`
+      flavor: messageFlavor(step, `${context.project.name} — ${fallbackLabel}`, context.variables) + details,
+      flags
     }, { rollMode });
   }
 }

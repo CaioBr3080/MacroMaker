@@ -8,6 +8,7 @@ import {
 } from "../constants.js";
 import { createId, isSafeId } from "../utils/ids.js";
 import { safePath } from "../utils/safe-values.js";
+import { MESSAGE_FONTS } from "../utils/message-style.js";
 
 function clone(value) {
   if (typeof structuredClone === "function") return structuredClone(value);
@@ -254,6 +255,20 @@ export class ProjectValidator {
     const rollTypes = [STEP_TYPES.ATTACK, STEP_TYPES.TEST, STEP_TYPES.DAMAGE, STEP_TYPES.HEALING, STEP_TYPES.ROLL];
     if (!rollTypes.includes(step.type)) return;
 
+    if (step.messageStyle != null) {
+      if (!isRecord(step.messageStyle)) issues.push({ path: `${path}.messageStyle`, message: "A formatação da mensagem precisa ser um objeto." });
+      else {
+        const style = step.messageStyle;
+        if (style.font != null && !Object.hasOwn(MESSAGE_FONTS, style.font)) issues.push({ path: `${path}.messageStyle.font`, message: "Fonte de mensagem inválida." });
+        if (style.color != null && !/^#[0-9a-f]{6}$/i.test(style.color)) issues.push({ path: `${path}.messageStyle.color`, message: "Use uma cor no formato #RRGGBB." });
+        this.#normalizeOptionalNumber(style, "size", `${path}.messageStyle.size`, issues, { minimum: 8, maximum: 72 });
+        if (style.align != null && !["left", "center", "right"].includes(style.align)) issues.push({ path: `${path}.messageStyle.align`, message: "Alinhamento inválido." });
+        for (const key of ["bold", "italic", "underline"]) {
+          if (style[key] != null && typeof style[key] !== "boolean") issues.push({ path: `${path}.messageStyle.${key}`, message: "O estilo precisa ser booleano." });
+        }
+      }
+    }
+
     if (step.type === STEP_TYPES.ATTACK && step.hitMode != null && !["auto", "manual"].includes(step.hitMode)) {
       issues.push({ path: `${path}.hitMode`, message: `Modo de acerto inválido na etapa ${index + 1}.` });
     }
@@ -404,11 +419,11 @@ export class ProjectValidator {
     }
   }
 
-  static #normalizeOptionalNumber(object, key, path, issues, { minimum = -Infinity } = {}) {
+  static #normalizeOptionalNumber(object, key, path, issues, { minimum = -Infinity, maximum = Infinity } = {}) {
     if (object[key] == null || object[key] === "") return;
     const number = Number(object[key]);
-    if (!Number.isFinite(number) || number < minimum) {
-      issues.push({ path, message: `${path} precisa ser um número maior ou igual a ${minimum}.` });
+    if (!Number.isFinite(number) || number < minimum || number > maximum) {
+      issues.push({ path, message: `${path} precisa ser um número maior ou igual a ${minimum}${Number.isFinite(maximum) ? ` e no máximo ${maximum}` : ""}.` });
       return;
     }
     object[key] = number;

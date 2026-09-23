@@ -133,3 +133,38 @@ test("atribuição preserva ownership de outros usuários, inclusive se o destin
 test("exclusão exige ownership", async () => {
   await assert.rejects(ProjectRepository.delete({ isOwner: false }), /não pode excluir/);
 });
+
+test("Todos atribui acesso a usuários atuais e futuros sem alterar o objeto recebido", async (t) => {
+  t.after(clearFoundryMock);
+  const creates = installFoundryMock();
+  game.user.isGM = true;
+  game.users = new Map([["one", { id: "one" }], ["offline", { id: "offline", active: false }]]);
+  const ownership = { default: 0, one: 0, previous: 3 };
+  await ProjectRepository.create({ name: "Grupo", steps: [], sharing: { userId: "*", level: 2 } }, { ownership });
+  assert.deepEqual(creates[0].ownership, { default: 2, one: 2, previous: 2, offline: 2 });
+  assert.deepEqual(ownership, { default: 0, one: 0, previous: 3 });
+  assert.equal(Object.hasOwn(creates[0].ownership, "*"), false);
+});
+
+test("Todos funciona ao atualizar, inclusive NONE, e raiz remove a pasta", async (t) => {
+  t.after(clearFoundryMock);
+  installFoundryMock();
+  game.user.isGM = true;
+  game.users = new Map([["player", { id: "player" }]]);
+  const macro = {
+    isOwner: true, uuid: "Macro.test", img: "icon.svg",
+    ownership: { default: 3, player: 3, old: 2 },
+    getFlag: () => ({ name: "Antes", steps: [] }),
+    update: async (data) => data
+  };
+  const updated = await ProjectRepository.update(macro, { name: "Agora", steps: [], sharing: { userId: "*", level: 0, folderId: "" } });
+  assert.deepEqual(updated.ownership, { default: 0, player: 0, old: 0 });
+  assert.equal(updated.folder, null);
+});
+
+test("criação por jogador não aplica atribuição Todos herdada do projeto", async (t) => {
+  t.after(clearFoundryMock);
+  const creates = installFoundryMock();
+  await ProjectRepository.create({ name: "Cópia", steps: [], sharing: { userId: "*", level: 3 } });
+  assert.deepEqual(creates[0].ownership, { default: 0, "player-id": 3 });
+});

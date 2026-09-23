@@ -343,6 +343,59 @@
   padding: 0.7rem;
 }
 
+.macro-maker-step-fields[hidden] { display: none; }
+.macro-maker label { position: relative; }
+.macro-maker-help {
+  display: inline-grid;
+  place-items: center;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 15px;
+  height: 15px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  opacity: 0.75;
+  cursor: help;
+}
+.macro-maker-help:focus { outline: 2px solid var(--color-border-highlight); }
+.macro-maker-inactive-field { opacity: 0.4; }
+.macro-maker .file-field > span { display: flex; gap: 0.3rem; }
+.macro-maker .file-field input { min-width: 0; }
+.macro-maker .file-field button { flex: 0 0 32px; }
+.macro-maker [data-color-for] { width: 100%; height: 26px; cursor: pointer; }
+.macro-maker-variable {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr) auto;
+  gap: 0.5rem;
+  align-items: end;
+  margin-bottom: 0.5rem;
+}
+.macro-maker-variable label { min-width: 0; }
+.macro-maker-message-style {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+}
+.macro-maker-message-style input[type="checkbox"] { width: auto; }
+.macro-maker-message-style .full { grid-column: 1 / -1; }
+.macro-maker-message-preview {
+  padding: 0.65rem;
+  border: 1px dashed var(--color-border-light-primary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.macro-maker-step-outline { border-top: 1px solid var(--color-border-light-primary); padding-top: 0.5rem; }
+.macro-maker-step-outline h3 { margin: 0 0 0.4rem; }
+.macro-maker-step-outline ol { padding: 0; margin: 0; list-style: none; max-height: 36vh; overflow: auto; }
+.macro-maker-step-outline button { display: flex; width: 100%; gap: 0.4rem; text-align: left; }
+.macro-maker-step-outline [data-outline-label] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.macro-maker-step-header input.step-number { width: 52px; min-width: 52px; height: 30px; border-radius: 4px; }
+.macro-maker-step-header { flex-wrap: wrap; }
+
 .macro-maker-step-fields .file-field > span {
   display: flex;
   gap: 0.35rem;

@@ -36,6 +36,19 @@ function project(range) {
   };
 }
 
+test("sem alvos ignora contagens inativas preservadas de outro método", async (t) => {
+  installGlobals(t);
+  const source = project(5);
+  source.targeting.mode = "none";
+  source.targeting.minTargets = 3;
+  source.targeting.maxTargets = 5;
+  const execution = await new ExecutionContext(source, {}, {
+    targetingService: { resolve: async () => ({ targets: [], location: null, template: null }) }
+  }).initialize();
+  assert.equal(execution.targets.length, 0);
+  assert.equal(source.targeting.minTargets, 3);
+});
+
 test("alcance nulo não é interpretado como zero", async (t) => {
   installGlobals(t);
   const target = { id: "target", center: { x: 10, y: 0 } };

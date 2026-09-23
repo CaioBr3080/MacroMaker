@@ -98,6 +98,7 @@ export class ExecutionContext {
   }
 
   #validateTargets() {
+    if (this.project.targeting?.mode === TARGET_MODES.NONE) return;
     const min = Number(this.project.targeting?.minTargets ?? 0);
     const max = Number(this.project.targeting?.maxTargets ?? Infinity);
     const count = this.project.targeting?.mode === TARGET_MODES.POINT && this.location ? 1 : this.targets.length;

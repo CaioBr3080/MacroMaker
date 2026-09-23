@@ -19,6 +19,15 @@
       {{/each}}
     </ol>
 
+    <nav class="macro-maker-step-outline" aria-label="Sequência de etapas">
+      <h3>Sequência de etapas</h3>
+      <ol>
+        {{#each steps}}
+          <li><button type="button" data-action="focus-step" data-index="{{index}}" title="Ir para etapa {{number}}"><span>{{number}}.</span> <span data-outline-label="{{index}}">{{displayLabel}}</span></button></li>
+        {{else}}<li>Adicione etapas para organizar a sequência.</li>{{/each}}
+      </ol>
+    </nav>
+
     <section class="macro-maker-template-gallery">
       <h3><i class="fas fa-shapes"></i> Templates</h3>
       <div class="template-search"><input type="search" name="templateSearch" value="{{templateSearch}}" placeholder="Pesquisar"><button type="button" data-action="filter-templates"><i class="fas fa-search"></i></button></div>
@@ -74,8 +83,8 @@
         <label class="wide">Nome
           <input type="text" value="{{project.name}}" data-project-path="name">
         </label>
-        <label class="wide">Ícone
-          <input type="text" value="{{project.icon}}" data-project-path="icon">
+        <label class="wide file-field">Imagem do Macro
+          <span><input type="text" value="{{project.icon}}" data-project-path="icon"><button type="button" data-action="browse-file" data-project-field="icon" data-file-type="image" title="Selecionar imagem"><i class="fas fa-folder-open"></i></button></span>
         </label>
         <label class="full">Descrição
           <textarea rows="2" data-project-path="description">{{project.description}}</textarea>
@@ -86,10 +95,10 @@
         <fieldset class="macro-maker-project-fields">
           <legend>Compartilhamento</legend>
           <label>Pasta
-            <select data-project-path="sharing.folderId" data-value="{{project.sharing.folderId}}" data-value-type="optional-string"><option value="">Raiz</option>{{#each folders}}<option value="{{id}}">{{name}}</option>{{/each}}</select>
+            <select data-project-path="sharing.folderId" data-value="{{project.sharing.folderId}}"><option value="">Raiz</option>{{#each folders}}<option value="{{id}}">{{name}}</option>{{/each}}</select>
           </label>
           <label>Atribuir a
-            <select data-project-path="sharing.userId" data-value="{{project.sharing.userId}}" data-value-type="optional-string"><option value="">Ninguém</option>{{#each users}}<option value="{{id}}">{{name}}{{#unless active}} (offline){{/unless}}</option>{{/each}}</select>
+            <select data-project-path="sharing.userId" data-value="{{project.sharing.userId}}" data-value-type="optional-string"><option value="">Não alterar atribuição</option><option value="*">Todos</option>{{#each users}}<option value="{{id}}">{{name}}{{#unless active}} (offline){{/unless}}</option>{{/each}}</select>
           </label>
           <label>Acesso
             <select data-project-path="sharing.level" data-value="{{project.sharing.level}}" data-value-type="number"><option value="3">OWNER</option><option value="2">OBSERVER</option><option value="0">NONE</option></select>
@@ -152,6 +161,22 @@
         </label>
       </fieldset>
 
+      <fieldset class="macro-maker-project-fields">
+        <legend>Variáveis do projeto</legend>
+        <p class="full">Defina <strong>FOR = 4</strong> e use <code>1d20 + FOR</code> ou <code>1d20 + @FOR</code> nas fórmulas. Alterar o valor aqui atualiza todas as fórmulas que o usam. Renomear ou excluir exige revisar as referências.</p>
+        <div class="macro-maker-variables full">
+          {{#each variables}}
+            <div class="macro-maker-variable">
+              <label>Nome <input type="text" value="{{name}}" data-variable-name data-variable-index="{{index}}" title="Ex.: FOR ou BONUS. Letras, números e _, sem espaços."></label>
+              <label>Tipo <select data-variable-type data-variable-index="{{index}}" data-value="{{valueType}}"><option value="number">Número</option><option value="string">Texto</option><option value="boolean">Booleano</option><option value="json">Objeto/lista (JSON)</option></select></label>
+              <label>Valor <input type="text" value="{{value}}" data-variable-value data-variable-index="{{index}}" title="Número: 4. Booleano: true ou false. JSON: [1,2] ou um objeto."></label>
+              <button type="button" data-action="delete-variable" data-index="{{index}}" title="Excluir variável"><i class="fas fa-trash"></i></button>
+            </div>
+          {{else}}<p>Você ainda não definiu variáveis.</p>{{/each}}
+        </div>
+        <button type="button" data-action="add-variable"><i class="fas fa-plus"></i> Nova variável</button>
+      </fieldset>
+
       <section class="macro-maker-step-builder">
         {{#if debugLog}}
           <details class="macro-maker-debug">
@@ -174,13 +199,14 @@
             <li class="macro-maker-step {{#unless isEnabled}}disabled{{/unless}}" data-step-index="{{index}}" draggable="true">
               <header class="macro-maker-step-header">
                 <i class="fas fa-grip-vertical drag-handle" title="Arraste para reordenar"></i>
-                <span class="step-number">{{number}}</span>
+                <input class="step-number" type="number" min="1" max="{{../steps.length}}" value="{{number}}" data-step-position="{{index}}" aria-label="Posição da etapa" title="Digite a posição desejada e confirme saindo do campo">
                 <span class="step-type">{{type}}</span>
                 <label class="step-enabled" title="Etapa habilitada">
                   <input type="checkbox" {{#if isEnabled}}checked{{/if}} data-step-index="{{index}}" data-step-path="enabled" data-value-type="boolean">
                 </label>
                 <input class="step-label" type="text" value="{{label}}" aria-label="Rótulo da etapa" data-step-index="{{index}}" data-step-path="label">
                 <div class="step-actions">
+                  <button type="button" data-action="toggle-step" data-index="{{index}}" aria-expanded="{{#if collapsed}}false{{else}}true{{/if}}" title="{{#if collapsed}}Expandir etapa{{else}}Minimizar etapa{{/if}}"><i class="fas fa-chevron-{{#if collapsed}}down{{else}}up{{/if}}"></i></button>
                   <button type="button" data-action="move-step" data-index="{{index}}" data-offset="-1" title="Mover para cima" {{#if isFirst}}disabled{{/if}}><i class="fas fa-arrow-up"></i></button>
                   <button type="button" data-action="move-step" data-index="{{index}}" data-offset="1" title="Mover para baixo" {{#if isLast}}disabled{{/if}}><i class="fas fa-arrow-down"></i></button>
                   <button type="button" data-action="duplicate-step" data-index="{{index}}" title="Duplicar"><i class="fas fa-copy"></i></button>
@@ -188,7 +214,7 @@
                 </div>
               </header>
 
-              <div class="macro-maker-step-fields">
+              <div class="macro-maker-step-fields" {{#if collapsed}}hidden{{/if}}>
                 <div class="macro-maker-condition-builder full">
                   <header>
                     <strong>Condições da etapa</strong>
@@ -304,7 +330,7 @@
                       <option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option>
                     </select>
                   </label>
-                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isTest}}
@@ -314,7 +340,7 @@
                   <label>Visibilidade
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
-                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isDamage}}
@@ -338,7 +364,7 @@
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
                   <button type="button" data-action="add-part" data-index="{{index}}" data-kind="damage"><i class="fas fa-plus"></i> Componente de dano</button>
-                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isHealing}}
@@ -358,7 +384,7 @@
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
                   <button type="button" data-action="add-part" data-index="{{index}}" data-kind="healing"><i class="fas fa-plus"></i> Componente de cura</button>
-                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isRoll}}
@@ -366,7 +392,7 @@
                   <label>Visibilidade
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
-                  <label class="full">Mensagem <input type="text" value="{{flavor}}" data-step-index="{{index}}" data-step-path="flavor"></label>
+                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isMenu}}
@@ -429,6 +455,20 @@
                   <label>ID da etapa alvo <input type="text" value="{{targetId}}" data-step-index="{{index}}" data-step-path="targetId"></label>
                   <label>Habilitar etapa alvo <select data-step-index="{{index}}" data-step-path="changes.enabled" data-value="{{changes.enabled}}" data-value-type="boolean-select"><option value="false">Não</option><option value="true">Sim</option></select></label>
                   <label>Tipo a adicionar/substituir <select data-mutation-step-type data-step-index="{{index}}" data-step-path="step.type" data-value="{{step.type}}">{{#each ../stepTypes}}<option value="{{type}}">{{label}}</option>{{/each}}</select></label>
+                {{/if}}
+
+                {{#if isRollStep}}
+                  <fieldset class="macro-maker-message-style full">
+                    <legend>Formatação da mensagem</legend>
+                    <label>Fonte <select data-step-index="{{index}}" data-step-path="messageStyle.font" data-value="{{messageStyle.font}}">{{#each ../messageFonts}}<option value="{{value}}">{{label}}</option>{{/each}}</select></label>
+                    <label>Tamanho (px) <input type="number" min="8" max="72" value="{{messageStyle.size}}" data-step-index="{{index}}" data-step-path="messageStyle.size" data-value-type="optional-number"></label>
+                    <label>Cor <input type="text" placeholder="#ffffff" value="{{messageStyle.color}}" data-step-index="{{index}}" data-step-path="messageStyle.color" data-value-type="optional-string"></label>
+                    <label>Alinhamento <select data-step-index="{{index}}" data-step-path="messageStyle.align" data-value="{{messageStyle.align}}"><option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option></select></label>
+                    <label><input type="checkbox" {{#if messageStyle.bold}}checked{{/if}} data-step-index="{{index}}" data-step-path="messageStyle.bold" data-value-type="boolean"> Negrito</label>
+                    <label><input type="checkbox" {{#if messageStyle.italic}}checked{{/if}} data-step-index="{{index}}" data-step-path="messageStyle.italic" data-value-type="boolean"> Itálico</label>
+                    <label><input type="checkbox" {{#if messageStyle.underline}}checked{{/if}} data-step-index="{{index}}" data-step-path="messageStyle.underline" data-value-type="boolean"> Sublinhado</label>
+                    <div class="macro-maker-message-preview full" data-message-preview="{{index}}" aria-label="Prévia da mensagem"></div>
+                  </fieldset>
                 {{/if}}
 
                 {{#if isRemovePersistent}}

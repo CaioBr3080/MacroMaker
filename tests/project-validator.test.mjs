@@ -11,6 +11,16 @@ function registry() {
   });
 }
 
+test("valida estilos de mensagem e mantém variáveis numéricas do projeto", () => {
+  const project = { name: "Força", variables: { FOR: 4 }, steps: [{ type: "roll", formula: "1d20 + FOR", messageStyle: { font: "Arial", size: "18", color: "#aabbcc", bold: true } }] };
+  const normalized = ProjectValidator.normalize(project);
+  assert.equal(normalized.variables.FOR, 4);
+  assert.equal(normalized.steps[0].messageStyle.size, 18);
+  for (const style of [{ size: 99 }, { size: 4 }, { color: "red;display:none" }, { font: "unknown" }, { bold: "true" }, "invalid"]) {
+    assert.throws(() => ProjectValidator.normalize({ ...project, steps: [{ ...project.steps[0], messageStyle: style }] }), ProjectValidationError);
+  }
+});
+
 test("normaliza o projeto sem remover propriedades desconhecidas", () => {
   const project = ProjectValidator.normalize({
     name: "  Projeto de teste  ",
