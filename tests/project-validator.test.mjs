@@ -38,14 +38,17 @@ test("valida e normaliza a coluna opcional das opções do menu", () => {
     variables: {},
     steps: [{
       type: "menu",
+      columnSettings: { 2: { title: "  Magias  ", textTransform: "upper" } },
       options: [{ label: "A", value: "a", column: "2" }]
     }]
   });
   assert.equal(project.steps[0].options[0].column, 2);
+  assert.equal(project.steps[0].columnSettings[2].title, "  Magias  ");
+  assert.equal(project.steps[0].columnSettings[2].textTransform, "upper");
   assert.throws(() => ProjectValidator.normalize({
     name: "Menu",
     variables: {},
-    steps: [{ type: "menu", options: [{ label: "A", value: "a", column: 7 }] }]
+    steps: [{ type: "menu", columnSettings: { 1: { textTransform: "invert" } }, options: [{ label: "A", value: "a", column: 7 }] }]
   }), ProjectValidationError);
 });
 test("normaliza o projeto sem remover propriedades desconhecidas", () => {

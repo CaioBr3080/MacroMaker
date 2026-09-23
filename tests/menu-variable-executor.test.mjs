@@ -44,13 +44,16 @@ test("menu respeita a coluna explícita de cada opção", async (t) => {
   await MenuExecutor.execute({
     variable: "choice",
     columns: 3,
+    columnSettings: { 3: { title: "Escolhas especiais", textTransform: "upper" } },
     options: [
-      { label: "A", value: "a", column: 3 },
+      { label: "fogo", value: "a", column: 3 },
       { label: "B", value: "b" }
     ]
   }, { project: { name: "Teste" }, variables: {} });
 
   assert.match(rendered, /grid-column:3/);
+  assert.match(rendered, /Escolhas especiais/);
+  assert.match(rendered, />FOGO</);
   assert.doesNotMatch(rendered, /grid-column:7/);
 });
 test("cancelamento pode usar padrão e variáveis não vazam entre contextos", async (t) => {

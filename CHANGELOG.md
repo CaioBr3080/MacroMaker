@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.6 - 2026-09-23
+
+- O complemento do nome no chat preserva os espaços iniciais, finais e repetidos exatamente como digitados, inclusive ao usar uma frase completa com o alias.
+- Cada coluna de um menu pode receber título e padronização visual do rótulo (original, maiúsculas, minúsculas ou iniciais maiúsculas), sem alterar os valores usados nas condições.
+
 ## 0.9.5 - 2026-09-23
 
 - Menus reorganizados com seletor de imagem para o menu e para cada opção, coluna explícita por opção e instruções para usar a escolha em condições de ramificação.

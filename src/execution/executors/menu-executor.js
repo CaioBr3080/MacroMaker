@@ -13,19 +13,46 @@ function optionColumn(value, columns) {
   return Number.isInteger(column) && column >= 1 && column <= columns ? column : null;
 }
 
+function transformOptionText(value, transform) {
+  const text = String(value ?? "");
+  if (transform === "upper") return text.toLocaleUpperCase();
+  if (transform === "lower") return text.toLocaleLowerCase();
+  if (transform === "capitalize") {
+    return text.replace(/(^|[\s-])(\p{L})/gu, (_match, prefix, letter) => prefix + letter.toLocaleUpperCase());
+  }
+  return text;
+}
+
 export class MenuExecutor {
   static async execute(step, context) {
     const columns = Math.min(6, Math.max(1, Number(step.columns ?? 1)));
-    const options = (step.options ?? []).map((option, index) => ({
-      index,
-      value: option.value,
-      label: interpolate(option.label, context.variables, { escape: true }),
-      description: interpolate(option.description, context.variables, { escape: true }),
-      image: escapeHtml(option.image ?? ""),
-      icon: escapeHtml(option.icon ?? ""),
-      column: optionColumn(option.column, columns)
-    }));
+    const options = (step.options ?? []).map((option, index) => {
+      const configuredColumn = optionColumn(option.column, columns);
+      const effectiveColumn = configuredColumn ?? (index % columns) + 1;
+      const textTransform = step.columnSettings?.[effectiveColumn]?.textTransform ?? "none";
+      return {
+        index,
+        value: option.value,
+        label: transformOptionText(interpolate(option.label, context.variables, { escape: true }), textTransform),
+        description: interpolate(option.description, context.variables, { escape: true }),
+        image: escapeHtml(option.image ?? ""),
+        icon: escapeHtml(option.icon ?? ""),
+        column: configuredColumn
+      };
+    });
     if (!options.length) throw new Error("A etapa de menu não possui opções.");
+    const columnHeaders = Array.from({ length: columns }, (_value, index) => {
+      const number = index + 1;
+      return {
+        number,
+        title: escapeHtml(interpolate(step.columnSettings?.[number]?.title ?? "", context.variables))
+      };
+    });
+    const columnHeaderMarkup = columnHeaders.some((column) => column.title)
+      ? '<div class="macro-maker-menu-column-titles" style="--macro-maker-menu-columns:' + columns + '">'
+        + columnHeaders.map((column) => '<strong style="grid-column:' + column.number + '">' + column.title + "</strong>").join("")
+        + "</div>"
+      : "";
 
     const multiple = step.selection === "multiple" || step.multiple === true;
     const defaults = new Set((multiple ? step.defaultValues : [step.defaultValue])
@@ -36,6 +63,7 @@ export class MenuExecutor {
       <form class="macro-maker-menu">
         ${step.description ? `<p>${interpolate(step.description, context.variables, { escape: true })}</p>` : ""}
         ${step.image ? `<img class="macro-maker-menu-image" src="${escapeHtml(step.image)}" alt="">` : ""}
+        ${columnHeaderMarkup}
         <div class="macro-maker-menu-options" style="--macro-maker-menu-columns:${columns}">
           ${options.map((option) => `<label class="macro-maker-menu-card"${option.column ? ` style="grid-column:${option.column}"` : ""}>
             <input type="${inputType}" name="choice" value="${option.index}" ${defaults.has(option.value) ? "checked" : ""}>

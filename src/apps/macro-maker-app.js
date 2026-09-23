@@ -162,6 +162,11 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         speakerStyle: { font: "inherit", size: 14, align: "left", ...step.speakerStyle },
         parts: (step.parts ?? []).map((part, partIndex) => ({ ...part, partIndex })),
         options: (step.options ?? []).map((option, optionIndex) => ({ ...option, optionIndex })),
+        menuColumns: Array.from({ length: Math.min(6, Math.max(1, Number(step.columns ?? 1))) }, (_value, columnIndex) => {
+          const number = columnIndex + 1;
+          const settings = step.columnSettings?.[number] ?? {};
+          return { number, title: settings.title ?? "", textTransform: settings.textTransform ?? "none" };
+        }),
         conditionNodes: (step.conditions ?? []).flatMap((condition, conditionIndex) => flattenConditions(condition, `conditions.${conditionIndex}`)),
         branchConditionNodes: flattenConditions(step.condition, "condition", { deletable: false }),
         thenSteps: (step.then ?? []).map((child, branchIndex) => ({ ...child, branchIndex })),

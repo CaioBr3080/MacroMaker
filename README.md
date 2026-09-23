@@ -4,7 +4,7 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.0` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.6` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - uma aba própria **Macro Maker** na sidebar e um botão de fallback no diretório de Macros;
 - editor migrado para `ApplicationV2` e Handlebars;
@@ -77,7 +77,7 @@ macro-maker/
 - **Variáveis do projeto:** adicione uma variável, renomeie para `FOR`, escolha Número e informe `4`. Use `1d20 + FOR` (ou `1d20 + @FOR`) na fórmula. Basta alterar o valor de FOR e salvar para atualizar as próximas execuções. Os nomes diferenciam maiúsculas de minúsculas. Renomear/excluir uma variável exige atualizar suas referências. OWNER pode editar; campos bloqueados pelo GM continuam protegidos.
 - **Dano e cura:** componentes dentro da mesma etapa aparecem em uma única rolagem, com total e discriminação dos tipos. Crie outra etapa se quiser uma segunda rolagem. Resistências são indicadas separadamente do total bruto dos dados; o módulo não altera HP automaticamente.
 - **Mensagens:** o texto aceita várias linhas e preserva espaços no início, no fim e repetidos ao salvar. Os controles de formatação alteram a mensagem inteira e mostram uma prévia. No texto, use `{{variables.FOR}}` para mostrar o valor de uma variável.
-- **Menus:** cada opção aceita rótulo, valor, descrição, imagem, ícone e coluna (1–6). O menu grava a escolha na variável de saída; em uma Ramificação, use a condição Opção de menu com essa variável e o valor escolhido.
+- **Menus:** cada opção aceita rótulo, valor, descrição, imagem, ícone e coluna (1–6). Cada coluna pode ter título e padronizar visualmente os rótulos como original, MAIÚSCULAS, minúsculas ou Iniciais Maiúsculas, sem mudar o valor salvo. O menu grava a escolha na variável de saída; em uma Ramificação, use a condição Opção de menu com essa variável e o valor escolhido.
 - **Nome no chat:** em Formatação da mensagem, use Complemento após o nome para manter o alias original e anexar texto livre. `Aldine destrói com sua lâmina` resulta no nome original seguido de ` destrói com sua lâmina`; o nome e o complemento têm controles próprios de fonte, tamanho, cor, alinhamento e estilo. Espaços e quebras de linha são preservados.
 - **Etapas:** use a seta de recolher para deixar só o cabeçalho. Edite o número para mudar a posição; Enter ou sair do campo confirma. A lista lateral permite navegar pela sequência sem expandir todos os cartões.
 - **Distâncias:** os campos cinza não se aplicam ao método selecionado. Seus valores são mantidos para quando você voltar àquele método. Passe o mouse sobre `?` para consultar exemplos e unidades.

@@ -413,6 +413,26 @@
                       <span><input type="text" value="{{image}}" data-step-index="{{index}}" data-step-path="image"><button type="button" data-action="browse-file" data-index="{{index}}" data-step-field="image" data-file-type="image" title="Escolher imagem do menu"><i class="fas fa-folder-open"></i></button></span>
                     </label>
                   </fieldset>
+                  <fieldset class="macro-maker-menu-columns full">
+                    <legend>Títulos e texto por coluna</legend>
+                    <p class="full">Dê um título a cada coluna e escolha como os textos das opções dela serão exibidos. Isso altera só a apresentação do menu, não os valores usados nas condições.</p>
+                    {{#each menuColumns}}
+                      <section>
+                        <strong>Coluna {{number}}</strong>
+                        <label>Título
+                          <input type="text" value="{{title}}" placeholder="Ex.: Tipo de ataque" data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.title">
+                        </label>
+                        <label>Padronizar texto
+                          <select data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.textTransform" data-value="{{textTransform}}">
+                            <option value="none">Original</option>
+                            <option value="upper">MAIÚSCULAS</option>
+                            <option value="lower">minúsculas</option>
+                            <option value="capitalize">Iniciais maiúsculas</option>
+                          </select>
+                        </label>
+                      </section>
+                    {{/each}}
+                  </fieldset>
                   <p class="macro-maker-menu-help full"><strong>Como ligar a uma condição:</strong> este menu grava a escolha em <code>{{variable}}</code>. Para executar etapas diferentes, coloque uma etapa <strong>Ramificação</strong> depois dele e escolha a condição <strong>Opção de menu</strong>, usando essa variável na chave e o valor da opção no campo Valor.</p>
                   <div class="macro-maker-menu-editor full">
                     <header><strong>Opções do menu</strong><small>Defina rótulo, valor e imagem. Coluna vazia usa o preenchimento automático.</small></header>

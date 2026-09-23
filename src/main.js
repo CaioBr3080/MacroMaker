@@ -79,10 +79,11 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
     const current = sender.textContent ?? "";
     // Accept either only the suffix (" destrói...") or a complete phrase
     // ("Aldine destrói...") without replacing the original speaker alias.
-    const trimmed = append.trimStart();
-    const alias = current.trimEnd();
-    const suffix = alias && trimmed.toLocaleLowerCase().startsWith(alias.toLocaleLowerCase())
-      ? trimmed.slice(alias.length)
+    const leading = append.match(/^\s*/)?.[0] ?? "";
+    const text = append.slice(leading.length);
+    const alias = current;
+    const suffix = alias && text.toLocaleLowerCase().startsWith(alias.toLocaleLowerCase())
+      ? leading + text.slice(alias.length)
       : append;
     sender.append(document.createTextNode(suffix));
   }

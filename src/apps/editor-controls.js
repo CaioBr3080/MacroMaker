@@ -83,6 +83,7 @@ export const FIELD_HELP = {
   title: "Título apresentado ao jogador no menu de escolha.",
   selection: "Única salva um valor; múltipla salva uma lista com as opções escolhidas.",
   columns: "Número de colunas do menu visual, entre 1 e 6. A posição de cada opção pode ser definida no campo Coluna.",
+  textTransform: "Define como os rótulos das opções dessa coluna aparecem: texto original, maiúsculas, minúsculas ou iniciais maiúsculas. Os valores das opções não mudam.",
   cancelBehavior: "Define se cancelar o menu interrompe a macro, usa o valor padrão ou continua sem atribuir uma escolha.",
   defaultValue: "Valor atribuído à variável quando o menu é cancelado com a opção Usar padrão.",
   image: "Caminho de imagem no servidor Foundry para ilustrar o menu ou uma opção.",

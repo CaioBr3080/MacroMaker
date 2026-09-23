@@ -382,6 +382,28 @@ export class ProjectValidator {
     }
     this.#normalizeOptionalNumber(step, "columns", `${path}.columns`, issues, { minimum: 1 });
     if (Number(step.columns) > 6) issues.push({ path: `${path}.columns`, message: "O menu aceita no máximo 6 colunas." });
+    if (step.columnSettings != null) {
+      if (!isRecord(step.columnSettings)) {
+        issues.push({ path: path + ".columnSettings", message: "As configurações das colunas precisam ser um objeto." });
+      } else {
+        for (const [key, settings] of Object.entries(step.columnSettings)) {
+          const column = Number(key);
+          const settingsPath = path + ".columnSettings." + key;
+          if (!Number.isInteger(column) || column < 1 || column > 6) {
+            issues.push({ path: settingsPath, message: "A configuração precisa apontar para uma coluna de 1 a 6." });
+          } else if (!isRecord(settings)) {
+            issues.push({ path: settingsPath, message: "A configuração da coluna precisa ser um objeto." });
+          } else {
+            if (settings.title != null && typeof settings.title !== "string") {
+              issues.push({ path: settingsPath + ".title", message: "O título da coluna precisa ser texto." });
+            }
+            if (settings.textTransform != null && !["none", "upper", "lower", "capitalize"].includes(settings.textTransform)) {
+              issues.push({ path: settingsPath + ".textTransform", message: "A padronização de texto da coluna é inválida." });
+            }
+          }
+        }
+      }
+    }
   }
 
   static #normalizeVariableStep(step, path, issues) {
