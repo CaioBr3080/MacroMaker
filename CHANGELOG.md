@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.10 - 2026-09-23
+
+- O campo simples de Mensagem voltou ao editor, com altura para editar parágrafos.
+- Linhas vazias inseridas com Enter, inclusive antes e depois do texto, são preservadas no projeto e no chat.
 ## 0.9.9 - 2026-09-23
 
 - A árvore de pastas da aba Macro Maker agora permite abrir e fechar cada pasta, lembrando a escolha por usuário.

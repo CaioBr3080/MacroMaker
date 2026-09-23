@@ -925,20 +925,6 @@
   font-weight: 600;
 }
 
-.macro-maker-message-text {
-  min-width: 0;
-  margin: 0;
-}
-
-.macro-maker-message-text > label {
-  min-width: 0;
-}
-
-.macro-maker-message-input {
-  min-height: 3.75rem;
-  resize: vertical;
-  white-space: pre-wrap;
-}
 
 .macro-maker-sidebar-folder-create {
   margin: 0.4rem 0 0.6rem;

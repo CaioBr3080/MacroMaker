@@ -143,8 +143,8 @@ test("o nome do usuário recebe complemento sem perder o alias original", () => 
     append: "Aldine destrói com sua lâmina",
     css: "white-space:pre-wrap;font-weight:bold;text-align:center"
   });
-  assert.equal(messageFlavor({ flavor: "  Aldine  destrói\ncom sua lâmina" }, ""),
-    '<div style="white-space:pre-wrap">  Aldine  destrói\ncom sua lâmina</div>');
+  assert.equal(messageFlavor({ flavor: "\n\n  Aldine  destrói\ncom sua lâmina\n\n" }, ""),
+    '<div style="white-space:pre-wrap">\n\n  Aldine  destrói\ncom sua lâmina\n\n</div>');
 });
 
 test("anexa os alvos resolvidos depois da mensagem personalizada", async (t) => {

@@ -26,10 +26,10 @@ test("preserva espaços nas bordas e no meio de descrições e mensagens", () =>
     name: "Projeto",
     description: "  descrição com espaço final  ",
     variables: {},
-    steps: [{ type: "roll", formula: "1d20", flavor: "  texto com  dois espaços  " }]
+    steps: [{ type: "roll", formula: "1d20", flavor: "\n\n  texto com  dois espaços  \n\n" }]
   });
   assert.equal(project.description, "  descrição com espaço final  ");
-  assert.equal(project.steps[0].flavor, "  texto com  dois espaços  ");
+  assert.equal(project.steps[0].flavor, "\n\n  texto com  dois espaços  \n\n");
 });
 
 test("valida e normaliza a coluna opcional das opções do menu", () => {
