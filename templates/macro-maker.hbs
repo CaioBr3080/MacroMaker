@@ -18,20 +18,36 @@
         <li class="empty">Nenhum projeto ainda.</li>
       {{/each}}
     </ol>
+
+    <section class="macro-maker-template-gallery">
+      <h3><i class="fas fa-shapes"></i> Templates</h3>
+      <div class="template-search"><input type="search" name="templateSearch" value="{{templateSearch}}" placeholder="Pesquisar"><button type="button" data-action="filter-templates"><i class="fas fa-search"></i></button></div>
+      <select name="templateCategory" data-value="{{templateCategory}}"><option value="">Todas as categorias</option>{{#each templateCategories}}<option value="{{this}}">{{this}}</option>{{/each}}</select>
+      <ol>
+        {{#each templates}}
+          <li><button type="button" data-action="apply-template" data-template-id="{{id}}"><span>{{name}}</span><small>{{category}}</small></button></li>
+        {{else}}<li class="empty">Nenhum template encontrado.</li>{{/each}}
+      </ol>
+    </section>
   </aside>
 
-  <main class="macro-maker-editor">
+  <main class="macro-maker-editor {{#unless canEdit}}read-only{{/unless}}">
     <header class="macro-maker-toolbar">
       <div>
         <h1>{{project.name}}</h1>
         <p>Projeto-fonte salvo nas flags do Macro.</p>
       </div>
       <div class="macro-maker-actions">
-        <button type="button" data-action="duplicate" {{#unless hasMacro}}disabled{{/unless}}>
+        <button type="button" data-action="import"><i class="fas fa-file-import"></i> Importar</button>
+        <button type="button" data-action="export"><i class="fas fa-file-export"></i> Exportar</button>
+        {{#if isGM}}<button type="button" data-action="save-template"><i class="fas fa-bookmark"></i> Template</button>{{/if}}
+        {{#if isGM}}<button type="button" data-action="migrate-all"><i class="fas fa-database"></i> Migrar</button>{{/if}}
+        <button type="button" data-action="duplicate" {{#unless canManageMacro}}disabled{{/unless}}>
           <i class="fas fa-copy"></i> Duplicar
         </button>
+        <button type="button" data-action="delete" {{#unless canManageMacro}}disabled{{/unless}}><i class="fas fa-trash"></i> Excluir</button>
         <button type="button" data-action="run"><i class="fas fa-play"></i> Executar</button>
-        <button type="button" data-action="save" class="primary"><i class="fas fa-save"></i> Salvar</button>
+        <button type="button" data-action="save" class="primary" {{#unless canEdit}}disabled{{/unless}}><i class="fas fa-save"></i> Salvar</button>
       </div>
     </header>
 
@@ -52,6 +68,7 @@
     </nav>
 
     <section class="macro-maker-panel macro-maker-visual" data-editor-panel="visual">
+      {{#if migrationPending}}<p class="macro-maker-notice"><i class="fas fa-database"></i> Projeto migrado em memória. Salve para persistir a versão atual.</p>{{/if}}
       <fieldset class="macro-maker-project-fields">
         <legend>Projeto</legend>
         <label class="wide">Nome
@@ -64,6 +81,24 @@
           <textarea rows="2" data-project-path="description">{{project.description}}</textarea>
         </label>
       </fieldset>
+
+      {{#if isGM}}
+        <fieldset class="macro-maker-project-fields">
+          <legend>Compartilhamento</legend>
+          <label>Pasta
+            <select data-project-path="sharing.folderId" data-value="{{project.sharing.folderId}}" data-value-type="optional-string"><option value="">Raiz</option>{{#each folders}}<option value="{{id}}">{{name}}</option>{{/each}}</select>
+          </label>
+          <label>Atribuir a
+            <select data-project-path="sharing.userId" data-value="{{project.sharing.userId}}" data-value-type="optional-string"><option value="">Ninguém</option>{{#each users}}<option value="{{id}}">{{name}}{{#unless active}} (offline){{/unless}}</option>{{/each}}</select>
+          </label>
+          <label>Acesso
+            <select data-project-path="sharing.level" data-value="{{project.sharing.level}}" data-value-type="number"><option value="3">OWNER</option><option value="2">OBSERVER</option><option value="0">NONE</option></select>
+          </label>
+          <label>Slot da sua hotbar <input type="number" min="1" max="50" value="{{project.sharing.hotbarSlot}}" data-project-path="sharing.hotbarSlot" data-value-type="optional-number"></label>
+          <label class="checkbox-field"><input type="checkbox" {{#if project.sharing.observerCanExecute}}checked{{/if}} data-project-path="sharing.observerCanExecute" data-value-type="boolean"> OBSERVER pode executar</label>
+          <label class="full">Campos bloqueados para não-GM <input type="text" value="{{project.sharing.lockedFields}}" placeholder="targeting, steps" data-project-path="sharing.lockedFields"></label>
+        </fieldset>
+      {{/if}}
 
       <fieldset class="macro-maker-project-fields">
         <legend>Seleção e alcance</legend>
@@ -118,6 +153,12 @@
       </fieldset>
 
       <section class="macro-maker-step-builder">
+        {{#if debugLog}}
+          <details class="macro-maker-debug">
+            <summary><i class="fas fa-bug"></i> Explicação da última execução</summary>
+            <ol>{{#each debugLog}}<li class="{{#if passed}}passed{{else}}failed{{/if}}"><strong>{{status}}</strong> — {{reason}}</li>{{/each}}</ol>
+          </details>
+        {{/if}}
         <header class="macro-maker-add-step">
           <h2>Etapas</h2>
           <span class="spacer"></span>
@@ -148,15 +189,38 @@
               </header>
 
               <div class="macro-maker-step-fields">
-                <label>Condição
-                  <select data-condition-type data-step-index="{{index}}" data-value="{{conditionType}}">
-                    <option value="always">Sempre</option>
-                    <option value="critical">Crítico</option>
-                    <option value="notCritical">Não crítico</option>
-                    <option value="hit">Acerto</option>
-                    <option value="miss">Erro</option>
-                  </select>
-                </label>
+                <div class="macro-maker-condition-builder full">
+                  <header>
+                    <strong>Condições da etapa</strong>
+                    <button type="button" data-action="add-condition" data-index="{{index}}" data-path="conditions"><i class="fas fa-plus"></i> Condição</button>
+                    <button type="button" data-action="add-condition" data-index="{{index}}" data-path="conditions" data-condition-kind="group"><i class="fas fa-diagram-project"></i> Grupo</button>
+                  </header>
+                  {{#each conditionNodes}}
+                    <div class="macro-maker-condition-node" style="margin-left: {{indent}}px">
+                      <select data-condition-node-type data-step-index="{{../index}}" data-step-path="{{path}}.type" data-value="{{type}}">
+                        <option value="critical">Crítico</option><option value="notCritical">Não crítico</option>
+                        <option value="hit">Acerto</option><option value="miss">Erro</option>
+                        <option value="distance">Distância</option><option value="rollTotal">Total da rolagem</option>
+                        <option value="damage">Dano</option><option value="naturalDie">Dado natural</option>
+                        <option value="hpPercent">HP percentual</option><option value="hasItem">Possui item</option>
+                        <option value="hasEffect">Possui efeito</option><option value="hasTag">Possui tag</option>
+                        <option value="targetCount">Quantidade de alvos</option><option value="variable">Variável</option>
+                        <option value="menuOption">Opção de menu</option><option value="group">Grupo lógico</option>
+                      </select>
+                      {{#if isGroup}}
+                        <select data-step-index="{{../index}}" data-step-path="{{path}}.operator" data-value="{{operator}}"><option value="and">AND</option><option value="or">OR</option><option value="not">NOT</option></select>
+                        <button type="button" data-action="add-condition" data-index="{{../index}}" data-path="{{path}}.children"><i class="fas fa-plus"></i></button>
+                      {{else}}
+                        <select data-step-index="{{../index}}" data-step-path="{{path}}.operator" data-value="{{operator}}" data-value-type="optional-string"><option value="">Padrão</option><option value="eq">=</option><option value="neq">≠</option><option value="gt">&gt;</option><option value="gte">≥</option><option value="lt">&lt;</option><option value="lte">≤</option><option value="includes">Contém</option></select>
+                        <input type="text" value="{{key}}" placeholder="Variável/chave" data-step-index="{{../index}}" data-step-path="{{path}}.key" data-value-type="optional-string">
+                        <input type="text" value="{{value}}" placeholder="Valor" data-step-index="{{../index}}" data-step-path="{{path}}.value" data-value-type="optional-string">
+                      {{/if}}
+                      {{#if deletable}}<button type="button" data-action="delete-condition" data-index="{{../index}}" data-path="{{path}}"><i class="fas fa-trash"></i></button>{{/if}}
+                    </div>
+                  {{else}}
+                    <small>Sem condição: a etapa sempre executa.</small>
+                  {{/each}}
+                </div>
 
                 <label>Evento
                   <select data-step-index="{{index}}" data-step-path="event" data-value="{{event}}" data-value-type="optional-string">
@@ -201,6 +265,13 @@
                     <label><input type="checkbox" {{#if mirrorY}}checked{{/if}} data-step-index="{{index}}" data-step-path="mirrorY" data-value-type="boolean"> Espelhar Y</label>
                     <label><input type="checkbox" {{#if persist}}checked{{/if}} data-step-index="{{index}}" data-step-path="persist" data-value-type="boolean"> Persistente</label>
                   </div>
+                  <label>Política ao repetir
+                    <select data-step-index="{{index}}" data-step-path="duplicatePolicy" data-value="{{duplicatePolicy}}"><option value="replace">Atualizar/substituir</option><option value="skip">Manter existente</option><option value="stack">Empilhar</option></select>
+                  </label>
+                  <label>Duração (segundos) <input type="number" min="0" step="any" value="{{durationSeconds}}" data-step-index="{{index}}" data-step-path="durationSeconds" data-value-type="optional-number"></label>
+                  <label>Duração (rodadas) <input type="number" min="0" step="any" value="{{durationRounds}}" data-step-index="{{index}}" data-step-path="durationRounds" data-value-type="optional-number"></label>
+                  <label>UUID de vínculo <input type="text" value="{{linkUuid}}" placeholder="Token/Actor/Item/ActiveEffect" data-step-index="{{index}}" data-step-path="linkUuid" data-value-type="optional-string"></label>
+                  <label class="full">Tags (separadas por vírgula) <input type="text" value="{{tags}}" data-step-index="{{index}}" data-step-path="tags"></label>
                 {{/if}}
 
                 {{#if isSound}}
@@ -301,15 +372,70 @@
                 {{#if isMenu}}
                   <label>Título <input type="text" value="{{title}}" data-step-index="{{index}}" data-step-path="title"></label>
                   <label>Variável <input type="text" value="{{variable}}" data-step-index="{{index}}" data-step-path="variable"></label>
-                  <label>Primeira opção <input type="text" value="{{options.0.label}}" data-step-index="{{index}}" data-step-path="options.0.label"></label>
-                  <label>Valor <input type="text" value="{{options.0.value}}" data-step-index="{{index}}" data-step-path="options.0.value"></label>
+                  <label>Seleção <select data-step-index="{{index}}" data-step-path="selection" data-value="{{selection}}"><option value="single">Única</option><option value="multiple">Múltipla</option></select></label>
+                  <label>Colunas <input type="number" min="1" max="6" value="{{columns}}" data-step-index="{{index}}" data-step-path="columns" data-value-type="number"></label>
+                  <label>Ao cancelar <select data-step-index="{{index}}" data-step-path="cancelBehavior" data-value="{{cancelBehavior}}"><option value="abort">Abortar macro</option><option value="default">Usar padrão</option><option value="continue">Continuar sem atribuir</option></select></label>
+                  <label>Valor padrão <input type="text" value="{{defaultValue}}" data-step-index="{{index}}" data-step-path="defaultValue" data-value-type="optional-string"></label>
+                  <label class="full">Descrição <input type="text" value="{{description}}" data-step-index="{{index}}" data-step-path="description"></label>
+                  <label class="full">Imagem do menu <input type="text" value="{{image}}" data-step-index="{{index}}" data-step-path="image"></label>
+                  <div class="macro-maker-menu-editor full">
+                    {{#each options}}
+                      <div class="macro-maker-menu-option">
+                        <input type="text" value="{{label}}" placeholder="Rótulo" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.label">
+                        <input type="text" value="{{value}}" placeholder="Valor" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.value">
+                        <input type="text" value="{{description}}" placeholder="Descrição" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.description">
+                        <input type="text" value="{{image}}" placeholder="Imagem" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.image">
+                        <input type="text" value="{{icon}}" placeholder="Ícone Font Awesome" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.icon">
+                        <button type="button" data-action="delete-menu-option" data-index="{{../index}}" data-option-index="{{optionIndex}}"><i class="fas fa-trash"></i></button>
+                      </div>
+                    {{/each}}
+                    <button type="button" data-action="add-menu-option" data-index="{{index}}"><i class="fas fa-plus"></i> Adicionar opção</button>
+                  </div>
+                {{/if}}
+
+                {{#if isBranch}}
+                  <div class="macro-maker-condition-builder full">
+                    <header><strong>Decisão da ramificação</strong></header>
+                    {{#each branchConditionNodes}}
+                      <div class="macro-maker-condition-node" style="margin-left: {{indent}}px">
+                        <select data-condition-node-type data-step-index="{{../index}}" data-step-path="{{path}}.type" data-value="{{type}}"><option value="critical">Crítico</option><option value="hit">Acerto</option><option value="miss">Erro</option><option value="distance">Distância</option><option value="rollTotal">Rolagem</option><option value="damage">Dano</option><option value="naturalDie">Dado natural</option><option value="hpPercent">HP %</option><option value="hasItem">Item</option><option value="hasEffect">Efeito</option><option value="hasTag">Tag</option><option value="targetCount">Alvos</option><option value="variable">Variável</option><option value="menuOption">Opção de menu</option><option value="group">Grupo</option></select>
+                        {{#if isGroup}}
+                          <select data-step-index="{{../index}}" data-step-path="{{path}}.operator" data-value="{{operator}}"><option value="and">AND</option><option value="or">OR</option><option value="not">NOT</option></select>
+                          <button type="button" data-action="add-condition" data-index="{{../index}}" data-path="{{path}}.children"><i class="fas fa-plus"></i></button>
+                        {{else}}
+                          <select data-step-index="{{../index}}" data-step-path="{{path}}.operator" data-value="{{operator}}"><option value="eq">=</option><option value="neq">≠</option><option value="gt">&gt;</option><option value="gte">≥</option><option value="lt">&lt;</option><option value="lte">≤</option><option value="includes">Contém</option></select>
+                          <input type="text" value="{{key}}" placeholder="Variável/chave" data-step-index="{{../index}}" data-step-path="{{path}}.key">
+                          <input type="text" value="{{value}}" placeholder="Valor" data-step-index="{{../index}}" data-step-path="{{path}}.value">
+                        {{/if}}
+                        {{#if deletable}}<button type="button" data-action="delete-condition" data-index="{{../index}}" data-path="{{path}}"><i class="fas fa-trash"></i></button>{{/if}}
+                      </div>
+                    {{/each}}
+                  </div>
+                  <div class="macro-maker-branch-lanes full">
+                    <section class="then"><h4><i class="fas fa-check"></i> Então</h4>{{#each thenSteps}}<div class="branch-step"><span>{{type}} — {{label}}</span><button type="button" data-action="delete-branch-step" data-index="{{../index}}" data-lane="then" data-branch-index="{{branchIndex}}"><i class="fas fa-trash"></i></button></div>{{/each}}<div class="branch-add"><select data-branch-step-type="{{index}}-then">{{#each ../stepTypes}}<option value="{{type}}">{{label}}</option>{{/each}}</select><button type="button" data-action="add-branch-step" data-index="{{index}}" data-lane="then"><i class="fas fa-plus"></i></button></div></section>
+                    <section class="else"><h4><i class="fas fa-xmark"></i> Senão</h4>{{#each elseSteps}}<div class="branch-step"><span>{{type}} — {{label}}</span><button type="button" data-action="delete-branch-step" data-index="{{../index}}" data-lane="else" data-branch-index="{{branchIndex}}"><i class="fas fa-trash"></i></button></div>{{/each}}<div class="branch-add"><select data-branch-step-type="{{index}}-else">{{#each ../stepTypes}}<option value="{{type}}">{{label}}</option>{{/each}}</select><button type="button" data-action="add-branch-step" data-index="{{index}}" data-lane="else"><i class="fas fa-plus"></i></button></div></section>
+                  </div>
+                {{/if}}
+
+                {{#if isSetVariable}}
+                  <label>Variável <input type="text" value="{{variable}}" data-step-index="{{index}}" data-step-path="variable"></label>
+                  <label>Operação <select data-step-index="{{index}}" data-step-path="operation" data-value="{{operation}}"><option value="set">Definir</option><option value="add">Somar</option><option value="subtract">Subtrair</option><option value="multiply">Multiplicar</option><option value="append">Adicionar à lista</option><option value="toggle">Alternar booleano</option></select></label>
+                  <label>Tipo <select data-step-index="{{index}}" data-step-path="valueType" data-value="{{valueType}}"><option value="auto">Automático</option><option value="string">Texto</option><option value="number">Número</option><option value="boolean">Booleano</option><option value="array">Lista</option></select></label>
+                  <label>Valor <input type="text" value="{{value}}" data-step-index="{{index}}" data-step-path="value"></label>
+                {{/if}}
+
+                {{#if isMutateSteps}}
+                  <label>Ação <select data-step-index="{{index}}" data-step-path="action" data-value="{{action}}"><option value="modify">Modificar</option><option value="remove">Remover</option><option value="replace">Substituir</option><option value="add">Adicionar</option></select></label>
+                  <label>ID da etapa alvo <input type="text" value="{{targetId}}" data-step-index="{{index}}" data-step-path="targetId"></label>
+                  <label>Habilitar etapa alvo <select data-step-index="{{index}}" data-step-path="changes.enabled" data-value="{{changes.enabled}}" data-value-type="boolean-select"><option value="false">Não</option><option value="true">Sim</option></select></label>
+                  <label>Tipo a adicionar/substituir <select data-mutation-step-type data-step-index="{{index}}" data-step-path="step.type" data-value="{{step.type}}">{{#each ../stepTypes}}<option value="{{type}}">{{label}}</option>{{/each}}</select></label>
                 {{/if}}
 
                 {{#if isRemovePersistent}}
-                  <label>Objeto
-                    <select data-step-index="{{index}}" data-step-path="object" data-value="{{object}}"><option value="target">Alvo</option><option value="source">Executante</option></select>
-                  </label>
+                  <label>Escopo <select data-step-index="{{index}}" data-step-path="scope" data-value="{{scope}}"><option value="name">Nome</option><option value="step">Etapa</option><option value="source">Origem</option><option value="target">Alvo</option><option value="project">Projeto</option><option value="tag">Tag</option><option value="all">Todos do Macro Maker</option></select></label>
                   <label>Nome <input type="text" value="{{name}}" data-step-index="{{index}}" data-step-path="name"></label>
+                  <label>ID da etapa <input type="text" value="{{stepId}}" data-step-index="{{index}}" data-step-path="stepId"></label>
+                  <label>Tag <input type="text" value="{{tag}}" data-step-index="{{index}}" data-step-path="tag"></label>
                 {{/if}}
               </div>
             </li>

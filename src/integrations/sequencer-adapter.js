@@ -1,4 +1,5 @@
 import { MODULE_ID } from "../constants.js";
+import { slug } from "../utils/ids.js";
 
 export class SequencerAdapter {
   static assertReady() {
@@ -11,16 +12,25 @@ export class SequencerAdapter {
     this.assertReady();
     const source = context.resolveLocation(step.source ?? "source");
     const target = context.resolveLocation(step.target ?? "target");
-    const effectName = step.name
-      ? `${MODULE_ID}.${context.macro.id}.${step.name}`
-      : undefined;
+    const effectName = step.persist || step.name ? this.persistentName(step, context) : undefined;
+    const attached = typeof step.attachTo === "string"
+      ? context.resolveLocation(step.attachTo)
+      : step.attachTo ? source : null;
+
+    if (step.persist && effectName) {
+      const filters = { name: effectName, ...((attached ?? source) ? { object: attached ?? source } : {}) };
+      const duplicatePolicy = step.duplicatePolicy ?? "replace";
+      const existing = Sequencer.EffectManager.getEffects?.(filters) ?? [];
+      if (duplicatePolicy === "skip" && existing.length) return;
+      if (duplicatePolicy === "replace" && existing.length) await Sequencer.EffectManager.endEffects(filters);
+    }
 
     const sequence = new Sequence({ moduleName: MODULE_ID, softFail: true });
     const effect = sequence.effect().file(step.file);
 
     if (source) effect.atLocation(source);
     if (effectName) effect.name(effectName);
-    if (step.attachTo && source) effect.attachTo(source);
+    if (attached) effect.attachTo(attached, step.attachOptions ?? {});
 
     const distance = context.distanceTo(target);
     const stretchThreshold = Number(step.distanceBehavior?.stretchAfter);
@@ -40,6 +50,13 @@ export class SequencerAdapter {
     if (step.mirrorX) effect.mirrorX();
     if (step.mirrorY) effect.mirrorY();
     if (step.persist) effect.persist(true, step.persistOptions ?? {});
+    const duration = this.#durationMilliseconds(step);
+    if (duration != null) {
+      effect.duration(duration);
+      if (step.persist) effect.loopOptions({ loops: 1, endOnLastLoop: true });
+    }
+    const origin = this.#origin(step, context);
+    if (origin) effect.origin(origin);
     if (step.fadeIn) effect.fadeIn(Number(step.fadeIn));
     if (step.fadeOut) effect.fadeOut(Number(step.fadeOut));
 
@@ -58,8 +75,45 @@ export class SequencerAdapter {
 
   static async removePersistent(step, context) {
     this.assertReady();
-    const object = context.resolveLocation(step.object ?? "target");
-    const name = step.name ? `${MODULE_ID}.${context.macro.id}.${step.name}` : undefined;
-    await Sequencer.EffectManager.endEffects({ object, name });
+    const scope = step.scope ?? (step.name ? "name" : step.object ?? "target");
+    const projectId = slug(context.project?.id ?? context.macro?.id, "project");
+    const filters = {};
+    if (scope === "step") filters.name = `${MODULE_ID}.${projectId}.${slug(step.stepId, "step")}.*`;
+    else if (scope === "name") filters.name = `${MODULE_ID}.${projectId}.*.${slug(step.name)}.*`;
+    else if (scope === "project") filters.name = `${MODULE_ID}.${projectId}.*`;
+    else if (scope === "tag") filters.name = `${MODULE_ID}.*.*.*.*${slug(step.tag)}*`;
+    else filters.name = `${MODULE_ID}.*`;
+
+    if (scope === "source" || scope === "target") filters[scope] = context.resolveLocation(scope);
+    else if (step.object) filters.object = context.resolveLocation(step.object);
+    if (step.sceneId) filters.sceneId = step.sceneId;
+    await Sequencer.EffectManager.endEffects(filters);
+  }
+
+  static persistentName(step, context) {
+    const projectId = slug(context.project?.id ?? context.macro?.id, "project");
+    const stepId = slug(step.id, "step");
+    const logicalName = slug(step.name ?? step.label, "effect");
+    const tags = (Array.isArray(step.tags) ? step.tags : String(step.tags ?? "").split(","))
+      .map((tag) => slug(tag, ""))
+      .filter(Boolean)
+      .join("_") || "untagged";
+    return `${MODULE_ID}.${projectId}.${stepId}.${logicalName}.${tags}`;
+  }
+
+  static #durationMilliseconds(step) {
+    const seconds = Number(step.durationSeconds);
+    if (Number.isFinite(seconds) && seconds > 0) return seconds * 1000;
+    const rounds = Number(step.durationRounds);
+    if (!Number.isFinite(rounds) || rounds <= 0) return null;
+    const roundSeconds = Number(globalThis.CONFIG?.time?.roundTime ?? 6);
+    return rounds * roundSeconds * 1000;
+  }
+
+  static #origin(step, context) {
+    if (step.linkUuid) return step.linkUuid;
+    const reference = step.link ?? step.attachTo;
+    const document = context.resolveLocation(reference)?.document ?? context.resolveLocation(reference);
+    return document?.uuid ?? context.macro?.uuid ?? null;
   }
 }

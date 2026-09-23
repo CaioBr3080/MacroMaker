@@ -1,3 +1,5 @@
+import { createId } from "../utils/ids.js";
+
 function clone(value) {
   if (typeof structuredClone === "function") return structuredClone(value);
   return JSON.parse(JSON.stringify(value));
@@ -46,7 +48,7 @@ export class StepRegistry {
   create(type, overrides = {}) {
     const definition = this.get(type);
     if (!definition) throw new Error(`Tipo de etapa desconhecido: ${type}.`);
-    return { ...clone(definition.defaults), ...clone(overrides), type };
+    return { ...clone(definition.defaults), ...clone(overrides), type, id: overrides.id ?? createId("step") };
   }
 
   async execute(step, context) {

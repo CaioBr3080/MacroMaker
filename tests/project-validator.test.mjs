@@ -28,7 +28,7 @@ test("normaliza o projeto sem remover propriedades desconhecidas", () => {
     futureProjectOption: [1, 2, 3]
   }, { stepRegistry: registry() });
 
-  assert.equal(project.schemaVersion, 1);
+  assert.equal(project.schemaVersion, 2);
   assert.equal(project.name, "Projeto de teste");
   assert.equal(project.targeting.minTargets, 1);
   assert.equal(project.targeting.maxTargets, 2);
@@ -41,7 +41,7 @@ test("normaliza o projeto sem remover propriedades desconhecidas", () => {
 test("retorna todos os caminhos inválidos em um único erro", () => {
   assert.throws(
     () => ProjectValidator.normalize({
-      schemaVersion: 1,
+      schemaVersion: 2,
       name: "",
       targeting: {
         source: "controlled",
@@ -71,7 +71,7 @@ test("retorna todos os caminhos inválidos em um único erro", () => {
 
 test("não altera o objeto fornecido pelo chamador", () => {
   const input = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     name: "  Original  ",
     targeting: { source: "none", mode: "none" },
     variables: {},
@@ -108,6 +108,44 @@ test("rejeita fórmulas, eventos e modos de rolagem inválidos", () => {
     assert.ok(paths.includes("steps.0.formula"));
     assert.ok(paths.includes("steps.0.event"));
     assert.ok(paths.includes("steps.0.rollMode"));
+    return true;
+  });
+});
+
+test("preserva condições e ramificações aninhadas com IDs estáveis", () => {
+  const normalized = ProjectValidator.normalize({
+    name: "Árvore",
+    targeting: { source: "none", mode: "none" },
+    steps: [{
+      type: "branch",
+      condition: {
+        type: "group",
+        operator: "and",
+        children: [
+          { type: "critical" },
+          { type: "variable", key: "poison", operator: "eq", value: "purple" }
+        ]
+      },
+      then: [{ type: "wait", ms: 10 }],
+      else: []
+    }]
+  }, { stepRegistry: createCoreStepRegistry() });
+  const reopened = ProjectValidator.normalize(normalized, { stepRegistry: createCoreStepRegistry() });
+
+  assert.match(normalized.id, /^project-/);
+  assert.equal(reopened.id, normalized.id);
+  assert.equal(reopened.steps[0].id, normalized.steps[0].id);
+  assert.equal(reopened.steps[0].then[0].id, normalized.steps[0].then[0].id);
+  assert.deepEqual(reopened.steps[0].condition, normalized.steps[0].condition);
+});
+
+test("rejeita condições que tentam armazenar código arbitrário", () => {
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Código",
+    targeting: { source: "none", mode: "none" },
+    steps: [{ type: "wait", ms: 1, conditions: [{ type: "javascript", code: "return true" }] }]
+  }, { stepRegistry: createCoreStepRegistry() }), (error) => {
+    assert.ok(error.issues.some((issue) => issue.path === "steps.0.conditions.0.type"));
     return true;
   });
 });

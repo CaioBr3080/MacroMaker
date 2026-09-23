@@ -3,6 +3,7 @@ import { createCoreStepRegistry } from "../execution/core-step-registry.js";
 import { ProjectRepository } from "../services/project-repository.js";
 import { ProjectValidationError, ProjectValidator } from "../validation/project-validator.js";
 import { ProjectHistory } from "./project-history.js";
+import { createId } from "../utils/ids.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const DELETE_VALUE = Symbol("delete-value");
@@ -24,6 +25,40 @@ function setPath(object, path, value) {
   else cursor[last] = value;
 }
 
+function getPath(object, path) {
+  return path.split(".").reduce((value, key) => value?.[key], object);
+}
+
+function deletePath(object, path) {
+  const keys = path.split(".");
+  const last = keys.pop();
+  const parent = keys.reduce((value, key) => value?.[key], object);
+  if (Array.isArray(parent)) parent.splice(Number(last), 1);
+  else if (parent) delete parent[last];
+}
+
+function flattenConditions(condition, path, { deletable = true, depth = 0 } = {}) {
+  if (!condition) return [];
+  const node = {
+    ...condition,
+    path,
+    depth,
+    indent: depth * 18,
+    isGroup: condition.type === "group",
+    deletable
+  };
+  const children = condition.type === "group"
+    ? (condition.children ?? []).flatMap((child, index) => flattenConditions(child, `${path}.children.${index}`, { depth: depth + 1 }))
+    : [];
+  return [node, ...children];
+}
+
+function saveJson(data, filename) {
+  const save = globalThis.foundry?.utils?.saveDataToFile ?? globalThis.saveDataToFile;
+  if (!save) throw new Error("O download de arquivos não está disponível.");
+  return save(data, "application/json", filename);
+}
+
 export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: "macro-maker-app",
@@ -40,6 +75,13 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       save: this.#onSave,
       run: this.#onRun,
       duplicate: this.#onDuplicate,
+      delete: this.#onDelete,
+      "apply-template": this.#onApplyTemplate,
+      "filter-templates": this.#onFilterTemplates,
+      "save-template": this.#onSaveTemplate,
+      export: this.#onExport,
+      import: this.#onImport,
+      "migrate-all": this.#onMigrateAll,
       "add-step": this.#onAddStep,
       "format-json": this.#onFormatJson,
       "show-tab": this.#onShowTab,
@@ -50,7 +92,13 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       "delete-step": this.#onDeleteStep,
       "browse-file": this.#onBrowseFile,
       "add-part": this.#onAddPart,
-      "delete-part": this.#onDeletePart
+      "delete-part": this.#onDeletePart,
+      "add-menu-option": this.#onAddMenuOption,
+      "delete-menu-option": this.#onDeleteMenuOption,
+      "add-branch-step": this.#onAddBranchStep,
+      "delete-branch-step": this.#onDeleteBranchStep,
+      "add-condition": this.#onAddCondition,
+      "delete-condition": this.#onDeleteCondition
     }
   };
 
@@ -70,13 +118,22 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.project = createDefaultProject();
     this.history = new ProjectHistory(this.project);
     this.activeTab = "visual";
+    this.lastDebugLog = [];
+    this.canEdit = true;
+    this.migrationPending = false;
+    this.templateSearch = "";
+    this.templateCategory = "";
   }
 
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     if (this.macroUuid && this.loadedUuid !== this.macroUuid) {
-      const { project } = await ProjectRepository.get(this.macroUuid);
+      const { macro, project, migration } = await ProjectRepository.get(this.macroUuid);
+      project.sharing ??= {};
+      if (game.user.isGM) project.sharing.folderId ??= macro.folder?.id ?? "";
       this.project = ProjectValidator.normalize(project, { stepRegistry: this.stepRegistry });
+      this.canEdit = macro.isOwner;
+      this.migrationPending = migration.changed;
       this.loadedUuid = this.macroUuid;
       this.history.reset(this.project);
     }
@@ -86,6 +143,11 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       steps: (this.project.steps ?? []).map((step, index, steps) => ({
         ...step,
         parts: (step.parts ?? []).map((part, partIndex) => ({ ...part, partIndex })),
+        options: (step.options ?? []).map((option, optionIndex) => ({ ...option, optionIndex })),
+        conditionNodes: (step.conditions ?? []).flatMap((condition, conditionIndex) => flattenConditions(condition, `conditions.${conditionIndex}`)),
+        branchConditionNodes: flattenConditions(step.condition, "condition", { deletable: false }),
+        thenSteps: (step.then ?? []).map((child, branchIndex) => ({ ...child, branchIndex })),
+        elseSteps: (step.else ?? []).map((child, branchIndex) => ({ ...child, branchIndex })),
         index,
         number: index + 1,
         isFirst: index === 0,
@@ -103,9 +165,22 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         isHealing: step.type === "healing",
         isRoll: step.type === "roll",
         isMenu: step.type === "menu",
+        isBranch: step.type === "branch",
+        isSetVariable: step.type === "setVariable",
+        isMutateSteps: step.type === "mutateSteps",
         isRemovePersistent: step.type === "removePersistent"
       })),
       hasMacro: Boolean(this.macroUuid),
+      canManageMacro: Boolean(this.macroUuid) && this.canEdit,
+      canEdit: this.canEdit,
+      isGM: game.user.isGM,
+      migrationPending: this.migrationPending,
+      folders: (game.folders ?? []).filter((folder) => folder.type === "Macro").map((folder) => ({ id: folder.id, name: folder.name })),
+      users: (game.users ?? []).map((user) => ({ id: user.id, name: user.name, active: user.active })),
+      templates: game.macroMaker?.templates?.list({ query: this.templateSearch, category: this.templateCategory }) ?? [],
+      templateCategories: [...new Set((game.macroMaker?.templates?.list() ?? []).map((template) => template.category))].sort(),
+      templateSearch: this.templateSearch,
+      templateCategory: this.templateCategory,
       projectJson: JSON.stringify(this.project, null, 2),
       projects: ProjectRepository.list().map((macro) => ({
         uuid: macro.uuid,
@@ -115,6 +190,12 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         active: macro.uuid === this.macroUuid
       })),
       stepTypes: this.stepRegistry.list().map(({ type, label }) => ({ type, label })),
+      debugLog: this.lastDebugLog.map((entry) => ({
+        ...entry,
+        passed: entry.evaluation?.matched !== false,
+        status: entry.evaluation?.matched === false ? "Falhou" : "Passou",
+        reason: entry.evaluation?.reason ?? `${entry.kind}: ${entry.action ?? entry.branch ?? entry.variable ?? "executado"}`
+      })),
       canUndo: this.history.canUndo,
       canRedo: this.history.canRedo
     }, { inplace: false });
@@ -141,6 +222,13 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onSave() { return this.#save(); }
   static #onRun() { return this.#run(); }
   static #onDuplicate() { return this.#duplicate(); }
+  static #onDelete() { return this.#deleteProject(); }
+  static #onApplyTemplate(_event, target) { return this.#applyTemplate(target); }
+  static #onFilterTemplates() { return this.#filterTemplates(); }
+  static #onSaveTemplate() { return this.#saveTemplate(); }
+  static #onExport() { return this.#exportProject(); }
+  static #onImport() { return this.#importProject(); }
+  static #onMigrateAll() { return this.#migrateAll(); }
   static #onAddStep() { return this.#addStep(); }
   static #onFormatJson() { return this.#formatJson(); }
   static #onShowTab(_event, target) { return this.#showTab(target); }
@@ -152,6 +240,12 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onBrowseFile(_event, target) { return this.#browseFile(target); }
   static #onAddPart(_event, target) { return this.#addPart(target); }
   static #onDeletePart(_event, target) { return this.#deletePart(target); }
+  static #onAddMenuOption(_event, target) { return this.#addMenuOption(target); }
+  static #onDeleteMenuOption(_event, target) { return this.#deleteMenuOption(target); }
+  static #onAddBranchStep(_event, target) { return this.#addBranchStep(target); }
+  static #onDeleteBranchStep(_event, target) { return this.#deleteBranchStep(target); }
+  static #onAddCondition(_event, target) { return this.#addCondition(target); }
+  static #onDeleteCondition(_event, target) { return this.#deleteCondition(target); }
 
   #query(selector) {
     return this.element?.querySelector(selector) ?? null;
@@ -180,6 +274,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   #mutate(callback, { render = true } = {}) {
+    if (this.macroUuid && !this.canEdit) return ui.notifications.warn("Este projeto está em modo somente leitura.");
     try {
       const project = this.#readRawEditor();
       callback(project);
@@ -193,6 +288,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.macroUuid = null;
     this.loadedUuid = null;
     this.project = createDefaultProject();
+    this.canEdit = true;
+    this.migrationPending = false;
     this.history.reset(this.project);
     await this.render();
   }
@@ -204,6 +301,10 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   async #save() {
+    if (this.macroUuid && !this.canEdit) {
+      ui.notifications.warn("Você pode visualizar e executar este projeto, mas não salvá-lo.");
+      return false;
+    }
     try {
       this.#clearValidationErrors();
       const project = this.#readEditor();
@@ -218,6 +319,15 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.project = project;
       this.history.commit(project);
       this.loadedUuid = this.macroUuid;
+      this.migrationPending = false;
+      const slot = Number(project.sharing?.hotbarSlot);
+      if (Number.isInteger(slot) && slot >= 1) {
+        try {
+          await ProjectRepository.assignHotbar(macro, slot);
+        } catch (error) {
+          ui.notifications.warn(`Projeto salvo, mas a hotbar não foi atualizada: ${error.message}`);
+        }
+      }
       ui.notifications.info(`Macro Maker: ${project.name} salvo.`);
       await this.render();
       ui["macro-maker"]?.render?.();
@@ -230,9 +340,13 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   async #run() {
-    if (!await this.#save()) return;
+    if (this.canEdit) {
+      if (!await this.#save()) return;
+    } else if (!this.macroUuid) return;
     try {
-      await game.macroMaker.executeMacro(this.macroUuid);
+      const context = await game.macroMaker.executeMacro(this.macroUuid);
+      this.lastDebugLog = context.debugLog ?? [];
+      await this.render();
     } catch (error) {
       console.error("Macro Maker | falha ao executar pela interface", error);
     }
@@ -242,13 +356,129 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.macroUuid) return ui.notifications.warn("Salve o projeto antes de duplicar.");
     try {
       const { macro } = await ProjectRepository.get(this.macroUuid);
-      const copy = await ProjectRepository.duplicate(macro);
+      const userId = game.user.isGM && this.project.sharing?.userId ? this.project.sharing.userId : game.user.id;
+      const level = Number(this.project.sharing?.level ?? CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
+      const copy = await ProjectRepository.duplicate(macro, { userId, level });
       this.macroUuid = copy.uuid;
       this.loadedUuid = null;
       await this.render();
       ui["macro-maker"]?.render?.();
     } catch (error) {
       this.#reportError("duplicar", error);
+    }
+  }
+
+  async #deleteProject() {
+    if (!this.macroUuid) return;
+    try {
+      const deleted = await game.macroMaker.deleteProject(this.macroUuid);
+      if (!deleted) return;
+      await this.#newProject();
+      ui["macro-maker"]?.render?.();
+    } catch (error) {
+      this.#reportError("excluir", error);
+    }
+  }
+
+  async #applyTemplate(target) {
+    try {
+      this.project = game.macroMaker.templates.instantiate(target.dataset.templateId);
+      this.macroUuid = null;
+      this.loadedUuid = null;
+      this.canEdit = true;
+      this.migrationPending = false;
+      this.history.reset(this.project);
+      await this.render();
+    } catch (error) {
+      this.#reportError("aplicar o template", error);
+    }
+  }
+
+  async #filterTemplates() {
+    this.templateSearch = this.#query("[name='templateSearch']")?.value ?? "";
+    this.templateCategory = this.#query("[name='templateCategory']")?.value ?? "";
+    await this.render();
+  }
+
+  async #saveTemplate() {
+    try {
+      const project = this.#readEditor();
+      const values = await Dialog.wait({
+        title: "Salvar como template",
+        content: `<form><label>Nome <input name="name" value="${foundry.utils.escapeHTML(project.name)}"></label><label>Categoria <input name="category" value="Personalizados"></label></form>`,
+        buttons: { save: { label: "Salvar", icon: '<i class="fas fa-save"></i>', callback: (html) => {
+          const root = html?.[0] ?? html;
+          return { name: root.querySelector('[name="name"]').value, category: root.querySelector('[name="category"]').value };
+        } } },
+        close: () => null
+      });
+      if (!values) return;
+      await game.macroMaker.templates.save(project, values);
+      ui.notifications.info("Template salvo.");
+      await this.render();
+    } catch (error) {
+      this.#reportError("salvar o template", error);
+    }
+  }
+
+  #exportProject() {
+    try {
+      const project = this.#readEditor();
+      const data = game.macroMaker.templates.export(project);
+      const filename = `${foundry.utils.slugify?.(project.name) ?? "macro-maker-project"}.macro-maker.json`;
+      saveJson(data, filename);
+    } catch (error) {
+      this.#reportError("exportar", error);
+    }
+  }
+
+  async #importProject() {
+    try {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json,application/json";
+      const file = await new Promise((resolve) => {
+        input.addEventListener("change", () => resolve(input.files?.[0] ?? null), { once: true });
+        input.click();
+      });
+      if (!file) return;
+      let preview = await game.macroMaker.templates.previewImport(await file.text());
+      const content = preview.missingAssets.length
+        ? `<p>Revise os caminhos ausentes antes de importar:</p><form class="macro-maker-import-assets">${preview.missingAssets.map((item) => `<label>${foundry.utils.escapeHTML(item.label ?? item.stepId)}<input data-step-id="${foundry.utils.escapeHTML(item.stepId)}" value="${foundry.utils.escapeHTML(item.file)}"></label>`).join("")}</form>`
+        : "<p>Nenhum caminho ausente detectado.</p>";
+      const replacements = await Dialog.wait({
+        title: `Importar ${foundry.utils.escapeHTML(preview.project.name)}`,
+        content: `<p>${preview.project.steps.length} etapa(s), schema ${preview.project.schemaVersion}.</p>${content}`,
+        buttons: { import: { label: "Importar", icon: '<i class="fas fa-file-import"></i>', callback: (html) => {
+          const root = html?.[0] ?? html;
+          return Object.fromEntries([...root.querySelectorAll("[data-step-id]")].map((input) => [input.dataset.stepId, input.value]));
+        } } },
+        close: () => null
+      });
+      if (replacements == null) return;
+      preview = game.macroMaker.templates.resolveAssets(preview, replacements);
+      this.project = game.macroMaker.templates.instantiateImport(preview);
+      this.macroUuid = null;
+      this.loadedUuid = null;
+      this.canEdit = true;
+      this.history.reset(this.project);
+      await this.render();
+    } catch (error) {
+      this.#reportError("importar", error);
+    }
+  }
+
+  async #migrateAll() {
+    try {
+      if (!await Dialog.confirm({ title: "Migrar projetos", content: "<p>Um backup JSON será baixado antes da migração em lote.</p>" })) return;
+      const backup = game.macroMaker.migrations.createBackup();
+      saveJson(backup, `macro-maker-backup-${Date.now()}.json`);
+      const report = await game.macroMaker.migrations.migrateAll();
+      ui.notifications.info(`Migração concluída: ${report.success} sucesso(s), ${report.failed} falha(s).`);
+      this.loadedUuid = null;
+      await this.render();
+    } catch (error) {
+      this.#reportError("migrar projetos", error);
     }
   }
 
@@ -273,6 +503,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const index = Number(target.dataset.index);
     return this.#mutate((project) => {
       const copy = clone(project.steps[index]);
+      copy.id = createId("step");
       copy.label = `${copy.label || copy.type} (cópia)`;
       project.steps.splice(index + 1, 0, copy);
     });
@@ -305,6 +536,59 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       parts.splice(partIndex, 1);
       if (!parts.length) delete project.steps[index].parts;
     });
+  }
+
+  #addMenuOption(target) {
+    const index = Number(target.dataset.index);
+    return this.#mutate((project) => {
+      project.steps[index].options ??= [];
+      project.steps[index].options.push({ label: "Nova opção", value: `option-${project.steps[index].options.length + 1}`, description: "", image: "", icon: "" });
+    });
+  }
+
+  #deleteMenuOption(target) {
+    const index = Number(target.dataset.index);
+    const optionIndex = Number(target.dataset.optionIndex);
+    return this.#mutate((project) => project.steps[index]?.options?.splice(optionIndex, 1));
+  }
+
+  #addBranchStep(target) {
+    const index = Number(target.dataset.index);
+    const lane = target.dataset.lane;
+    const type = this.#query(`[data-branch-step-type='${index}-${lane}']`)?.value;
+    if (!type || !["then", "else"].includes(lane)) return;
+    return this.#mutate((project) => {
+      project.steps[index][lane] ??= [];
+      project.steps[index][lane].push(this.stepRegistry.create(type));
+    });
+  }
+
+  #deleteBranchStep(target) {
+    const index = Number(target.dataset.index);
+    const branchIndex = Number(target.dataset.branchIndex);
+    const lane = target.dataset.lane;
+    return this.#mutate((project) => project.steps[index]?.[lane]?.splice(branchIndex, 1));
+  }
+
+  #addCondition(target) {
+    const index = Number(target.dataset.index);
+    const path = target.dataset.path ?? "conditions";
+    const type = target.dataset.conditionKind === "group" ? "group" : "critical";
+    return this.#mutate((project) => {
+      let conditions = getPath(project.steps[index], path);
+      if (!Array.isArray(conditions)) {
+        setPath(project.steps[index], path, []);
+        conditions = getPath(project.steps[index], path);
+      }
+      conditions.push(type === "group"
+        ? { type: "group", operator: "and", children: [{ type: "critical" }] }
+        : { type: "critical" });
+    });
+  }
+
+  #deleteCondition(target) {
+    const index = Number(target.dataset.index);
+    return this.#mutate((project) => deletePath(project.steps[index], target.dataset.path));
   }
 
   #formatJson() {
@@ -363,6 +647,16 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         return;
       }
       const value = this.#controlValue(element);
+      if (element.dataset.conditionNodeType !== undefined) {
+        setPath(project.steps[index], element.dataset.stepPath.replace(/\.type$/, ""), value === "group"
+          ? { type: "group", operator: "and", children: [{ type: "critical" }] }
+          : { type: value });
+        return;
+      }
+      if (element.dataset.mutationStepType !== undefined) {
+        project.steps[index].step = this.stepRegistry.create(value);
+        return;
+      }
       if (element.dataset.projectPath) setPath(project, element.dataset.projectPath, value);
       if (element.dataset.stepPath) setPath(project.steps[index], element.dataset.stepPath, value);
     }, { render: false });
@@ -379,6 +673,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   #controlValue(element) {
     const type = element.dataset.valueType ?? "string";
     if (type === "boolean") return element.checked;
+    if (type === "boolean-select") return element.value === "true";
     if (type === "optional-string") return element.value === "" ? DELETE_VALUE : element.value;
     if (["number", "optional-number", "number-null"].includes(type)) {
       if (element.value === "") return type === "number-null" ? null : DELETE_VALUE;

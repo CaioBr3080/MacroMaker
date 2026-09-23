@@ -17,7 +17,10 @@ export class MacroMakerSidebar extends HandlebarsApplicationMixin(AbstractSideba
     actions: {
       new: this.#onNew,
       open: this.#onOpen,
-      run: this.#onRun
+      run: this.#onRun,
+      delete: this.#onDelete,
+      "end-persistent": this.#onEndPersistent,
+      "open-persistent-manager": this.#onOpenPersistentManager
     }
   };
 
@@ -36,7 +39,9 @@ export class MacroMakerSidebar extends HandlebarsApplicationMixin(AbstractSideba
         name: macro.name,
         img: macro.img,
         canEdit: macro.isOwner
-      }))
+      })),
+      isGM: game.user.isGM,
+      persistents: game.user.isGM ? game.macroMaker?.persistents?.list?.() ?? [] : []
     }, { inplace: false });
   }
 
@@ -50,5 +55,22 @@ export class MacroMakerSidebar extends HandlebarsApplicationMixin(AbstractSideba
 
   static async #onRun(_event, target) {
     await game.macroMaker.executeMacro(target.dataset.uuid);
+  }
+
+  static async #onDelete(_event, target) {
+    if (await game.macroMaker.deleteProject(target.dataset.uuid)) await this.render();
+  }
+
+  static async #onEndPersistent(_event, target) {
+    await game.macroMaker.persistents.end({
+      id: target.dataset.effectId,
+      name: target.dataset.effectName,
+      sceneId: target.dataset.sceneId
+    });
+    await this.render();
+  }
+
+  static #onOpenPersistentManager() {
+    return Sequencer.EffectManager.show();
   }
 }

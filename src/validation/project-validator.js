@@ -6,6 +6,8 @@ import {
   TARGET_FILTERS,
   TARGET_MODES
 } from "../constants.js";
+import { createId, isSafeId } from "../utils/ids.js";
+import { safePath } from "../utils/safe-values.js";
 
 function clone(value) {
   if (typeof structuredClone === "function") return structuredClone(value);
@@ -35,6 +37,8 @@ export class ProjectValidator {
     }
 
     const project = clone(input);
+    if (project.id == null) project.id = createId("project");
+    else if (!isSafeId(project.id)) issues.push({ path: "id", message: "O ID do projeto é inválido." });
     project.schemaVersion ??= SCHEMA_VERSION;
     if (!Number.isInteger(project.schemaVersion)) {
       issues.push({ path: "schemaVersion", message: "schemaVersion precisa ser um número inteiro." });
@@ -69,11 +73,40 @@ export class ProjectValidator {
     if (!Array.isArray(project.steps)) {
       issues.push({ path: "steps", message: "project.steps precisa ser uma lista." });
     } else {
-      project.steps.forEach((step, index) => this.#normalizeStep(step, index, issues, stepRegistry));
+      const stepIds = new Set();
+      project.steps.forEach((step, index) => this.#normalizeStep(step, index, issues, stepRegistry, {
+        path: `steps.${index}`,
+        depth: 0,
+        stepIds
+      }));
     }
 
     if (project.metadata != null && !isRecord(project.metadata)) {
       issues.push({ path: "metadata", message: "metadata precisa ser um objeto." });
+    }
+
+    project.sharing ??= { observerCanExecute: true, lockedFields: [] };
+    if (!isRecord(project.sharing)) {
+      issues.push({ path: "sharing", message: "sharing precisa ser um objeto." });
+    } else {
+      const sharing = project.sharing;
+      sharing.observerCanExecute ??= true;
+      if (typeof sharing.observerCanExecute !== "boolean") {
+        issues.push({ path: "sharing.observerCanExecute", message: "observerCanExecute precisa ser booleano." });
+      }
+      if (sharing.level != null && ![0, 2, 3].includes(Number(sharing.level))) {
+        issues.push({ path: "sharing.level", message: "Nível de acesso inválido." });
+      } else if (sharing.level != null) sharing.level = Number(sharing.level);
+      if (sharing.hotbarSlot != null && sharing.hotbarSlot !== "") {
+        this.#normalizeInteger(sharing, "hotbarSlot", "sharing.hotbarSlot", issues, { minimum: 1 });
+        if (Number(sharing.hotbarSlot) > 50) issues.push({ path: "sharing.hotbarSlot", message: "O slot da hotbar deve ser no máximo 50." });
+      }
+      const locks = Array.isArray(sharing.lockedFields)
+        ? sharing.lockedFields
+        : String(sharing.lockedFields ?? "").split(",").map((path) => path.trim()).filter(Boolean);
+      if (locks.some((path) => !safePath(path))) {
+        issues.push({ path: "sharing.lockedFields", message: "Há um caminho de campo bloqueado inválido." });
+      }
     }
 
     if (issues.length) throw new ProjectValidationError(issues);
@@ -156,12 +189,19 @@ export class ProjectValidator {
     object[key] = number;
   }
 
-  static #normalizeStep(step, index, issues, stepRegistry) {
-    const path = `steps.${index}`;
+  static #normalizeStep(step, index, issues, stepRegistry, { path = `steps.${index}`, depth = 0, stepIds = new Set() } = {}) {
     if (!isRecord(step)) {
       issues.push({ path, message: `A etapa ${index + 1} precisa ser um objeto.` });
       return;
     }
+    if (depth > 32) {
+      issues.push({ path, message: "A árvore de ramificações excede 32 níveis." });
+      return;
+    }
+    if (step.id == null) step.id = createId("step");
+    else if (!isSafeId(step.id)) issues.push({ path: `${path}.id`, message: `O ID da etapa ${index + 1} é inválido.` });
+    if (stepIds.has(step.id)) issues.push({ path: `${path}.id`, message: `ID de etapa duplicado: ${step.id}.` });
+    stepIds.add(step.id);
     if (typeof step.type !== "string" || !step.type.trim()) {
       issues.push({ path: `${path}.type`, message: `A etapa ${index + 1} não possui type.` });
       return;
@@ -175,6 +215,13 @@ export class ProjectValidator {
     }
     if (step.conditions != null && !Array.isArray(step.conditions)) {
       issues.push({ path: `${path}.conditions`, message: `conditions da etapa ${index + 1} precisa ser uma lista.` });
+    } else {
+      step.conditions?.forEach((condition, conditionIndex) => this.#normalizeCondition(
+        condition,
+        `${path}.conditions.${conditionIndex}`,
+        issues,
+        depth
+      ));
     }
     if (step.event != null && !EXECUTION_EVENTS.includes(step.event)) {
       issues.push({ path: `${path}.event`, message: `Evento inválido na etapa ${index + 1}: ${step.event}.` });
@@ -182,6 +229,27 @@ export class ProjectValidator {
     if (step.rollMode != null && !ROLL_MODES.includes(step.rollMode)) {
       issues.push({ path: `${path}.rollMode`, message: `Modo de rolagem inválido na etapa ${index + 1}.` });
     }
+
+    if (step.type === STEP_TYPES.MENU) this.#normalizeMenu(step, path, issues);
+    if (step.type === STEP_TYPES.SET_VARIABLE) this.#normalizeVariableStep(step, path, issues);
+    if (step.type === STEP_TYPES.BRANCH) {
+      this.#normalizeCondition(step.condition, `${path}.condition`, issues, depth);
+      for (const branch of ["then", "else"]) {
+        step[branch] ??= [];
+        if (!Array.isArray(step[branch])) {
+          issues.push({ path: `${path}.${branch}`, message: `${branch} precisa ser uma lista de etapas.` });
+          continue;
+        }
+        step[branch].forEach((child, childIndex) => this.#normalizeStep(child, childIndex, issues, stepRegistry, {
+          path: `${path}.${branch}.${childIndex}`,
+          depth: depth + 1,
+          stepIds
+        }));
+      }
+    }
+    if (step.type === STEP_TYPES.MUTATE_STEPS) this.#normalizeMutation(step, path, issues, stepRegistry, depth, stepIds);
+    if (step.type === STEP_TYPES.ANIMATION) this.#normalizePersistence(step, path, issues);
+    if (step.type === STEP_TYPES.REMOVE_PERSISTENT) this.#normalizePersistentRemoval(step, path, issues);
 
     const rollTypes = [STEP_TYPES.ATTACK, STEP_TYPES.TEST, STEP_TYPES.DAMAGE, STEP_TYPES.HEALING, STEP_TYPES.ROLL];
     if (!rollTypes.includes(step.type)) return;
@@ -225,6 +293,114 @@ export class ProjectValidator {
       });
     } else if (typeof step.formula !== "string" || !step.formula.trim()) {
       issues.push({ path: `${path}.formula`, message: `A etapa ${index + 1} precisa de uma fórmula.` });
+    }
+  }
+
+  static #normalizeCondition(condition, path, issues, depth = 0) {
+    if (!isRecord(condition)) {
+      issues.push({ path, message: "A condição precisa ser um objeto." });
+      return;
+    }
+    const types = [
+      "always", "group", "critical", "notCritical", "hit", "miss", "distance", "distanceAbove",
+      "distanceAtMost", "rollValue", "rollTotal", "damage", "damageValue", "naturalDie", "hpPercent",
+      "hasItem", "hasEffect", "hasTag", "targetCount", "variable", "variableEquals", "menuOption"
+    ];
+    if (!types.includes(condition.type)) {
+      issues.push({ path: `${path}.type`, message: `Tipo de condição desconhecido: ${condition.type}.` });
+      return;
+    }
+    if (condition.type === "group") {
+      if (!['and', 'or', 'not'].includes(condition.operator)) {
+        issues.push({ path: `${path}.operator`, message: "O operador do grupo deve ser AND, OR ou NOT." });
+      }
+      if (!Array.isArray(condition.children) || condition.children.length === 0) {
+        issues.push({ path: `${path}.children`, message: "O grupo precisa de ao menos uma condição." });
+        return;
+      }
+      if (condition.operator === "not" && condition.children.length !== 1) {
+        issues.push({ path: `${path}.children`, message: "Um grupo NOT precisa ter exatamente uma condição." });
+      }
+      if (depth >= 32) {
+        issues.push({ path, message: "A árvore de condições excede 32 níveis." });
+        return;
+      }
+      condition.children.forEach((child, index) => this.#normalizeCondition(child, `${path}.children.${index}`, issues, depth + 1));
+    }
+    if (["variable", "variableEquals", "menuOption"].includes(condition.type) && !safePath(condition.key)) {
+      issues.push({ path: `${path}.key`, message: "A condição precisa de um nome de variável válido." });
+    }
+    if (condition.operator != null && !["eq", "neq", "gt", "gte", "lt", "lte", "includes", "and", "or", "not"].includes(condition.operator)) {
+      issues.push({ path: `${path}.operator`, message: `Operador de condição inválido: ${condition.operator}.` });
+    }
+  }
+
+  static #normalizeMenu(step, path, issues) {
+    if (!safePath(step.variable ?? "choice")) {
+      issues.push({ path: `${path}.variable`, message: "O menu precisa de um nome de variável válido." });
+    }
+    if (!Array.isArray(step.options) || step.options.length === 0) {
+      issues.push({ path: `${path}.options`, message: "O menu precisa de ao menos uma opção." });
+    } else {
+      step.options.forEach((option, index) => {
+        if (!isRecord(option)) issues.push({ path: `${path}.options.${index}`, message: "A opção precisa ser um objeto." });
+        else if (typeof option.label !== "string" || !option.label.trim()) {
+          issues.push({ path: `${path}.options.${index}.label`, message: "A opção precisa de um rótulo." });
+        }
+      });
+    }
+    if (step.selection != null && !["single", "multiple"].includes(step.selection)) {
+      issues.push({ path: `${path}.selection`, message: "A seleção do menu deve ser single ou multiple." });
+    }
+    if (step.cancelBehavior != null && !["abort", "default", "continue"].includes(step.cancelBehavior)) {
+      issues.push({ path: `${path}.cancelBehavior`, message: "Comportamento de cancelamento inválido." });
+    }
+    this.#normalizeOptionalNumber(step, "columns", `${path}.columns`, issues, { minimum: 1 });
+    if (Number(step.columns) > 6) issues.push({ path: `${path}.columns`, message: "O menu aceita no máximo 6 colunas." });
+  }
+
+  static #normalizeVariableStep(step, path, issues) {
+    if (!safePath(step.variable)) issues.push({ path: `${path}.variable`, message: "Nome de variável inválido." });
+    if (!["set", "add", "subtract", "multiply", "append", "toggle"].includes(step.operation ?? "set")) {
+      issues.push({ path: `${path}.operation`, message: "Transformação de variável inválida." });
+    }
+    if (!["auto", "string", "number", "boolean", "array"].includes(step.valueType ?? "auto")) {
+      issues.push({ path: `${path}.valueType`, message: "Tipo de variável inválido." });
+    }
+  }
+
+  static #normalizeMutation(step, path, issues, stepRegistry, depth, stepIds) {
+    if (!["add", "remove", "replace", "modify"].includes(step.action ?? "modify")) {
+      issues.push({ path: `${path}.action`, message: "Ação de alteração de etapa inválida." });
+      return;
+    }
+    if (["add", "replace"].includes(step.action)) {
+      this.#normalizeStep(step.step, 0, issues, stepRegistry, {
+        path: `${path}.step`,
+        depth: depth + 1,
+        stepIds
+      });
+    }
+    if (step.action === "modify" && !isRecord(step.changes)) {
+      issues.push({ path: `${path}.changes`, message: "As modificações precisam ser um objeto." });
+    }
+  }
+
+  static #normalizePersistence(step, path, issues) {
+    if (step.duplicatePolicy != null && !["replace", "skip", "stack"].includes(step.duplicatePolicy)) {
+      issues.push({ path: `${path}.duplicatePolicy`, message: "Política de duplicação inválida." });
+    }
+    for (const key of ["durationSeconds", "durationRounds"]) {
+      this.#normalizeOptionalNumber(step, key, `${path}.${key}`, issues, { minimum: 0 });
+    }
+    if (step.attachTo != null && ![true, false, "source", "target", "location"].includes(step.attachTo)) {
+      issues.push({ path: `${path}.attachTo`, message: "Vínculo persistente inválido." });
+    }
+  }
+
+  static #normalizePersistentRemoval(step, path, issues) {
+    if (step.scope != null && !["step", "name", "source", "target", "project", "tag", "all"].includes(step.scope)) {
+      issues.push({ path: `${path}.scope`, message: "Escopo de remoção persistente inválido." });
     }
   }
 

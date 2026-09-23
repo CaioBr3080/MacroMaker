@@ -83,6 +83,47 @@
   text-align: center;
 }
 
+.macro-maker-template-gallery {
+  display: grid;
+  gap: 0.4rem;
+  min-height: 0;
+  border-top: 1px solid var(--color-border-light-primary);
+  padding-top: 0.65rem;
+}
+
+.macro-maker-template-gallery h3 {
+  margin: 0;
+}
+
+.macro-maker-template-gallery .template-search {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.macro-maker-template-gallery .template-search input {
+  min-width: 0;
+}
+
+.macro-maker-template-gallery ol {
+  display: grid;
+  gap: 0.25rem;
+  max-height: 240px;
+  padding: 0;
+  margin: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.macro-maker-template-gallery li button {
+  display: grid;
+  width: 100%;
+  text-align: left;
+}
+
+.macro-maker-template-gallery small {
+  opacity: 0.65;
+}
+
 .macro-maker-editor {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
@@ -90,6 +131,23 @@
   min-width: 0;
   padding: 1rem;
   overflow: hidden;
+}
+
+.macro-maker-editor.read-only [data-project-path],
+.macro-maker-editor.read-only [data-step-path],
+.macro-maker-editor.read-only [data-action="add-step"],
+.macro-maker-editor.read-only [data-action="delete-step"],
+.macro-maker-editor.read-only [data-action="duplicate-step"],
+.macro-maker-editor.read-only [data-action="move-step"] {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.macro-maker-notice {
+  margin: 0;
+  padding: 0.55rem;
+  border: 1px solid var(--color-level-info, #4c78a8);
+  border-radius: 4px;
 }
 
 .macro-maker-toolbar p {
@@ -189,6 +247,20 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+
+.macro-maker-debug {
+  padding: 0.55rem;
+  border: 1px solid #4c78a8;
+  border-radius: 4px;
+  background: rgba(76, 120, 168, 0.1);
+}
+
+.macro-maker-debug ol {
+  margin-bottom: 0;
+}
+
+.macro-maker-debug .passed strong { color: #65b96f; }
+.macro-maker-debug .failed strong { color: #d46a6a; }
 
 .macro-maker-add-step {
   position: sticky;
@@ -319,6 +391,71 @@
   min-width: 32px;
 }
 
+.macro-maker-condition-builder,
+.macro-maker-menu-editor,
+.macro-maker-branch-lanes {
+  padding: 0.55rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.macro-maker-condition-builder > header,
+.macro-maker-condition-node,
+.macro-maker-menu-option,
+.branch-step,
+.branch-add {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.macro-maker-condition-builder > header strong {
+  flex: 1;
+}
+
+.macro-maker-condition-node {
+  margin-top: 0.4rem;
+  padding-left: 0.4rem;
+  border-left: 2px solid rgba(105, 169, 255, 0.5);
+}
+
+.macro-maker-condition-node input,
+.macro-maker-condition-node select {
+  min-width: 0;
+}
+
+.macro-maker-menu-editor,
+.macro-maker-menu-option {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.macro-maker-menu-option {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+}
+
+.macro-maker-branch-lanes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.macro-maker-branch-lanes section {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 4px;
+}
+
+.macro-maker-branch-lanes h4 {
+  margin: 0 0 0.4rem;
+}
+
+.branch-step span,
+.branch-add select {
+  flex: 1;
+}
+
 .macro-maker-json {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -364,10 +501,73 @@
 
 .macro-maker-sidebar-content {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 0.65rem;
   height: 100%;
   padding: 0.75rem;
+}
+
+.macro-maker-persistents {
+  max-height: 36vh;
+  overflow: auto;
+  border-top: 1px solid var(--color-border-light-primary);
+  padding-top: 0.5rem;
+}
+
+.macro-maker-persistents header,
+.macro-maker-persistents li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.macro-maker-persistents h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.macro-maker-persistents ol {
+  padding: 0;
+  margin: 0.4rem 0 0;
+  list-style: none;
+}
+
+.macro-maker-persistents li span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.macro-maker-persistents li.orphan {
+  color: var(--color-level-warning, #d99b3d);
+}
+
+.macro-maker-menu-options {
+  display: grid;
+  grid-template-columns: repeat(var(--macro-maker-menu-columns, 1), minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.macro-maker-menu-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.25rem 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 4px;
+}
+
+.macro-maker-menu-card img,
+.macro-maker-menu-image {
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+}
+
+.macro-maker-menu-card small {
+  grid-column: 2;
 }
 
 .macro-maker-sidebar-header,

@@ -1,7 +1,9 @@
 import { SCHEMA_VERSION, TARGET_FILTERS, TARGET_MODES } from "../constants.js";
+import { createId } from "../utils/ids.js";
 
 export function createDefaultProject(overrides = {}) {
   return foundry.utils.mergeObject({
+    id: createId("project"),
     schemaVersion: SCHEMA_VERSION,
     name: "Novo Macro",
     description: "",
@@ -20,6 +22,14 @@ export function createDefaultProject(overrides = {}) {
     },
     variables: {},
     steps: [],
+    sharing: {
+      folderId: "",
+      userId: "",
+      level: 3,
+      observerCanExecute: true,
+      hotbarSlot: null,
+      lockedFields: []
+    },
     metadata: {
       createdBy: game.user?.id ?? null,
       createdAt: Date.now(),

@@ -1,6 +1,11 @@
 export const MODULE_ID = "macro-maker";
 export const PROJECT_FLAG = "project";
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
+
+export const COMPATIBILITY = Object.freeze({
+  foundry: { minimum: "13", verified: "13" },
+  sequencer: { minimum: "3.6.0" }
+});
 
 export const STEP_TYPES = Object.freeze({
   ANIMATION: "animation",
@@ -12,6 +17,9 @@ export const STEP_TYPES = Object.freeze({
   HEALING: "healing",
   ROLL: "roll",
   MENU: "menu",
+  BRANCH: "branch",
+  SET_VARIABLE: "setVariable",
+  MUTATE_STEPS: "mutateSteps",
   REMOVE_PERSISTENT: "removePersistent"
 });
 

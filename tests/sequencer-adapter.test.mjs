@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { SequencerAdapter } from "../src/integrations/sequencer-adapter.js";
 
-function installSequencerMock() {
+function installSequencerMock(existing = []) {
   const calls = [];
   class Section {
     constructor(kind) {
@@ -30,6 +30,9 @@ function installSequencerMock() {
     mirrorX(...args) { return this.call("mirrorX", ...args); }
     mirrorY(...args) { return this.call("mirrorY", ...args); }
     persist(...args) { return this.call("persist", ...args); }
+    duration(...args) { return this.call("duration", ...args); }
+    loopOptions(...args) { return this.call("loopOptions", ...args); }
+    origin(...args) { return this.call("origin", ...args); }
     fadeIn(...args) { return this.call("fadeIn", ...args); }
     fadeOut(...args) { return this.call("fadeOut", ...args); }
     volume(...args) { return this.call("volume", ...args); }
@@ -48,6 +51,7 @@ function installSequencerMock() {
   };
   globalThis.Sequencer = {
     EffectManager: {
+      getEffects(filters) { calls.push(["manager", "getEffects", filters]); return existing; },
       async endEffects(filters) { calls.push(["manager", "endEffects", filters]); }
     }
   };
@@ -66,6 +70,7 @@ test("encadeia animação persistente com a assinatura atual do Sequencer", asyn
   const target = { id: "target" };
   const context = {
     macro: { id: "macro-id" },
+    project: { id: "project-id" },
     resolveLocation: (reference) => reference === "source" ? source : target,
     distanceTo: () => 3
   };
@@ -77,6 +82,7 @@ test("encadeia animação persistente com a assinatura atual do Sequencer", asyn
     stretchTo: true,
     persist: true,
     persistOptions: { persistTokenPrototype: true },
+    id: "step-id",
     name: "aura",
     fadeIn: 100,
     fadeOut: 200
@@ -91,7 +97,7 @@ test("encadeia animação persistente com a assinatura atual do Sequencer", asyn
   assert.deepEqual(calls.find((call) => call[1] === "name"), [
     "effect",
     "name",
-    "macro-maker.macro-id.aura"
+    "macro-maker.project-id.step-id.aura.untagged"
   ]);
   assert.deepEqual(calls.find((call) => call[1] === "stretchTo"), [
     "effect",
@@ -125,11 +131,54 @@ test("remove somente o persistente nomeado no objeto escolhido", async (t) => {
 
   await SequencerAdapter.removePersistent({ object: "target", name: "aura" }, {
     macro: { id: "macro-id" },
+    project: { id: "project-id" },
     resolveLocation: () => target
   });
 
   assert.deepEqual(calls.at(-1), ["manager", "endEffects", {
     object: target,
-    name: "macro-maker.macro-id.aura"
+    name: "macro-maker.project-id.*.aura.*"
   }]);
+});
+
+test("substitui duplicata no mesmo alvo e converte rodadas em duração", async (t) => {
+  t.after(() => { clearSequencerMock(); delete globalThis.CONFIG; });
+  const calls = installSequencerMock([{ id: "existing" }]);
+  globalThis.CONFIG = { time: { roundTime: 6 } };
+  const source = { id: "source", document: { uuid: "Scene.s.Token.source" } };
+  const target = { id: "target", document: { uuid: "Scene.s.Token.target" } };
+  const context = {
+    macro: { id: "macro-id", uuid: "Macro.macro-id" },
+    project: { id: "project-id" },
+    resolveLocation: (reference) => reference === "target" ? target : source,
+    distanceTo: () => 1
+  };
+
+  await SequencerAdapter.playAnimation({
+    id: "step-id",
+    label: "Aura",
+    file: "jb2a.test",
+    persist: true,
+    duplicatePolicy: "replace",
+    attachTo: "target",
+    durationRounds: 2
+  }, context);
+
+  assert.ok(calls.some((call) => call[0] === "manager" && call[1] === "endEffects" && call[2].object === target));
+  assert.deepEqual(calls.find((call) => call[1] === "duration"), ["effect", "duration", 12000]);
+  assert.deepEqual(calls.find((call) => call[1] === "loopOptions"), ["effect", "loopOptions", { loops: 1, endOnLastLoop: true }]);
+  assert.deepEqual(calls.find((call) => call[1] === "origin"), ["effect", "origin", "Scene.s.Token.target"]);
+});
+
+test("remoção por alvo não usa o executante", async (t) => {
+  t.after(clearSequencerMock);
+  const calls = installSequencerMock();
+  const source = { id: "source" };
+  const target = { id: "target" };
+  await SequencerAdapter.removePersistent({ scope: "target" }, {
+    project: { id: "project-id" },
+    resolveLocation: (reference) => reference === "target" ? target : source
+  });
+
+  assert.deepEqual(calls.at(-1), ["manager", "endEffects", { name: "macro-maker.*", target }]);
 });

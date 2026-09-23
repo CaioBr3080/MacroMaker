@@ -2,6 +2,9 @@ import { STEP_TYPES } from "../constants.js";
 import { SequencerAdapter } from "../integrations/sequencer-adapter.js";
 import { MenuExecutor } from "./executors/menu-executor.js";
 import { RollExecutor } from "./executors/roll-executor.js";
+import { BranchExecutor } from "./executors/branch-executor.js";
+import { RuntimeStepExecutor } from "./executors/runtime-step-executor.js";
+import { VariableExecutor } from "./executors/variable-executor.js";
 import { StepRegistry } from "./step-registry.js";
 
 export function createCoreStepRegistry() {
@@ -15,7 +18,9 @@ export function createCoreStepRegistry() {
       file: "jb2a.",
       source: "source",
       target: "target",
-      stretchTo: true
+      stretchTo: true,
+      persist: false,
+      duplicatePolicy: "replace"
     },
     schema: {},
     execute: (step, context) => SequencerAdapter.playAnimation(step, context)
@@ -88,17 +93,57 @@ export function createCoreStepRegistry() {
     icon: "fas fa-list",
     defaults: {
       label: "Escolha",
+      title: "Escolha uma opção",
+      description: "",
+      selection: "single",
+      columns: 1,
       variable: "choice",
-      options: [{ label: "Opção A", value: "a" }]
+      cancelBehavior: "abort",
+      options: [{ label: "Opção A", value: "a", description: "", image: "", icon: "" }]
     },
     schema: {},
     execute: (step, context) => MenuExecutor.execute(step, context)
   });
 
+  registry.register(STEP_TYPES.BRANCH, {
+    label: "Ramificação",
+    icon: "fas fa-code-branch",
+    defaults: {
+      label: "Se / senão",
+      condition: { type: "variable", key: "choice", operator: "eq", value: "a" },
+      then: [],
+      else: []
+    },
+    schema: {},
+    execute: (step, context) => BranchExecutor.execute(step, context, registry)
+  });
+
+  registry.register(STEP_TYPES.SET_VARIABLE, {
+    label: "Definir variável",
+    icon: "fas fa-square-root-variable",
+    defaults: { label: "Definir variável", variable: "value", operation: "set", valueType: "string", value: "" },
+    schema: {},
+    execute: (step, context) => VariableExecutor.execute(step, context)
+  });
+
+  registry.register(STEP_TYPES.MUTATE_STEPS, {
+    label: "Alterar etapa nesta execução",
+    icon: "fas fa-pen-to-square",
+    defaults: {
+      label: "Alterar etapa",
+      action: "modify",
+      targetId: "",
+      changes: { enabled: false },
+      step: { type: "wait", label: "Espera condicional", ms: 500 }
+    },
+    schema: {},
+    execute: (step, context) => RuntimeStepExecutor.execute(step, context)
+  });
+
   registry.register(STEP_TYPES.REMOVE_PERSISTENT, {
     label: "Remover persistente",
     icon: "fas fa-eraser",
-    defaults: { label: "Remover persistente", object: "target", name: "efeito" },
+    defaults: { label: "Remover persistente", scope: "name", object: "target", name: "efeito" },
     schema: {},
     execute: (step, context) => SequencerAdapter.removePersistent(step, context)
   });

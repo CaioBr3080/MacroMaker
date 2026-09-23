@@ -34,7 +34,7 @@ test("impede registro duplicado e definições sem executor", () => {
   assert.throws(() => registry.register("valid", { execute: async () => {} }), /já está registrado/);
 });
 
-test("o registro principal contém todos os tipos do schema v1", () => {
+test("o registro principal contém todos os tipos do schema atual", () => {
   const types = createCoreStepRegistry().list().map((definition) => definition.type);
   assert.deepEqual(types, [
     "animation",
@@ -46,6 +46,9 @@ test("o registro principal contém todos os tipos do schema v1", () => {
     "healing",
     "roll",
     "menu",
+    "branch",
+    "setVariable",
+    "mutateSteps",
     "removePersistent"
   ]);
 });

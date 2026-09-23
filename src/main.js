@@ -18,12 +18,23 @@ Hooks.once("init", () => {
     type: Boolean,
     default: false
   });
+  game.settings.register(MODULE_ID, "customTemplates", {
+    name: "Templates personalizados do Macro Maker",
+    scope: "world",
+    config: false,
+    type: Object,
+    default: []
+  });
 });
 
 Hooks.once("ready", () => {
   const api = new MacroMakerAPI(MacroMakerApp);
   game.macroMaker = api;
   game.modules.get(MODULE_ID).api = api;
+  const compatibility = api.compatibility.report();
+  if (!compatibility.foundry.supported || !compatibility.sequencer.supported) {
+    console.warn("Macro Maker | ambiente fora da matriz declarada", compatibility);
+  }
   Hooks.callAll("macroMaker.ready", api);
 });
 
@@ -56,3 +67,8 @@ Hooks.on("renderMacroConfig", (app, html) => {
   button.addEventListener("click", () => game.macroMaker.open(app.object.uuid));
   root.querySelector("footer")?.prepend(button);
 });
+
+Hooks.on("preDeleteToken", (document) => game.macroMaker?.persistents?.cleanupDocument(document));
+Hooks.on("preDeleteScene", (document) => game.macroMaker?.persistents?.cleanupDocument(document));
+Hooks.on("sequencerEffectManagerReady", () => ui[MODULE_ID]?.render?.());
+Hooks.on("endedSequencerEffect", () => ui[MODULE_ID]?.render?.());

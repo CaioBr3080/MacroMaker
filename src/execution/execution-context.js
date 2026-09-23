@@ -1,5 +1,6 @@
 import { TARGET_MODES } from "../constants.js";
 import { TargetingService } from "../targeting/targeting-service.js";
+import { clone } from "../utils/safe-values.js";
 
 export class ExecutionContext {
   constructor(project, macro, { targetingService = TargetingService, systemRegistry = null } = {}) {
@@ -12,7 +13,12 @@ export class ExecutionContext {
     this.target = null;
     this.location = null;
     this.template = null;
-    this.variables = foundry.utils.deepClone(project.variables ?? {});
+    this.variables = globalThis.foundry?.utils?.deepClone
+      ? foundry.utils.deepClone(project.variables ?? {})
+      : clone(project.variables ?? {});
+    this.runtimeSteps = clone(project.steps ?? []);
+    this.debugLog = [];
+    this.branchStack = [];
     this.attack = null;
     this.damage = null;
     this.healing = null;
@@ -23,6 +29,30 @@ export class ExecutionContext {
     this.lastResult = null;
     this.cancelled = false;
     this.executionId = foundry.utils.randomID();
+  }
+
+  recordDebug(entry) {
+    const record = { timestamp: Date.now(), ...entry };
+    this.debugLog.push(record);
+    if (globalThis.game?.settings?.get?.("macro-maker", "debug")) {
+      console.debug("Macro Maker | execução", record);
+    }
+    return record;
+  }
+
+  enterBranch(step) {
+    const id = step?.id ?? step?.label ?? step?.type ?? "branch";
+    if (this.branchStack.length >= 32) {
+      throw new Error("Limite de 32 níveis de ramificação excedido.");
+    }
+    if (this.branchStack.includes(id)) {
+      throw new Error(`Ciclo de ramificação detectado em ${step?.label ?? id}.`);
+    }
+    this.branchStack.push(id);
+  }
+
+  leaveBranch() {
+    this.branchStack.pop();
   }
 
   async initialize() {

@@ -19,10 +19,31 @@
         <button type="button" data-action="run" data-uuid="{{uuid}}" title="Executar {{name}}">
           <i class="fas fa-play"></i>
         </button>
+        {{#if canEdit}}<button type="button" data-action="delete" data-uuid="{{uuid}}" title="Excluir {{name}}"><i class="fas fa-trash"></i></button>{{/if}}
         {{#unless canEdit}}<i class="fas fa-eye" title="Somente leitura"></i>{{/unless}}
       </li>
     {{else}}
       <li class="empty">Nenhum projeto. Crie sua primeira automação.</li>
     {{/each}}
   </ol>
+
+  {{#if isGM}}
+    <section class="macro-maker-persistents">
+      <header>
+        <h3><i class="fas fa-link"></i> Persistentes ativos</h3>
+        <button type="button" data-action="open-persistent-manager" title="Abrir gerenciador do Sequencer"><i class="fas fa-up-right-from-square"></i></button>
+      </header>
+      <ol>
+        {{#each persistents}}
+          <li class="{{#if orphan}}orphan{{/if}}">
+            <span title="{{name}}">{{label}}</span>
+            {{#if orphan}}<i class="fas fa-triangle-exclamation" title="Efeito órfão"></i>{{/if}}
+            <button type="button" data-action="end-persistent" data-effect-id="{{id}}" data-effect-name="{{name}}" data-scene-id="{{sceneId}}" title="Encerrar efeito"><i class="fas fa-stop"></i></button>
+          </li>
+        {{else}}
+          <li class="empty">Nenhum efeito do Macro Maker nesta cena.</li>
+        {{/each}}
+      </ol>
+    </section>
+  {{/if}}
 </section>
