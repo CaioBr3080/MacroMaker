@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.8 - 2026-09-23
+
+- A aba lateral do Macro Maker agora organiza projetos em uma árvore de pastas e subpastas visível aos jogadores; o GM cria e configura proprietários/permissões pela própria aba.
+- A lista de templates não exibe mais a categoria translúcida abaixo do nome.
+- Mensagens de rolagem usam o mesmo bloco de textarea do complemento de nome, com tamanho ajustado e preservação explícita de espaços.
+
 ## 0.9.7 - 2026-09-23
 
 - Etapas minimizadas ficam lembradas por Macro após fechar e reabrir o editor.

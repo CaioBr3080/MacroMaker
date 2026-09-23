@@ -902,25 +902,40 @@
 @media (max-width: 800px) {
   .macro-maker-menu-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-.macro-maker-folder-creator {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-  gap: 0.5rem;
-  align-items: end;
-  padding-top: 0.35rem;
-  border-top: 1px solid var(--color-border-light-primary);
-}
-
-.macro-maker-folder-creator strong,
-.macro-maker-folder-creator p {
-  grid-column: 1 / -1;
-  margin: 0;
-}
-
-.macro-maker-folder-creator p {
-  opacity: 0.78;
-}
 .macro-maker-target-report {
   margin: 0.35rem 0;
   color: var(--color-text-light-highlight);
+}
+.macro-maker-sidebar-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.macro-maker-sidebar-folder,
+.macro-maker-sidebar-project {
+  padding-left: calc(0.35rem + var(--macro-maker-indent, 0px)) !important;
+}
+
+.macro-maker-sidebar-folder {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--color-text-light-highlight);
+  background: rgba(0, 0, 0, 0.12);
+  font-weight: 600;
+}
+
+.macro-maker-message-text {
+  min-width: 0;
+  margin: 0;
+}
+
+.macro-maker-message-text > label {
+  min-width: 0;
+}
+
+.macro-maker-message-input {
+  min-height: 3.75rem;
+  resize: vertical;
+  white-space: pre-wrap;
 }

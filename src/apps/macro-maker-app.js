@@ -105,8 +105,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       "add-branch-step": this.#onAddBranchStep,
       "delete-branch-step": this.#onDeleteBranchStep,
       "add-condition": this.#onAddCondition,
-      "delete-condition": this.#onDeleteCondition,
-      "create-folder": this.#onCreateFolder
+      "delete-condition": this.#onDeleteCondition
     }
   };
 
@@ -307,7 +306,6 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onDeleteBranchStep(_event, target) { return this.#deleteBranchStep(target); }
   static #onAddCondition(_event, target) { return this.#addCondition(target); }
   static #onDeleteCondition(_event, target) { return this.#deleteCondition(target); }
-  static #onCreateFolder() { return this.#createFolder(); }
 
   #query(selector) {
     return this.element?.querySelector(selector) ?? null;
@@ -628,20 +626,6 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.collapsedProjectUuid = this.macroUuid;
   }
 
-  async #createFolder() {
-    if (!game.user.isGM) return ui.notifications.warn("Somente o GM pode criar pastas de Macros.");
-    const name = this.#query("[name='newFolderName']")?.value?.trim();
-    if (!name) return ui.notifications.warn("Informe um nome para a pasta.");
-    const parent = this.#query("[name='newFolderParent']")?.value || null;
-    try {
-      await Folder.create({ name, type: "Macro", folder: parent });
-      ui.notifications.info("Pasta de Macros criada.");
-      await this.render();
-      ui["macro-maker"]?.render?.();
-    } catch (error) {
-      this.#reportError("criar a pasta", error);
-    }
-  }
   async #focusStep(target) {
     const index = Number(target.dataset.index);
     if (!this.project.steps[index]) return;

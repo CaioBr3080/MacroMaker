@@ -34,7 +34,7 @@
       <select name="templateCategory" data-value="{{templateCategory}}"><option value="">Todas as categorias</option>{{#each templateCategories}}<option value="{{this}}">{{this}}</option>{{/each}}</select>
       <ol>
         {{#each templates}}
-          <li><button type="button" data-action="apply-template" data-template-id="{{id}}"><span>{{name}}</span><small>{{category}}</small></button></li>
+          <li><button type="button" data-action="apply-template" data-template-id="{{id}}"><span>{{name}}</span></button></li>
         {{else}}<li class="empty">Nenhum template encontrado.</li>{{/each}}
       </ol>
     </section>
@@ -105,13 +105,7 @@
           </label>
           <label>Slot da sua hotbar <input type="number" min="1" max="50" value="{{project.sharing.hotbarSlot}}" data-project-path="sharing.hotbarSlot" data-value-type="optional-number"></label>
           <label class="checkbox-field"><input type="checkbox" {{#if project.sharing.observerCanExecute}}checked{{/if}} data-project-path="sharing.observerCanExecute" data-value-type="boolean"> OBSERVER pode executar</label>
-          <label class="full">Campos bloqueados para não-GM <input type="text" value="{{project.sharing.lockedFields}}" placeholder="targeting, steps" data-project-path="sharing.lockedFields"></label>          <section class="macro-maker-folder-creator full">
-            <strong>Pastas de Macros</strong>
-            <p>Crie uma pasta ou subpasta aqui; depois escolha-a no campo Pasta acima. As permissões continuam sendo atribuídas em cada Macro.</p>
-            <label>Nome da nova pasta <input type="text" name="newFolderName" placeholder="Ex.: Magias"></label>
-            <label>Dentro de <select name="newFolderParent"><option value="">Raiz</option>{{#each folders}}<option value="{{id}}">{{name}}</option>{{/each}}</select></label>
-            <button type="button" data-action="create-folder"><i class="fas fa-folder-plus"></i> Criar pasta</button>
-          </section>
+          <label class="full">Campos bloqueados para não-GM <input type="text" value="{{project.sharing.lockedFields}}" placeholder="targeting, steps" data-project-path="sharing.lockedFields"></label>
         </fieldset>
       {{/if}}
 
@@ -339,7 +333,12 @@
                       <option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option>
                     </select>
                   </label>
-                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <fieldset class="macro-maker-message-text full">
+                    <legend>Mensagem</legend>
+                    <label class="full">Texto
+                      <textarea class="macro-maker-message-input" rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea>
+                    </label>
+                  </fieldset>
                 {{/if}}
 
                 {{#if isTest}}
@@ -349,7 +348,12 @@
                   <label>Visibilidade
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
-                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <fieldset class="macro-maker-message-text full">
+                    <legend>Mensagem</legend>
+                    <label class="full">Texto
+                      <textarea class="macro-maker-message-input" rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea>
+                    </label>
+                  </fieldset>
                 {{/if}}
 
                 {{#if isDamage}}
@@ -373,7 +377,12 @@
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
                   <button type="button" data-action="add-part" data-index="{{index}}" data-kind="damage"><i class="fas fa-plus"></i> Componente de dano</button>
-                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <fieldset class="macro-maker-message-text full">
+                    <legend>Mensagem</legend>
+                    <label class="full">Texto
+                      <textarea class="macro-maker-message-input" rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea>
+                    </label>
+                  </fieldset>
                 {{/if}}
 
                 {{#if isHealing}}
@@ -393,7 +402,12 @@
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
                   <button type="button" data-action="add-part" data-index="{{index}}" data-kind="healing"><i class="fas fa-plus"></i> Componente de cura</button>
-                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <fieldset class="macro-maker-message-text full">
+                    <legend>Mensagem</legend>
+                    <label class="full">Texto
+                      <textarea class="macro-maker-message-input" rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea>
+                    </label>
+                  </fieldset>
                 {{/if}}
 
                 {{#if isRoll}}
@@ -401,7 +415,12 @@
                   <label>Visibilidade
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
-                  <label class="full">Mensagem <textarea rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <fieldset class="macro-maker-message-text full">
+                    <legend>Mensagem</legend>
+                    <label class="full">Texto
+                      <textarea class="macro-maker-message-input" rows="2" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea>
+                    </label>
+                  </fieldset>
                 {{/if}}
 
                 {{#if isMenu}}
