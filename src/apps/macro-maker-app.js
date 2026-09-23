@@ -318,6 +318,34 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     return ProjectValidator.normalize(this.#readRawEditor(), { stepRegistry: this.stepRegistry });
   }
 
+  #syncVisualControls() {
+    if (!this.element) return;
+    const project = this.#readRawEditor();
+    for (const element of this.element.querySelectorAll("[data-project-path], [data-step-path], [data-condition-type], [data-condition-node-type], [data-mutation-step-type]")) {
+      const index = Number(element.dataset.stepIndex);
+      const value = this.#controlValue(element);
+      if (element.dataset.conditionType !== undefined) {
+        project.steps[index].conditions = value === "always" ? [] : [{ type: value }];
+        continue;
+      }
+      if (element.dataset.conditionNodeType !== undefined) {
+        setPath(project.steps[index], element.dataset.stepPath.replace(/\.type$/, ""), value === "group"
+          ? { type: "group", operator: "and", children: [{ type: "critical" }] }
+          : { type: value });
+        continue;
+      }
+      if (element.dataset.mutationStepType !== undefined) {
+        project.steps[index].step = this.stepRegistry.create(value);
+        continue;
+      }
+      if (element.dataset.projectPath) setPath(project, element.dataset.projectPath, value);
+      if (element.dataset.stepPath && Number.isInteger(index) && project.steps[index]) {
+        setPath(project.steps[index], element.dataset.stepPath, value);
+      }
+    }
+    this.#commit(project);
+  }
+
   #commit(project, { render = false } = {}) {
     this.project = clone(project);
     this.history.commit(this.project);
@@ -360,6 +388,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       return false;
     }
     try {
+      // Read controls directly so a focused textarea is saved before its blur/change event.
+      if (this.activeTab === "visual") this.#syncVisualControls();
       this.#clearValidationErrors();
       const project = this.#readEditor();
       let macro;
@@ -708,6 +738,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   async #showTab(target) {
     try {
       const nextTab = target.dataset.tab;
+      if (this.activeTab === "visual" && nextTab === "json") this.#syncVisualControls();
       if (this.activeTab === "json" && nextTab !== "json") {
         const project = this.#readEditor();
         this.#commit(project);

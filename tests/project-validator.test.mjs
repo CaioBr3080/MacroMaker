@@ -21,6 +21,17 @@ test("valida estilos de mensagem e mantém variáveis numéricas do projeto", ()
   }
 });
 
+test("preserva espaços nas bordas e no meio de descrições e mensagens", () => {
+  const project = ProjectValidator.normalize({
+    name: "Projeto",
+    description: "  descrição com espaço final  ",
+    variables: {},
+    steps: [{ type: "roll", formula: "1d20", flavor: "  texto com  dois espaços  " }]
+  });
+  assert.equal(project.description, "  descrição com espaço final  ");
+  assert.equal(project.steps[0].flavor, "  texto com  dois espaços  ");
+});
+
 test("normaliza o projeto sem remover propriedades desconhecidas", () => {
   const project = ProjectValidator.normalize({
     name: "  Projeto de teste  ",

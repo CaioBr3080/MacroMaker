@@ -1,7 +1,7 @@
 {
   "name": "macro-maker-foundry",
   "private": true,
-  "version": "0.9.3",
+  "version": "0.9.4",
   "type": "module",
   "scripts": {
     "check": "node scripts/check.mjs",
