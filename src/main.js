@@ -1,4 +1,4 @@
-import { MODULE_ID } from "./constants.js";
+import { MODULE_ID, PROJECT_FLAG } from "./constants.js";
 import { MacroMakerAPI } from "./api.js";
 import { MacroMakerApp } from "./apps/macro-maker-app.js";
 import { MacroMakerSidebar } from "./apps/macro-maker-sidebar.js";
@@ -17,6 +17,13 @@ Hooks.once("init", () => {
     config: true,
     type: Boolean,
     default: false
+  });
+  game.settings.register(MODULE_ID, "collapsedSteps", {
+    name: "Etapas minimizadas do Macro Maker",
+    scope: "client",
+    config: false,
+    type: Object,
+    default: {}
   });
   game.settings.register(MODULE_ID, "customTemplates", {
     name: "Templates personalizados do Macro Maker",
@@ -68,6 +75,17 @@ Hooks.on("renderMacroConfig", (app, html) => {
   root.querySelector("footer")?.prepend(button);
 });
 
+Hooks.on("getMacroDirectoryEntryContext", (_html, options) => {
+  options.push({
+    name: "Abrir no Macro Maker",
+    icon: '<i class="fas fa-wand-magic-sparkles"></i>',
+    condition: (li) => Boolean(game.macros.get(li.dataset.documentId)?.getFlag?.(MODULE_ID, PROJECT_FLAG)),
+    callback: (li) => {
+      const macro = game.macros.get(li.dataset.documentId);
+      if (macro) game.macroMaker.open(macro.uuid);
+    }
+  });
+});
 Hooks.on("renderChatMessageHTML", (message, html) => {
   const root = html instanceof HTMLElement ? html : html?.[0];
   const speaker = message.flags?.[MODULE_ID]?.speaker;

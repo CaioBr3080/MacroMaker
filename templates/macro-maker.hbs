@@ -105,7 +105,13 @@
           </label>
           <label>Slot da sua hotbar <input type="number" min="1" max="50" value="{{project.sharing.hotbarSlot}}" data-project-path="sharing.hotbarSlot" data-value-type="optional-number"></label>
           <label class="checkbox-field"><input type="checkbox" {{#if project.sharing.observerCanExecute}}checked{{/if}} data-project-path="sharing.observerCanExecute" data-value-type="boolean"> OBSERVER pode executar</label>
-          <label class="full">Campos bloqueados para não-GM <input type="text" value="{{project.sharing.lockedFields}}" placeholder="targeting, steps" data-project-path="sharing.lockedFields"></label>
+          <label class="full">Campos bloqueados para não-GM <input type="text" value="{{project.sharing.lockedFields}}" placeholder="targeting, steps" data-project-path="sharing.lockedFields"></label>          <section class="macro-maker-folder-creator full">
+            <strong>Pastas de Macros</strong>
+            <p>Crie uma pasta ou subpasta aqui; depois escolha-a no campo Pasta acima. As permissões continuam sendo atribuídas em cada Macro.</p>
+            <label>Nome da nova pasta <input type="text" name="newFolderName" placeholder="Ex.: Magias"></label>
+            <label>Dentro de <select name="newFolderParent"><option value="">Raiz</option>{{#each folders}}<option value="{{id}}">{{name}}</option>{{/each}}</select></label>
+            <button type="button" data-action="create-folder"><i class="fas fa-folder-plus"></i> Criar pasta</button>
+          </section>
         </fieldset>
       {{/if}}
 
@@ -158,6 +164,9 @@
         <label class="checkbox-field">
           <input type="checkbox" {{#if project.targeting.blockOutOfRange}}checked{{/if}} data-project-path="targeting.blockOutOfRange" data-value-type="boolean">
           Bloquear fora do alcance
+        </label>        <label class="checkbox-field">
+          <input type="checkbox" {{#if project.targeting.clearTargetsAfterExecution}}checked{{/if}} data-project-path="targeting.clearTargetsAfterExecution" data-value-type="boolean">
+          Desmarcar alvos ao terminar
         </label>
       </fieldset>
 
@@ -502,6 +511,7 @@
                     <label><input type="checkbox" {{#if messageStyle.italic}}checked{{/if}} data-step-index="{{index}}" data-step-path="messageStyle.italic" data-value-type="boolean"> Itálico</label>
                     <label><input type="checkbox" {{#if messageStyle.underline}}checked{{/if}} data-step-index="{{index}}" data-step-path="messageStyle.underline" data-value-type="boolean"> Sublinhado</label>
                     <div class="macro-maker-message-preview full" data-message-preview="{{index}}" aria-label="Prévia da mensagem"></div>
+                    <label class="full checkbox-field"><input type="checkbox" {{#if announceTargets}}checked{{/if}} data-step-index="{{index}}" data-step-path="announceTargets" data-value-type="boolean"> Anexar quantidade e nomes dos alvos atingidos depois da mensagem (ex.: “Alvos atingidos (2): X, Y”)</label>
                     <fieldset class="macro-maker-speaker-style full">
                       <legend>Nome do usuário no chat</legend>
                       <label class="full">Complemento após o nome

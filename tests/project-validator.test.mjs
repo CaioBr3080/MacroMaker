@@ -189,3 +189,19 @@ test("rejeita condições que tentam armazenar código arbitrário", () => {
     return true;
   });
 });
+
+test("normaliza a limpeza opcional de alvos e rejeita valor inválido", () => {
+  const project = ProjectValidator.normalize({
+    name: "Alvos",
+    targeting: { clearTargetsAfterExecution: true },
+    variables: {},
+    steps: []
+  });
+  assert.equal(project.targeting.clearTargetsAfterExecution, true);
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Alvos",
+    targeting: { clearTargetsAfterExecution: "sim" },
+    variables: {},
+    steps: []
+  }), ProjectValidationError);
+});

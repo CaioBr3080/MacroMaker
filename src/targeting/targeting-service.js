@@ -21,7 +21,8 @@ export class TargetingService {
         source,
         range: targeting.range,
         blockOutOfRange: targeting.blockOutOfRange,
-        label: this.#labelForMode(mode)
+        label: this.#labelForMode(mode),
+        shape: { mode, radius: targeting.radius, angle: targeting.angle, width: targeting.width }
       });
       if (result.cancelled) return { cancelled: true, targets: [], location: null, template: null };
       location = result.point;

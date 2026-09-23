@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.7 - 2026-09-23
+
+- Etapas minimizadas ficam lembradas por Macro após fechar e reabrir o editor.
+- O editor cria pastas e subpastas de Macros; o menu de contexto de macros do Macro Maker abre diretamente no editor.
+- Seleção no canvas bloqueia o clique de controle durante a escolha, restaura o token executante e mostra prévias de círculo, cone e linha.
+- Nova opção para desmarcar alvos ao fim da execução e para anexar no chat a quantidade e os nomes dos alvos atingidos.
+
 ## 0.9.6 - 2026-09-23
 
 - O complemento do nome no chat preserva os espaços iniciais, finais e repetidos exatamente como digitados, inclusive ao usar uma frase completa com o alias.

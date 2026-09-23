@@ -32,16 +32,22 @@ export class ProjectExecutor {
       Hooks.callAll("macroMaker.cancelExecute", { project: normalizedProject, macro, context });
       return context;
     }
-    Hooks.callAll("macroMaker.preExecute", { project: normalizedProject, macro, context });
-    const events = new ExecutionEvents(context.runtimeSteps, context, stepRegistry);
-    context.runtimeEvents = events;
-    context.stepRegistry = stepRegistry;
-    await events.emit("onStart");
-    if (!context.cancelled) await events.emit("onTarget");
-    if (!context.cancelled) await StepRunner.run(context.runtimeSteps, context, stepRegistry, { events });
-    if (!context.cancelled) await events.emit("onEnd");
-    context.eventHistory = events.history;
-    Hooks.callAll("macroMaker.postExecute", { project: normalizedProject, macro, context });
-    return context;
+    try {
+      Hooks.callAll("macroMaker.preExecute", { project: normalizedProject, macro, context });
+      const events = new ExecutionEvents(context.runtimeSteps, context, stepRegistry);
+      context.runtimeEvents = events;
+      context.stepRegistry = stepRegistry;
+      await events.emit("onStart");
+      if (!context.cancelled) await events.emit("onTarget");
+      if (!context.cancelled) await StepRunner.run(context.runtimeSteps, context, stepRegistry, { events });
+      if (!context.cancelled) await events.emit("onEnd");
+      context.eventHistory = events.history;
+      Hooks.callAll("macroMaker.postExecute", { project: normalizedProject, macro, context });
+      return context;
+    } finally {
+      if (!context.cancelled && normalizedProject.targeting?.clearTargetsAfterExecution) {
+        for (const token of context.targets) token.setTarget?.(false, { user: game.user, releaseOthers: false });
+      }
+    }
   }
 }

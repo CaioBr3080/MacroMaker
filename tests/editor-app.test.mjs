@@ -93,3 +93,23 @@ test("observador não altera variáveis, etapas ou componentes", async () => {
   await action(app, "add-part", { index: "0", kind: "damage" });
   assert.deepEqual(app.project, original);
 });
+
+test("minimização salva a preferência por UUID do Macro", async () => {
+  let stored = {};
+  game.settings = {
+    get: () => stored,
+    set: async (_module, _key, value) => { stored = value; }
+  };
+  const app = editor();
+  app.macroUuid = "Macro.persistido";
+  app.project.steps = [{ id: "one", type: "wait" }];
+  const fields = { hidden: false };
+  const button = {
+    closest: () => ({ querySelector: () => fields }),
+    setAttribute() {},
+    querySelector: () => ({})
+  };
+  await action(app, "toggle-step", { index: "0" }, button);
+  assert.deepEqual(stored["Macro.persistido"], ["one"]);
+  delete game.settings;
+});

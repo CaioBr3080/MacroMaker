@@ -105,7 +105,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       "add-branch-step": this.#onAddBranchStep,
       "delete-branch-step": this.#onDeleteBranchStep,
       "add-condition": this.#onAddCondition,
-      "delete-condition": this.#onDeleteCondition
+      "delete-condition": this.#onDeleteCondition,
+      "create-folder": this.#onCreateFolder
     }
   };
 
@@ -131,6 +132,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.templateSearch = "";
     this.templateCategory = "";
     this.collapsedSteps = new Set();
+    this.collapsedProjectUuid = null;
   }
 
   async _prepareContext(options) {
@@ -143,6 +145,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.canEdit = macro.isOwner;
       this.migrationPending = migration.changed;
       this.loadedUuid = this.macroUuid;
+      this.#restoreCollapsedSteps(this.macroUuid);
       this.history.reset(this.project);
     }
 
@@ -304,6 +307,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onDeleteBranchStep(_event, target) { return this.#deleteBranchStep(target); }
   static #onAddCondition(_event, target) { return this.#addCondition(target); }
   static #onDeleteCondition(_event, target) { return this.#deleteCondition(target); }
+  static #onCreateFolder() { return this.#createFolder(); }
 
   #query(selector) {
     return this.element?.querySelector(selector) ?? null;
@@ -377,6 +381,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.project = createDefaultProject();
     this.canEdit = true;
     this.migrationPending = false;
+    this.collapsedSteps.clear();
+    this.collapsedProjectUuid = null;
     this.history.reset(this.project);
     await this.render();
   }
@@ -409,6 +415,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.history.commit(project);
       this.loadedUuid = this.macroUuid;
       this.migrationPending = false;
+      await this.#persistCollapsedSteps();
       const slot = Number(project.sharing?.hotbarSlot);
       if (Number.isInteger(slot) && slot >= 1) {
         try {
@@ -476,6 +483,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.loadedUuid = null;
       this.canEdit = true;
       this.migrationPending = false;
+      this.collapsedSteps.clear();
+      this.collapsedProjectUuid = null;
       this.history.reset(this.project);
       await this.render();
     } catch (error) {
@@ -550,6 +559,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.macroUuid = null;
       this.loadedUuid = null;
       this.canEdit = true;
+      this.collapsedSteps.clear();
+      this.collapsedProjectUuid = null;
       this.history.reset(this.project);
       await this.render();
     } catch (error) {
@@ -587,7 +598,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     });
   }
 
-  #toggleStep(target) {
+  async #toggleStep(target) {
     const step = this.project.steps[Number(target.dataset.index)];
     if (!step) return;
     if (this.collapsedSteps.has(step.id)) this.collapsedSteps.delete(step.id);
@@ -597,9 +608,40 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     card.querySelector(".macro-maker-step-fields").hidden = collapsed;
     target.setAttribute("aria-expanded", String(!collapsed));
     target.title = collapsed ? "Expandir etapa" : "Minimizar etapa";
-    target.querySelector("i").className = `fas fa-chevron-${collapsed ? "down" : "up"}`;
+    target.querySelector("i").className = "fas fa-chevron-" + (collapsed ? "down" : "up");
+    await this.#persistCollapsedSteps();
+  }
+  #restoreCollapsedSteps(uuid) {
+    if (this.collapsedProjectUuid === uuid) return;
+    const records = game.settings?.get?.("macro-maker", "collapsedSteps") ?? {};
+    const ids = Array.isArray(records?.[uuid]) ? records[uuid] : [];
+    this.collapsedSteps = new Set(ids);
+    this.collapsedProjectUuid = uuid;
   }
 
+  async #persistCollapsedSteps() {
+    if (!this.macroUuid || !game.settings?.get || !game.settings?.set) return;
+    const saved = game.settings.get("macro-maker", "collapsedSteps") ?? {};
+    const records = foundry.utils.deepClone ? foundry.utils.deepClone(saved) : clone(saved);
+    records[this.macroUuid] = [...this.collapsedSteps];
+    await game.settings.set("macro-maker", "collapsedSteps", records);
+    this.collapsedProjectUuid = this.macroUuid;
+  }
+
+  async #createFolder() {
+    if (!game.user.isGM) return ui.notifications.warn("Somente o GM pode criar pastas de Macros.");
+    const name = this.#query("[name='newFolderName']")?.value?.trim();
+    if (!name) return ui.notifications.warn("Informe um nome para a pasta.");
+    const parent = this.#query("[name='newFolderParent']")?.value || null;
+    try {
+      await Folder.create({ name, type: "Macro", folder: parent });
+      ui.notifications.info("Pasta de Macros criada.");
+      await this.render();
+      ui["macro-maker"]?.render?.();
+    } catch (error) {
+      this.#reportError("criar a pasta", error);
+    }
+  }
   async #focusStep(target) {
     const index = Number(target.dataset.index);
     if (!this.project.steps[index]) return;

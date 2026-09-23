@@ -6,6 +6,12 @@ import { messageFlavor, speakerConfig } from "../../utils/message-style.js";
 import { MODULE_ID } from "../../constants.js";
 import { escapeHtml, interpolate } from "../../utils/safe-values.js";
 
+function targetReport(context) {
+  const names = (context.targets ?? []).map((token) => token.name ?? token.document?.name ?? token.id ?? "Alvo");
+  if (!names.length) return "";
+  return '<p class="macro-maker-target-report"><strong>Alvos atingidos (' + names.length + '):</strong> ' + names.map((name) => escapeHtml(String(name))).join(", ") + "</p>";
+}
+
 export class RollExecutor {
   static async attack(step, context) {
     const roll = await this.#evaluate(step.formula, context);
@@ -174,7 +180,8 @@ export class RollExecutor {
     };
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ token: context.source?.document }),
-      flavor: messageFlavor(step, `${context.project.name} — ${fallbackLabel}`, context.variables) + details,
+      flavor: messageFlavor(step, context.project.name + " — " + fallbackLabel, context.variables)
+        + (step.announceTargets ? targetReport(context) : "") + details,
       flags: { ...flags, [MODULE_ID]: moduleFlags }
     }, { rollMode });
   }

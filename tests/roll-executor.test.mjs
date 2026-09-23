@@ -146,3 +146,17 @@ test("o nome do usuário recebe complemento sem perder o alias original", () => 
   assert.equal(messageFlavor({ flavor: "  Aldine  destrói\ncom sua lâmina" }, ""),
     '<div style="white-space:pre-wrap">  Aldine  destrói\ncom sua lâmina</div>');
 });
+
+test("anexa os alvos resolvidos depois da mensagem personalizada", async (t) => {
+  globalThis.CONFIG = { Dice: { rolls: [MockRoll] } };
+  globalThis.ChatMessage = { getSpeaker: () => ({}) };
+  t.after(() => { delete globalThis.CONFIG; delete globalThis.ChatMessage; });
+  MockRoll.messages = [];
+  const execution = context({
+    targets: [{ name: "Goblin <1>" }, { document: { name: "Orc" } }]
+  });
+  await RollExecutor.attack({ formula: "1d20", announceTargets: true }, execution);
+  assert.match(MockRoll.messages[0].data.flavor, /Alvos atingidos \(2\):/);
+  assert.match(MockRoll.messages[0].data.flavor, /Goblin &lt;1&gt;/);
+  assert.match(MockRoll.messages[0].data.flavor, /Orc/);
+});

@@ -129,6 +129,7 @@ export class ProjectValidator {
     targeting.maxTargets ??= 1;
     targeting.range ??= null;
     targeting.blockOutOfRange ??= false;
+    targeting.clearTargetsAfterExecution ??= false;
     targeting.radius ??= 3;
     targeting.angle ??= 90;
     targeting.width ??= 1;
@@ -164,6 +165,9 @@ export class ProjectValidator {
     }
     if (typeof targeting.blockOutOfRange !== "boolean") {
       issues.push({ path: "targeting.blockOutOfRange", message: "blockOutOfRange precisa ser booleano." });
+    }
+    if (typeof targeting.clearTargetsAfterExecution !== "boolean") {
+      issues.push({ path: "targeting.clearTargetsAfterExecution", message: "clearTargetsAfterExecution precisa ser booleano." });
     }
     this.#normalizePositiveNumber(targeting, "radius", "targeting.radius", issues);
     this.#normalizePositiveNumber(targeting, "angle", "targeting.angle", issues, { maximum: 360 });
@@ -272,7 +276,9 @@ export class ProjectValidator {
     if (step.speakerAppend != null && typeof step.speakerAppend !== "string") {
       issues.push({ path: `${path}.speakerAppend`, message: "O complemento do nome precisa ser texto." });
     }
-
+    if (step.announceTargets != null && typeof step.announceTargets !== "boolean") {
+      issues.push({ path: path + ".announceTargets", message: "O registro de alvos precisa ser booleano." });
+    }
     if (step.type === STEP_TYPES.ATTACK && step.hitMode != null && !["auto", "manual"].includes(step.hitMode)) {
       issues.push({ path: `${path}.hitMode`, message: `Modo de acerto inválido na etapa ${index + 1}.` });
     }
