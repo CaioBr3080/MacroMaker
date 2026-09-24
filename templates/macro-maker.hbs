@@ -429,6 +429,36 @@
                     <p class="full macro-maker-help-note">Use um Preset ou a lista JSON de filtros. O preset tem prioridade. Para atualizar, envie a lista JSON com o mesmo Filter ID; para remover, preencha somente o Filter ID.</p>
                   </fieldset>
                 {{/if}}
+                {{#if isApplyVisage}}
+                  <fieldset class="macro-maker-integration-settings full">
+                    <legend><i class="fas fa-masks-theater"></i> Aplicar Visage</legend>
+                    {{#unless ../visageActive}}<p class="macro-maker-integration-warning full">Ative Visage para executar esta etapa. A configuração continuará salva no projeto.</p>{{/unless}}
+                    <label>Tipo de variação
+                      <select data-step-index="{{index}}" data-step-path="mode" data-value="{{mode}}" data-render-on-change="true"><option value="global">Visage global</option><option value="local">Visage local de um token</option></select>
+                    </label>
+                    {{#if isVisageGlobal}}
+                      <label>Aplicar em
+                        <select data-step-index="{{index}}" data-step-path="scope" data-value="{{scope}}"><option value="target">Alvo principal</option><option value="targets">Todos os alvos</option><option value="source">Executante</option></select>
+                      </label>
+                      <label class="full">Visage global
+                        <select data-step-index="{{index}}" data-step-path="visageId"><option value="">Selecione uma variação global</option>{{#each visageGlobalChoices}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select>
+                      </label>
+                      <p class="full macro-maker-help-note">Visages globais não precisam de um token definido ao editar; serão aplicados ao executante ou aos alvos resolvidos quando a macro rodar.</p>
+                    {{/if}}
+                    {{#if isVisageLocal}}
+                      <label class="full">Token da cena
+                        <select data-step-index="{{index}}" data-step-path="localTokenUuid" data-value="{{localTokenUuid}}" data-render-on-change="true"><option value="">Escolha o token que possui o Visage</option>{{#each ../sceneTokens}}<option value="{{uuid}}">{{name}}</option>{{/each}}</select>
+                      </label>
+                      {{#if localTokenUuid}}
+                        <label class="full">Visage local de {{localTokenUuid}}
+                          <select data-step-index="{{index}}" data-step-path="visageId"><option value="">Selecione a variação deste token</option>{{#each visageLocalChoices}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select>
+                        </label>
+                      {{else}}
+                        <p class="full macro-maker-help-note">Defina primeiro o token da cena. Então o editor exibirá somente os Visages locais dele.</p>
+                      {{/if}}
+                    {{/if}}
+                  </fieldset>
+                {{/if}}
                 {{#if isSummon}}
                   <fieldset class="macro-maker-integration-settings full">
                     <legend><i class="fas fa-dragon"></i> Invocar token</legend>

@@ -11,8 +11,9 @@ import { ProjectTemplateService } from "./services/project-template-service.js";
 import { CompatibilityService } from "./services/compatibility-service.js";
 
 export class MacroMakerAPI {
-  constructor(appClass) {
+  constructor(appClass, managerClass = null) {
     this.appClass = appClass;
+    this.managerClass = managerClass;
     this.steps = createCoreStepRegistry();
     this.systems = new SystemAdapterRegistry();
     this.persistents = new PersistentEffectService();
@@ -26,6 +27,10 @@ export class MacroMakerAPI {
 
   open(uuid = null) {
     return new this.appClass({ uuid, stepRegistry: this.steps }).render({ force: true });
+  }
+
+  openManager() {
+    return this.managerClass?.open?.();
   }
 
   createProject(overrides = {}) {

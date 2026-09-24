@@ -9,6 +9,7 @@ import { BranchExecutor } from "./executors/branch-executor.js";
 import { RuntimeStepExecutor } from "./executors/runtime-step-executor.js";
 import { VariableExecutor } from "./executors/variable-executor.js";
 import { TokenUpdateExecutor } from "./executors/token-update-executor.js";
+import { VisageExecutor } from "./executors/visage-executor.js";
 import { StepRegistry } from "./step-registry.js";
 
 export function createCoreStepRegistry() {
@@ -197,6 +198,19 @@ export function createCoreStepRegistry() {
     execute: (step, context) => TokenMagicAdapter.apply(step, context)
   });
 
+  registry.register(STEP_TYPES.APPLY_VISAGE, {
+    label: "Aplicar Visage",
+    icon: "fas fa-masks-theater",
+    defaults: {
+      label: "Aplicar Visage",
+      mode: "global",
+      scope: "target",
+      visageId: "",
+      localTokenUuid: ""
+    },
+    schema: {},
+    execute: (step, context) => VisageExecutor.execute(step, context)
+  });
   registry.register(STEP_TYPES.SUMMON, {
     label: "Invocar token",
     icon: "fas fa-dragon",

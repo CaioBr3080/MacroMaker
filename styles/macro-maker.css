@@ -1308,3 +1308,133 @@
 .macro-maker-sidebar-folder-edit button {
   grid-column: 1 / -1;
 }
+/* Janela própria de projetos e pastas: abre pela barra de ferramentas do canvas. */
+.macro-maker-manager .window-content {
+  min-height: 0;
+  padding: 0;
+}
+
+.macro-maker-manager-content {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  color: var(--color-text-light-primary);
+  background: linear-gradient(135deg, rgba(17, 23, 37, 0.96), rgba(30, 38, 56, 0.92));
+}
+
+.macro-maker-manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid rgba(180, 208, 255, 0.35);
+  background: rgba(7, 12, 23, 0.4);
+}
+
+.macro-maker-manager-header h2,
+.macro-maker-manager-header p { margin: 0; }
+.macro-maker-manager-header h2 { font-size: 1.15rem; }
+.macro-maker-manager-header p { margin-top: 0.15rem; opacity: 0.68; font-size: 0.82rem; }
+.macro-maker-manager-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.macro-maker-manager-layout {
+  display: grid;
+  grid-template-columns: minmax(270px, 0.95fr) minmax(340px, 1.25fr);
+  min-height: 0;
+}
+
+.macro-maker-manager-tree,
+.macro-maker-manager-inspector {
+  min-width: 0;
+  min-height: 0;
+  padding: 0.9rem;
+  overflow: auto;
+}
+
+.macro-maker-manager-tree {
+  border-right: 1px solid rgba(180, 208, 255, 0.25);
+  background: rgba(4, 9, 18, 0.28);
+}
+
+.macro-maker-manager-tree > header { display: grid; gap: 0.16rem; margin-bottom: 0.7rem; }
+.macro-maker-manager-tree > header small { opacity: 0.65; font-size: 0.75rem; }
+.macro-maker-manager-root-drop {
+  margin-bottom: 0.65rem;
+  padding: 0.5rem;
+  border: 1px dashed rgba(154, 200, 255, 0.65);
+  border-radius: 5px;
+  text-align: center;
+  color: var(--color-text-light-highlight);
+  font-size: 0.8rem;
+}
+
+.macro-maker-manager-entries,
+.macro-maker-manager-persistents ol { display: flex; flex-direction: column; gap: 0.38rem; margin: 0; padding: 0; list-style: none; }
+.macro-maker-manager-folder,
+.macro-maker-manager-project {
+  padding-left: calc(0.25rem + var(--macro-maker-indent, 0px));
+}
+
+.macro-maker-manager-folder-row,
+.macro-maker-manager-project {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.42rem;
+  border: 1px solid rgba(180, 208, 255, 0.24);
+  border-radius: 5px;
+  background: rgba(18, 28, 45, 0.6);
+}
+
+.macro-maker-manager-folder-row { border-left: 4px solid var(--macro-maker-folder-color, #58729b); }
+.macro-maker-manager-folder-row[draggable="true"],
+.macro-maker-manager-project[draggable="true"] { cursor: grab; }
+.macro-maker-manager-folder-row.drag-over,
+.macro-maker-manager-root-drop.drag-over { outline: 2px solid #9ac8ff; outline-offset: 2px; background: rgba(102, 164, 242, 0.2); }
+
+.macro-maker-manager-folder-row > .fa-folder,
+.macro-maker-manager-folder-row > .fa-folder-open { color: var(--macro-maker-folder-color, #87aee5); }
+.macro-maker-manager-folder-row small { max-width: 34%; overflow: hidden; opacity: 0.62; text-overflow: ellipsis; white-space: nowrap; font-size: 0.7rem; }
+.macro-maker-manager-entry-name { flex: 1; min-width: 0; overflow: hidden; color: inherit; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.macro-maker-manager-project img { width: 28px; height: 28px; border: 0; object-fit: cover; }
+.macro-maker-manager-empty { padding: 1rem; text-align: center; opacity: 0.7; }
+
+.macro-maker-manager-inspector { display: flex; flex-direction: column; gap: 0.9rem; }
+.macro-maker-manager-folder-form,
+.macro-maker-manager-welcome,
+.macro-maker-manager-persistents {
+  padding: 0.85rem;
+  border: 1px solid rgba(180, 208, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(7, 13, 25, 0.38);
+}
+
+.macro-maker-manager-folder-form { display: grid; gap: 0.65rem; }
+.macro-maker-manager-folder-form header,
+.macro-maker-manager-persistents header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.macro-maker-manager-folder-form header strong { font-size: 1rem; }
+.macro-maker-manager-folder-form p { margin: 0; opacity: 0.72; font-size: 0.82rem; }
+.macro-maker-manager-folder-form label { display: grid; gap: 0.24rem; font-size: 0.82rem; }
+.macro-maker-manager-folder-form footer { display: flex; justify-content: flex-end; padding-top: 0.2rem; }
+
+.macro-maker-manager-welcome { display: grid; justify-items: center; gap: 0.45rem; padding: 2rem 1.15rem; text-align: center; }
+.macro-maker-manager-welcome > .fas { color: #a9c9ff; font-size: 2rem; }
+.macro-maker-manager-welcome h3,
+.macro-maker-manager-welcome p { margin: 0; }
+.macro-maker-manager-welcome p { max-width: 30rem; opacity: 0.72; }
+
+.macro-maker-manager-persistents { margin-top: auto; }
+.macro-maker-manager-persistents h3 { margin: 0; font-size: 0.9rem; }
+.macro-maker-manager-persistents li { display: flex; align-items: center; gap: 0.4rem; min-width: 0; padding: 0.32rem 0; border-top: 1px solid rgba(180, 208, 255, 0.14); }
+.macro-maker-manager-persistents li:first-child { border-top: 0; }
+.macro-maker-manager-persistents li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.macro-maker-manager-persistents .orphan { color: #eebd63; }
+
+@media (max-width: 700px) {
+  .macro-maker-manager-layout { grid-template-columns: 1fr; overflow: auto; }
+  .macro-maker-manager-tree { min-height: 250px; border-right: 0; border-bottom: 1px solid rgba(180, 208, 255, 0.25); }
+  .macro-maker-manager-header { align-items: flex-start; flex-direction: column; }
+}

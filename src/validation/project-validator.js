@@ -257,6 +257,7 @@ export class ProjectValidator {
     if (step.type === STEP_TYPES.REMOVE_PERSISTENT) this.#normalizePersistentRemoval(step, path, issues);
     if (step.type === STEP_TYPES.ASSET_PRESET) this.#normalizeAssetPreset(step, path, issues);
     if (step.type === STEP_TYPES.SUMMON) this.#normalizeSummon(step, path, issues);
+    if (step.type === STEP_TYPES.APPLY_VISAGE) this.#normalizeApplyVisage(step, path, issues);
     if (step.type === STEP_TYPES.TOKEN_MAGIC) this.#normalizeTokenMagic(step, path, issues);
     if (step.type === STEP_TYPES.MODIFY_TOKEN) this.#normalizeTokenMutation(step, path, issues);
 
@@ -591,6 +592,25 @@ export class ProjectValidator {
       } catch (_error) {
         issues.push({ path: path + ".filters", message: "Os filtros Token Magic precisam ser um JSON válido." });
       }
+    }
+  }
+  static #normalizeApplyVisage(step, path, issues) {
+    step.mode ??= "global";
+    if (!["global", "local"].includes(step.mode)) {
+      issues.push({ path: `${path}.mode`, message: "O modo do Visage deve ser global ou local do token." });
+    }
+    step.scope ??= "target";
+    if (!["source", "target", "targets"].includes(step.scope)) {
+      issues.push({ path: `${path}.scope`, message: "O escopo do Visage deve ser executante, alvo ou todos os alvos." });
+    }
+    if (typeof step.visageId !== "string" || !step.visageId.trim()) {
+      issues.push({ path: `${path}.visageId`, message: "Escolha uma variação do Visage." });
+    }
+    if (step.localTokenUuid != null && typeof step.localTokenUuid !== "string") {
+      issues.push({ path: `${path}.localTokenUuid`, message: "O token do Visage local precisa ser um UUID." });
+    }
+    if (step.mode === "local" && !String(step.localTokenUuid ?? "").trim()) {
+      issues.push({ path: `${path}.localTokenUuid`, message: "Escolha um token da cena para usar um Visage local." });
     }
   }
   static #normalizeSummon(step, path, issues) {

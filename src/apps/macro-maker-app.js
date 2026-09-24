@@ -45,6 +45,30 @@ function visageChoices(actorId, selectedId) {
   return [...unique.values()].sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { numeric: true }));
 }
 
+function globalVisageChoices(selectedId) {
+  const data = game.modules?.get?.("visage")?.active ? game.modules.get("visage")?.api?.Data : null;
+  return [...(data?.globals ?? [])]
+    .map((entry) => ({ id: entry?.id ?? entry?._id, name: entry?.label ?? entry?.name ?? entry?.id ?? entry?._id, selected: (entry?.id ?? entry?._id) === selectedId }))
+    .filter((entry) => entry.id)
+    .sort((left, right) => String(left.name).localeCompare(String(right.name), "pt-BR", { numeric: true }));
+}
+
+function sceneTokenChoices() {
+  return [...(globalThis.canvas?.tokens?.placeables ?? [])]
+    .map((token) => ({ uuid: token.document?.uuid ?? token.uuid, name: token.name ?? token.document?.name ?? token.id, actor: token.actor ?? token.document?.actor ?? null }))
+    .filter((token) => token.uuid)
+    .sort((left, right) => String(left.name).localeCompare(String(right.name), "pt-BR", { numeric: true }));
+}
+
+function localVisageChoices(tokenUuid, selectedId) {
+  const token = sceneTokenChoices().find((entry) => entry.uuid === tokenUuid);
+  const data = game.modules?.get?.("visage")?.active ? game.modules.get("visage")?.api?.Data : null;
+  const entries = token?.actor && data?.getLocal ? data.getLocal(token.actor) : [];
+  return [...entries]
+    .map((entry) => ({ id: entry?.id ?? entry?._id, name: entry?.label ?? entry?.name ?? entry?.id ?? entry?._id, selected: (entry?.id ?? entry?._id) === selectedId }))
+    .filter((entry) => entry.id)
+    .sort((left, right) => String(left.name).localeCompare(String(right.name), "pt-BR", { numeric: true }));
+}
 function movementActions() {
   return Object.entries(globalThis.CONFIG?.Token?.movement?.actions ?? {})
     .map(([id, action]) => ({ id, label: action?.label ?? action?.name ?? id }))
@@ -275,14 +299,20 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         isSummon: step.type === "summon",
         isTokenMagic: step.type === "tokenMagic",
         isModifyToken: step.type === "modifyToken",
+        isApplyVisage: step.type === "applyVisage",
+        isVisageGlobal: step.mode !== "local",
+        isVisageLocal: step.mode === "local",
         visageChoices: visageChoices(step.actorId, step.visageId),
-        summonActorName: summonActorName(step.actorId)
+        summonActorName: summonActorName(step.actorId),
+        visageGlobalChoices: globalVisageChoices(step.visageId),
+        visageLocalChoices: localVisageChoices(step.localTokenUuid, step.visageId)
       })),
       hasMacro: Boolean(this.macroUuid),
       canManageMacro: Boolean(this.macroUuid) && this.canEdit,
       canEdit: this.canEdit,
       isGM: game.user.isGM,
       summonActors: summonActors(),
+      sceneTokens: sceneTokenChoices(),
       massEditActive: Boolean(game.modules?.get?.("multi-token-edit")?.active),
       visageActive: Boolean(game.modules?.get?.("visage")?.active),
       tokenMagicActive: Boolean(game.modules?.get?.("tokenmagic")?.active),

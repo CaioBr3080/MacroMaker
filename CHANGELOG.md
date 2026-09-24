@@ -1,3 +1,8 @@
+## 0.9.22 - 2026-09-24
+
+- O Macro Maker saiu da sidebar: a varinha na barra esquerda do canvas abre um gerenciador próprio, redimensionável e minimizável, com árvore de pastas à esquerda e painel de configuração à direita.
+- O gerenciador preserva criação, cores, ownership, subpastas, projetos, efeitos persistentes e arrastar-e-soltar, agora sem comprimir ou deslocar a barra lateral do Foundry.
+- Nova etapa Aplicar Visage: variações globais podem atingir o executante, alvo principal ou todos os alvos; para um Visage local, selecione antes o token da cena e o editor exibirá apenas as variações dele.
 # Changelog
 
 ## 0.9.21 - 2026-09-24

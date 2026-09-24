@@ -4,10 +4,10 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.21` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.22` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
-- uma aba própria **Macro Maker** na sidebar e um botão de fallback no diretório de Macros;
-- árvore de pastas e subpastas recolhível na própria aba Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
+- botão próprio **Macro Maker** na barra esquerda do canvas, abrindo uma janela redimensionável de gerenciamento;
+- árvore de pastas e subpastas recolhível na janela do Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
 - editor migrado para `ApplicationV2` e Handlebars;
 - criação e edição de projetos por cartões visuais, com modo JSON avançado separado;
 - cada projeto salvo como um Macro normal do Foundry;
@@ -15,7 +15,7 @@ Esta versão `0.9.21` entrega a base do MVP até importação, compartilhamento 
 - comando compilado pequeno, chamando `game.macroMaker.executeMacro(uuid)`;
 - alvos marcados com `T`, seleção interativa de tokens com busca digitável por nome, ponto, círculo, cone, linha e template medido;
 - filtros de aliado/inimigo, mínimo, máximo, alcance e visualização do alcance no canvas;
-- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit, invocação de token com busca por nome, efeitos do Token Magic FX e modificação segura do token da cena;
+- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit, invocação de token com busca por nome, efeitos do Token Magic FX, aplicação de Visage global ou local e modificação segura do token da cena;
 - validação e normalização centralizadas antes de salvar ou executar;
 - registro público e extensível de tipos de etapa em `game.macroMaker.steps`;
 - adição, duplicação, exclusão, ativação e reordenação de etapas;
@@ -45,7 +45,7 @@ Etapas aninhadas aparecem nas faixas visuais da ramificação e continuam dispon
 
 1. Extraia a pasta `macro-maker` dentro de `FoundryVTT/Data/modules/`.
 2. Ative **Sequencer** e depois **Macro Maker** no mundo. Para assets, ative também **Baileywiki Mass Edit**; para variações de invocação, ative **Visage**; para filtros visuais, ative **Token Magic FX**.
-3. Abra a aba **Macro Maker** na sidebar. Se ela não estiver disponível, use o botão **Macro Maker** no diretório de Macros.
+3. Na barra esquerda do canvas, clique na varinha **Macro Maker** para abrir o gerenciador. O diretório de Macros também possui o botão de gerenciamento como atalho.
 4. Crie um projeto, edite o JSON e salve.
 5. Selecione o token executante, marque um alvo com `T` e execute.
 

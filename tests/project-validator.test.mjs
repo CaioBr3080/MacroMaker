@@ -264,3 +264,17 @@ test("valida a etapa Modificar token e bloqueia Recursos", () => {
     steps: [{ type: "modifyToken", changes: { bar1: { attribute: "hp" } } }]
   }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
 });
+test("valida Visage global e exige token para Visage local", () => {
+  const project = ProjectValidator.normalize({
+    name: "Visage",
+    targeting: { source: "none", mode: "none" },
+    steps: [{ type: "applyVisage", mode: "global", scope: "targets", visageId: "global-form" }]
+  }, { stepRegistry: createCoreStepRegistry() });
+  assert.equal(project.steps[0].scope, "targets");
+
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Visage local",
+    targeting: { source: "none", mode: "none" },
+    steps: [{ type: "applyVisage", mode: "local", visageId: "local-form" }]
+  }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
+});

@@ -2,7 +2,7 @@
   "id": "macro-maker",
   "title": "Macro Maker",
   "description": "Construtor visual e executor de macros com Sequencer para Foundry VTT.",
-  "version": "0.9.21",
+  "version": "0.9.22",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
@@ -55,7 +55,7 @@
       {
         "id": "visage",
         "type": "module",
-        "reason": "Necessário somente para aplicar variações Visage aos tokens invocados."
+        "reason": "Necessário para aplicar variações Visage a tokens invocados ou a tokens existentes na cena."
       },
       {
         "id": "tokenmagic",

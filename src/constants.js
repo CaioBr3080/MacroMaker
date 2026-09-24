@@ -24,7 +24,8 @@ export const STEP_TYPES = Object.freeze({
   ASSET_PRESET: "assetPreset",
   SUMMON: "summon",
   TOKEN_MAGIC: "tokenMagic",
-  MODIFY_TOKEN: "modifyToken"
+  MODIFY_TOKEN: "modifyToken",
+  APPLY_VISAGE: "applyVisage"
 });
 
 export const TARGET_MODES = Object.freeze({

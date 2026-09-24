@@ -1,16 +1,12 @@
 import { MODULE_ID, PROJECT_FLAG } from "./constants.js";
 import { MacroMakerAPI } from "./api.js";
 import { MacroMakerApp } from "./apps/macro-maker-app.js";
-import { MacroMakerSidebar } from "./apps/macro-maker-sidebar.js";
+import { MacroMakerManager } from "./apps/macro-maker-manager.js";
 import { SummonExecutor } from "./execution/executors/summon-executor.js";
 
 Hooks.once("init", () => {
   console.info("Macro Maker | inicializando");
-  CONFIG.ui[MODULE_ID] = MacroMakerSidebar;
-  CONFIG.ui.sidebar.TABS[MODULE_ID] = {
-    icon: "fas fa-wand-magic-sparkles",
-    tooltip: "Macro Maker"
-  };
+
   game.settings.register(MODULE_ID, "debug", {
     name: "Modo de depuração",
     hint: "Exibe informações extras no console.",
@@ -44,7 +40,7 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   SummonExecutor.registerSocket();
-  const api = new MacroMakerAPI(MacroMakerApp);
+  const api = new MacroMakerAPI(MacroMakerApp, MacroMakerManager);
   game.macroMaker = api;
   game.modules.get(MODULE_ID).api = api;
   const compatibility = api.compatibility.report();
@@ -62,8 +58,8 @@ Hooks.on("renderMacroDirectory", (_app, html) => {
   button.type = "button";
   button.dataset.macroMakerLauncher = "true";
   button.className = "macro-maker-launcher";
-  button.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Macro Maker';
-  button.addEventListener("click", () => game.macroMaker.open());
+  button.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Gerenciar Macro Maker';
+  button.addEventListener("click", () => game.macroMaker.openManager());
 
   const target = root.querySelector(".directory-header .header-actions")
     ?? root.querySelector(".directory-header")
@@ -120,5 +116,20 @@ Hooks.on("renderChatMessageHTML", (message, html) => {
 
 Hooks.on("preDeleteToken", (document) => game.macroMaker?.persistents?.cleanupDocument(document));
 Hooks.on("preDeleteScene", (document) => game.macroMaker?.persistents?.cleanupDocument(document));
-Hooks.on("sequencerEffectManagerReady", () => ui[MODULE_ID]?.render?.());
-Hooks.on("endedSequencerEffect", () => ui[MODULE_ID]?.render?.());
+Hooks.on("getSceneControlButtons", (controls) => {
+  const tokenControls = controls.tokens;
+  if (!tokenControls?.tools || tokenControls.tools[MODULE_ID]) return;
+  tokenControls.tools[MODULE_ID] = {
+    name: MODULE_ID,
+    title: "Gerenciar Macro Maker",
+    icon: "fas fa-wand-magic-sparkles",
+    order: Object.keys(tokenControls.tools).length,
+    button: true,
+    visible: true,
+    onChange: () => game.macroMaker?.openManager()
+  };
+});
+
+for (const hook of ["createMacro", "updateMacro", "deleteMacro", "createFolder", "updateFolder", "deleteFolder", "sequencerEffectManagerReady", "endedSequencerEffect"]) {
+  Hooks.on(hook, () => MacroMakerManager.refresh());
+}
