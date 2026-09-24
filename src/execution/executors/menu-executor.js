@@ -1,7 +1,5 @@
-import { escapeHtml, interpolate, setPath } from "../../utils/safe-values.js";
+import { escapeHtml, interpolateFormula, setPath } from "../../utils/safe-values.js";
 import { messageStyleCSS } from "../../utils/message-style.js";
-import { resolveFormulaVariables } from "../../utils/formula-variables.js";
-
 function selectedIndexes(root) {
   if (root?.querySelectorAll) {
     return [...root.querySelectorAll('[name="choice"]:checked')].map((input) => Number(input.value));
@@ -25,37 +23,14 @@ function transformOptionText(value, transform) {
   return text;
 }
 
-function styledText(tag, className, value, style, variables, extraCSS = "") {
-  const text = escapeHtml(interpolate(value ?? "", variables));
+async function styledText(tag, className, value, style, variables, extraCSS = "") {
+  const text = await interpolateFormula(value ?? "", variables, { escape: true });
   if (!text) return "";
   return "<" + tag + " class=\"" + className + "\" style=\"" + extraCSS + messageStyleCSS(style) + "\">" + text + "</" + tag + ">";
 }
 
 async function interpolateOptionDescription(value, variables) {
-  const text = interpolate(value, variables);
-  const expressions = [...text.matchAll(/\{([^{}]+)\}/g)];
-  if (!expressions.length) return escapeHtml(text);
-
-  let result = "";
-  let cursor = 0;
-  for (const match of expressions) {
-    result += text.slice(cursor, match.index);
-    const expression = match[1].trim();
-    if (!expression) throw new Error("A expressão {} na descrição de uma opção não pode ficar vazia.");
-    const RollClass = globalThis.CONFIG?.Dice?.rolls?.[0] ?? globalThis.Roll;
-    if (!RollClass) throw new Error("A classe de rolagem do Foundry não está disponível para calcular {" + expression + "}.");
-    let roll;
-    try {
-      roll = await new RollClass(resolveFormulaVariables(expression, variables), variables).evaluate();
-    } catch (error) {
-      throw new Error("Não foi possível calcular {" + expression + "} na descrição da opção: " + error.message);
-    }
-    const total = Number(roll?.total);
-    if (!Number.isFinite(total)) throw new Error("A expressão {" + expression + "} não produziu um número.");
-    result += String(total);
-    cursor = match.index + match[0].length;
-  }
-  return escapeHtml(result + text.slice(cursor));
+  return interpolateFormula(value, variables, { escape: true });
 }
 
 function dialogWidth(columns) {
@@ -75,7 +50,7 @@ export class MenuExecutor {
       return {
         index,
         value: option.value,
-        label: transformOptionText(interpolate(option.label, context.variables, { escape: true }), textTransform),
+        label: transformOptionText(await interpolateFormula(option.label, context.variables, { escape: true }), textTransform),
         description: await interpolateOptionDescription(option.description, context.variables),
         image: escapeHtml(option.image ?? ""),
         icon: escapeHtml(option.icon ?? ""),
@@ -95,7 +70,7 @@ export class MenuExecutor {
     });
     const columnHeaderMarkup = columnHeaders.some((column) => column.title)
       ? '<div class="macro-maker-menu-column-titles">'
-        + columnHeaders.map((column) => styledText("strong", "macro-maker-menu-column-title", column.title, column.titleStyle, context.variables, "grid-column:" + column.number + ";"))
+        + (await Promise.all(columnHeaders.map((column) => styledText("strong", "macro-maker-menu-column-title", column.title, column.titleStyle, context.variables, "grid-column:" + column.number + ";"))))
           .join("")
         + "</div>"
       : "";
@@ -110,8 +85,8 @@ export class MenuExecutor {
     const content = `
       <form class="macro-maker-menu">
         <header class="macro-maker-menu-heading">
-          ${styledText("h2", "macro-maker-menu-title", title, step.titleStyle ?? {}, context.variables)}
-          ${styledText("p", "macro-maker-menu-description", step.description, step.descriptionStyle ?? {}, context.variables)}
+          ${await styledText("h2", "macro-maker-menu-title", title, step.titleStyle ?? {}, context.variables)}
+          ${await styledText("p", "macro-maker-menu-description", step.description, step.descriptionStyle ?? {}, context.variables)}
         </header>
         ${step.image ? `<img class="macro-maker-menu-image" src="${escapeHtml(step.image)}" alt="">` : ""}
         <div class="macro-maker-menu-grid-scroll" style="${gridStyle}">
@@ -128,7 +103,7 @@ export class MenuExecutor {
       </form>`;
 
     const indexes = await Dialog.wait({
-      title: escapeHtml(interpolate(title, context.variables)),
+      title: await interpolateFormula(title, context.variables, { escape: true }),
       content,
       buttons: {
         confirm: {

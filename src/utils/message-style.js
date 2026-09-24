@@ -1,4 +1,4 @@
-import { escapeHtml, interpolate } from "./safe-values.js";
+import { escapeHtml, interpolate, interpolateFormula } from "./safe-values.js";
 
 export const MESSAGE_FONTS = {
   inherit: "Padrão", Arial: "Arial", Georgia: "Georgia", Verdana: "Verdana",
@@ -19,20 +19,34 @@ export function messageStyleCSS(style = {}) {
   return rules.join(";");
 }
 
-export function messageFlavor(step, fallback, variables = {}) {
-  const text = interpolate(step.flavor || fallback, variables);
+function formattedFlavor(step, text) {
   const hasStyle = step.messageStyle && Object.keys(step.messageStyle).length > 0;
-  // Keep legacy HTML flavors intact when no formatting or whitespace preservation is needed.
+  // Preserve legacy HTML when neither custom formatting nor whitespace handling is needed.
   if (!hasStyle && !/[\n\r]| {2,}|\t|^\s|\s$/.test(text)) return text;
   const content = hasStyle ? escapeHtml(text) : text;
   return `<div style="${messageStyleCSS(step.messageStyle ?? {})}">${content}</div>`;
 }
 
+export function messageFlavor(step, fallback, variables = {}) {
+  return formattedFlavor(step, interpolate(step.flavor || fallback, variables));
+}
+
+export async function messageFlavorFormula(step, fallback, variables = {}) {
+  return formattedFlavor(step, await interpolateFormula(step.flavor || fallback, variables));
+}
+
 export function speakerConfig(step, variables = {}) {
   const style = step.speakerStyle ?? {};
-  const append = interpolate(step.speakerAppend ?? "", variables);
   return {
-    append,
+    append: interpolate(step.speakerAppend ?? "", variables),
+    css: messageStyleCSS(style)
+  };
+}
+
+export async function speakerConfigFormula(step, variables = {}) {
+  const style = step.speakerStyle ?? {};
+  return {
+    append: await interpolateFormula(step.speakerAppend ?? "", variables),
     css: messageStyleCSS(style)
   };
 }

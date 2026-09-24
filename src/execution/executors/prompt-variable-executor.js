@@ -1,4 +1,4 @@
-import { clone, getPath, interpolate, setPath, escapeHtml } from "../../utils/safe-values.js";
+import { clone, getPath, interpolateFormula, setPath, escapeHtml } from "../../utils/safe-values.js";
 import { rollFormulaText } from "../../utils/roll-formula.js";
 import { typedValue } from "./variable-executor.js";
 import { ProjectRepository } from "../../services/project-repository.js";
@@ -24,8 +24,8 @@ export class PromptVariableExecutor {
     }
 
     const current = getPath(context.variables, variable);
-    const title = interpolate(step.title ?? step.label ?? "Informar valor", context.variables);
-    const description = interpolate(step.description ?? "", context.variables);
+    const title = await interpolateFormula(step.title ?? step.label ?? "Informar valor", context.variables);
+    const description = await interpolateFormula(step.description ?? "", context.variables);
     const type = step.valueType ?? "string";
     const defaultValue = displayValue(current);
     const input = type === "boolean"

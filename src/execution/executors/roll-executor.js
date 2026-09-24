@@ -2,9 +2,9 @@ import { ROLL_MODES } from "../../constants.js";
 import { ManualHitResolver } from "../manual-hit-resolver.js";
 import { RollAnalysis } from "../roll-analysis.js";
 import { resolveFormulaVariables } from "../../utils/formula-variables.js";
-import { messageFlavor, speakerConfig } from "../../utils/message-style.js";
+import { messageFlavorFormula, speakerConfigFormula } from "../../utils/message-style.js";
 import { MODULE_ID } from "../../constants.js";
-import { escapeHtml, interpolate } from "../../utils/safe-values.js";
+import { escapeHtml, interpolateFormula } from "../../utils/safe-values.js";
 
 function targetReport(context) {
   const names = (context.targets ?? []).map((token) => token.name ?? token.document?.name ?? token.id ?? "Alvo");
@@ -105,13 +105,13 @@ export class RollExecutor {
     summary.formula = combined.formula;
     context.lastRoll = combined;
     context.variables.lastRoll = { kind: summary.kind, formula: summary.formula, total: summary.total };
-    const lines = results.map((result, index) => {
+    const lines = (await Promise.all(results.map(async (result, index) => {
       const type = escapeHtml(result.type || label);
       const formula = escapeHtml(result.formula);
       const resistance = Number.isFinite(result.resistance) ? `; resistência ${result.resistance}; final ${result.total}` : "";
-      const note = parts[index].flavor ? ` — ${escapeHtml(interpolate(parts[index].flavor, context.variables))}` : "";
+      const note = parts[index].flavor ? ` — ${await interpolateFormula(parts[index].flavor, context.variables, { escape: true })}` : "";
       return `<li>${type}: ${formula} = ${result.rawTotal ?? result.total}${resistance}${note}</li>`;
-    }).join("");
+    }))).join("");
     const details = `<ul class="macro-maker-roll-components">${lines}</ul><p><strong>Total${summary.total !== summary.rawTotal ? " após resistências" : ""}: ${summary.total}</strong></p>`;
     await this.#toMessage(combined, step, context, label, details, {
       "macro-maker": { kind: summary.kind, total: summary.total, rawTotal: summary.rawTotal, parts: results }
@@ -176,11 +176,11 @@ export class RollExecutor {
     if (!ROLL_MODES.includes(rollMode)) throw new Error(`Modo de rolagem inválido: ${rollMode}.`);
     const moduleFlags = {
       ...(flags[MODULE_ID] ?? {}),
-      speaker: speakerConfig(step, context.variables)
+      speaker: await speakerConfigFormula(step, context.variables)
     };
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ token: context.source?.document }),
-      flavor: messageFlavor(step, context.project.name + " — " + fallbackLabel, context.variables)
+      flavor: await messageFlavorFormula(step, context.project.name + " — " + fallbackLabel, context.variables)
         + (step.announceTargets ? targetReport(context) : "") + details,
       flags: { ...flags, [MODULE_ID]: moduleFlags }
     }, { rollMode });

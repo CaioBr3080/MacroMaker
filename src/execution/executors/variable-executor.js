@@ -1,4 +1,4 @@
-import { clone, getPath, interpolate, setPath } from "../../utils/safe-values.js";
+import { clone, getPath, interpolateFormula, setPath } from "../../utils/safe-values.js";
 import { createRollFormulaVariable } from "../../utils/roll-formula.js";
 
 export function typedValue(value, type = "auto") {
@@ -17,7 +17,7 @@ export function typedValue(value, type = "auto") {
 export class VariableExecutor {
   static async execute(step, context) {
     const current = getPath(context.variables, step.variable);
-    const rawValue = typeof step.value === "string" ? interpolate(step.value, context.variables) : step.value;
+    const rawValue = typeof step.value === "string" ? await interpolateFormula(step.value, context.variables) : step.value;
     const value = typedValue(rawValue, step.valueType ?? "auto");
     let next;
     switch (step.operation ?? "set") {
