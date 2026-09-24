@@ -1,5 +1,6 @@
-import { MODULE_ID } from "../constants.js";
-import { folderChoices } from "./editor-controls.js";
+import { MODULE_ID, PROJECT_FLAG } from "../constants.js";
+import { folderChoices, parseVariableValue } from "./editor-controls.js";
+import { rollFormulaText } from "../utils/roll-formula.js";
 import { ProjectRepository } from "../services/project-repository.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -111,6 +112,71 @@ function users() {
     .sort(sortByName);
 }
 
+function variableType(value) {
+  if (rollFormulaText(value) !== null) return "formula";
+  if (typeof value === "number") return "number";
+  if (typeof value === "boolean") return "boolean";
+  if (value && typeof value === "object") return "json";
+  return "text";
+}
+
+function variableValueText(value) {
+  const formula = rollFormulaText(value);
+  if (formula !== null) return formula;
+  if (value && typeof value === "object") return JSON.stringify(value);
+  return String(value ?? "");
+}
+
+function variableTypeOptions(selected) {
+  return [
+    ["number", "Número"],
+    ["text", "Texto"],
+    ["boolean", "Booleano"],
+    ["json", "JSON"],
+    ["formula", "Fórmula"]
+  ].map(([value, label]) => ({ value, label, selected: value === selected }));
+}
+
+function variableIsLocked(project, name) {
+  if (game.user.isGM) return false;
+  const locks = project?.sharing?.lockedFields ?? [];
+  return (Array.isArray(locks) ? locks : String(locks).split(","))
+    .map((path) => path.trim())
+    .some((path) => path === "variables" || path === `variables.${name}` || path.startsWith(`variables.${name}.`));
+}
+
+function favoriteKey(uuid, name) {
+  return `${uuid}::${name}`;
+}
+
+function favoriteReference(entry) {
+  if (!entry || typeof entry !== "object" || !entry.uuid || !entry.name) return null;
+  return { uuid: String(entry.uuid), name: String(entry.name) };
+}
+
+function collectFavoriteVariableCandidates(macros) {
+  return macros
+    .filter((macro) => macro.isOwner)
+    .flatMap((macro) => {
+      const project = macro.getFlag(MODULE_ID, PROJECT_FLAG);
+      return Object.entries(project?.variables ?? {})
+        .filter(([name]) => !variableIsLocked(project, name))
+        .map(([name, value]) => {
+          const type = variableType(value);
+          return {
+            key: favoriteKey(macro.uuid, name),
+            uuid: macro.uuid,
+            name,
+            macroName: macro.name,
+            value: variableValueText(value),
+            type,
+            typeOptions: variableTypeOptions(type),
+            searchText: `${name} ${macro.name}`.toLocaleLowerCase("pt-BR")
+          };
+        });
+    })
+    .sort((left, right) => `${left.name} ${left.macroName}`.localeCompare(`${right.name} ${right.macroName}`, "pt-BR", { numeric: true }));
+}
 export class MacroMakerManager extends HandlebarsApplicationMixin(ApplicationV2) {
   static instance = null;
 
@@ -139,7 +205,11 @@ export class MacroMakerManager extends HandlebarsApplicationMixin(ApplicationV2)
       run: this.#onRun,
       delete: this.#onDelete,
       "end-persistent": this.#onEndPersistent,
-      "open-persistent-manager": this.#onOpenPersistentManager
+      "open-persistent-manager": this.#onOpenPersistentManager,
+      "add-favorite-variable": this.#onAddFavoriteVariable,
+      "cancel-favorite-variable": this.#onCancelFavoriteVariable,
+      "remove-favorite-variable": this.#onRemoveFavoriteVariable,
+      "save-favorite-variable": this.#onSaveFavoriteVariable
     }
   };
 
@@ -169,12 +239,14 @@ export class MacroMakerManager extends HandlebarsApplicationMixin(ApplicationV2)
 
   editingFolderId = null;
   folderPanel = null;
+  addingFavoriteVariable = false;
 
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const allFolders = game.folders ?? [];
     const choices = folderChoices(allFolders);
-    const projects = ProjectRepository.list().map((macro) => ({
+    const sourceMacros = ProjectRepository.list();
+    const projects = sourceMacros.map((macro) => ({
       uuid: macro.uuid,
       name: macro.name,
       img: macro.img,
@@ -188,6 +260,12 @@ export class MacroMakerManager extends HandlebarsApplicationMixin(ApplicationV2)
         .map(([id]) => id)
     );
     const entries = managerEntries(projects, allFolders, collapsedFolders);
+    const favoriteVariableCandidates = collectFavoriteVariableCandidates(sourceMacros);
+    const savedFavorites = (game.settings?.get?.(MODULE_ID, "favoriteVariables") ?? [])
+      .map(favoriteReference)
+      .filter(Boolean);
+    const favoriteKeys = new Set(savedFavorites.map((entry) => favoriteKey(entry.uuid, entry.name)));
+    const favoriteVariables = favoriteVariableCandidates.filter((candidate) => favoriteKeys.has(candidate.key));
     const selectedFolder = entries.find((entry) => entry.isFolder && entry.id === this.editingFolderId);
     return foundry.utils.mergeObject(context, {
       managerEntries: entries.map((entry) => ({
@@ -207,12 +285,17 @@ export class MacroMakerManager extends HandlebarsApplicationMixin(ApplicationV2)
       isGM: game.user.isGM,
       creatingFolder: this.folderPanel === "create",
       editingFolder: this.folderPanel === "edit" && Boolean(selectedFolder),
-      persistents: game.user.isGM ? game.macroMaker?.persistents?.list?.() ?? [] : []
+      persistents: game.user.isGM ? (game.macroMaker?.persistents?.list?.() ?? []) : [],
+      favoriteVariables,
+      favoriteVariableCandidates,
+      addingFavoriteVariable: this.addingFavoriteVariable
     }, { inplace: false });
   }
 
   async _onRender(context, options) {
     await super._onRender(context, options);
+    const favoriteSearch = this.element.querySelector("[data-favorite-variable-search]");
+    favoriteSearch?.addEventListener("input", (event) => this.#filterFavoriteCandidates(event.currentTarget.value));
     if (!game.user.isGM) return;
     this.element.querySelectorAll("[data-macro-maker-drag]").forEach((entry) => {
       entry.addEventListener("dragstart", (event) => this.#dragStart(event));
@@ -333,6 +416,71 @@ export class MacroMakerManager extends HandlebarsApplicationMixin(ApplicationV2)
 
   static #onOpenPersistentManager() {
     return Sequencer.EffectManager.show();
+  }
+
+  static async #onAddFavoriteVariable(_event, target) {
+    const uuid = target.dataset.uuid;
+    const name = target.dataset.variableName;
+    if (!uuid || !name) {
+      this.addingFavoriteVariable = true;
+      return this.render();
+    }
+    const favorites = (game.settings?.get?.(MODULE_ID, "favoriteVariables") ?? [])
+      .map(favoriteReference)
+      .filter(Boolean);
+    if (favorites.some((entry) => entry.uuid === uuid && entry.name === name)) {
+      return ui.notifications.info("Esta variável já está nas suas variáveis frequentes.");
+    }
+    favorites.push({ uuid, name });
+    await game.settings.set(MODULE_ID, "favoriteVariables", favorites);
+    this.addingFavoriteVariable = false;
+    await this.render();
+  }
+
+  static async #onCancelFavoriteVariable() {
+    this.addingFavoriteVariable = false;
+    await this.render();
+  }
+
+  static async #onRemoveFavoriteVariable(_event, target) {
+    const uuid = target.dataset.uuid;
+    const name = target.dataset.variableName;
+    const favorites = (game.settings?.get?.(MODULE_ID, "favoriteVariables") ?? [])
+      .map(favoriteReference)
+      .filter((entry) => entry && !(entry.uuid === uuid && entry.name === name));
+    await game.settings.set(MODULE_ID, "favoriteVariables", favorites);
+    await this.render();
+  }
+
+  static async #onSaveFavoriteVariable(_event, target) {
+    const row = target.closest("[data-favorite-variable]");
+    const uuid = row?.dataset.uuid;
+    const name = row?.dataset.variableName;
+    if (!uuid || !name) return;
+    try {
+      const { macro, project } = await ProjectRepository.get(uuid);
+      if (!macro.isOwner) throw new Error("Você não pode editar este macro.");
+      if (!Object.prototype.hasOwnProperty.call(project.variables ?? {}, name)) {
+        throw new Error("Esta variável não existe mais neste macro.");
+      }
+      if (variableIsLocked(project, name)) throw new Error(`A variável ${name} foi bloqueada pelo GM.`);
+      const rawValue = row.querySelector("[data-favorite-variable-value]")?.value ?? "";
+      const type = row.querySelector("[data-favorite-variable-type]")?.value ?? "text";
+      project.variables[name] = parseVariableValue(rawValue, type);
+      await ProjectRepository.update(macro, project);
+      ui.notifications.info(`Variável ${name} atualizada em ${macro.name}.`);
+      await this.render();
+    } catch (error) {
+      console.error("Macro Maker | falha ao atualizar variável frequente", error);
+      ui.notifications.error(error.message ?? "Não foi possível atualizar a variável.");
+    }
+  }
+
+  #filterFavoriteCandidates(query) {
+    const normalized = String(query ?? "").trim().toLocaleLowerCase("pt-BR");
+    this.element.querySelectorAll("[data-favorite-variable-candidate]").forEach((entry) => {
+      entry.hidden = normalized.length > 0 && !entry.dataset.favoriteSearchText.includes(normalized);
+    });
   }
 
   #dragStart(event) {

@@ -29,6 +29,13 @@ Hooks.once("init", () => {
     type: Object,
     default: {}
   });
+  game.settings.register(MODULE_ID, "favoriteVariables", {
+    name: "Variáveis frequentes do Macro Maker",
+    scope: "client",
+    config: false,
+    type: Array,
+    default: []
+  });
   game.settings.register(MODULE_ID, "customTemplates", {
     name: "Templates personalizados do Macro Maker",
     scope: "world",

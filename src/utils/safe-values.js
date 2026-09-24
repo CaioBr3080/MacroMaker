@@ -51,10 +51,13 @@ export function escapeHtml(value) {
 }
 
 export function interpolate(value, variables, { escape = false } = {}) {
-  const output = String(value ?? "").replace(/\{\{\s*variables\.([A-Za-z_][A-Za-z0-9_.-]*)\s*\}\}/g, (_match, path) => {
+  const resolve = (_match, path) => {
     const resolved = getPath(variables, path, "");
     const formula = rollFormulaText(resolved);
     return formula ?? (resolved == null ? "" : String(resolved));
-  });
+  };
+  const output = String(value ?? "")
+    .replace(/\{\{\s*variables\.([A-Za-z_][A-Za-z0-9_.-]*)\s*\}\}/g, resolve)
+    .replace(/\{\s*@?([A-Za-z_][A-Za-z0-9_.-]*)\s*\}/g, resolve);
   return escape ? escapeHtml(output) : output;
 }

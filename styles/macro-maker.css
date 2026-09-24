@@ -1562,3 +1562,61 @@
   .macro-maker-menu-text-styles > section,
   .macro-maker-menu-column-style { grid-template-columns: 1fr; }
 }
+/* Variáveis fixadas no gerenciador: cada usuário guarda sua própria seleção. */
+.macro-maker-manager-favorites {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(180, 208, 255, 0.25);
+}
+
+.macro-maker-manager-favorites > header,
+.macro-maker-favorite-list > li > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.macro-maker-manager-favorites > header > div { display: grid; gap: 0.15rem; }
+.macro-maker-manager-favorites > header small { opacity: 0.67; font-size: 0.72rem; line-height: 1.2; }
+.macro-maker-manager-favorites > header > button { flex: 0 0 auto; }
+
+.macro-maker-favorite-picker {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(148, 194, 255, 0.35);
+  border-radius: 5px;
+  background: rgba(50, 94, 153, 0.13);
+}
+
+.macro-maker-favorite-picker label { display: grid; gap: 0.22rem; font-size: 0.78rem; }
+.macro-maker-favorite-picker ol,
+.macro-maker-favorite-list { display: grid; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
+.macro-maker-favorite-picker ol { max-height: 180px; overflow: auto; }
+.macro-maker-favorite-picker li button { width: 100%; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.macro-maker-favorite-picker li small,
+.macro-maker-favorite-list small { opacity: 0.68; }
+
+.macro-maker-favorite-list > li {
+  display: grid;
+  gap: 0.38rem;
+  padding: 0.5rem;
+  border: 1px solid rgba(180, 208, 255, 0.25);
+  border-left: 3px solid #e5ba57;
+  border-radius: 5px;
+  background: rgba(18, 28, 45, 0.55);
+}
+
+.macro-maker-favorite-list > li > header span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.macro-maker-favorite-list > li > header button { flex: 0 0 auto; color: #e5ba57; }
+.macro-maker-favorite-edit { display: grid; grid-template-columns: minmax(0, 1fr) minmax(82px, auto) auto; gap: 0.3rem; }
+.macro-maker-favorite-edit input { min-width: 0; }
+.macro-maker-favorite-empty { padding: 0.6rem; border: 1px dashed rgba(180, 208, 255, 0.28); border-radius: 5px; opacity: 0.7; font-size: 0.78rem; text-align: center; }
+
+@media (max-width: 420px) {
+  .macro-maker-favorite-edit { grid-template-columns: 1fr auto; }
+  .macro-maker-favorite-edit select { grid-column: 1 / -1; }
+}
