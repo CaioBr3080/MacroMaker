@@ -257,6 +257,7 @@ export class ProjectValidator {
     if (step.type === STEP_TYPES.REMOVE_PERSISTENT) this.#normalizePersistentRemoval(step, path, issues);
     if (step.type === STEP_TYPES.ASSET_PRESET) this.#normalizeAssetPreset(step, path, issues);
     if (step.type === STEP_TYPES.SUMMON) this.#normalizeSummon(step, path, issues);
+    if (step.type === STEP_TYPES.TOKEN_MAGIC) this.#normalizeTokenMagic(step, path, issues);
 
     const rollTypes = [STEP_TYPES.ATTACK, STEP_TYPES.TEST, STEP_TYPES.DAMAGE, STEP_TYPES.HEALING, STEP_TYPES.ROLL];
     if (!rollTypes.includes(step.type)) return;
@@ -494,6 +495,42 @@ export class ProjectValidator {
     }
   }
 
+
+  static #normalizeTokenMagic(step, path, issues) {
+    if (step.destination != null && !["source", "target", "template"].includes(step.destination)) {
+      issues.push({ path: path + ".destination", message: "Destino do Token Magic inválido." });
+    }
+    if (step.operation != null && !["add", "update", "remove"].includes(step.operation)) {
+      issues.push({ path: path + ".operation", message: "Operação do Token Magic inválida." });
+    }
+    for (const key of ["preset", "filters", "filterId"]) {
+      if (step[key] != null && typeof step[key] !== "string") {
+        issues.push({ path: path + "." + key, message: "A configuração do Token Magic precisa ser texto." });
+      }
+    }
+    if (step.replace != null && typeof step.replace !== "boolean") {
+      issues.push({ path: path + ".replace", message: "replace do Token Magic precisa ser booleano." });
+    }
+    const operation = step.operation ?? "add";
+    const preset = String(step.preset ?? "").trim();
+    const rawFilters = String(step.filters ?? "").trim();
+    if (operation === "remove" && !String(step.filterId ?? "").trim()) {
+      issues.push({ path: path + ".filterId", message: "Informe o Filter ID para remover o efeito Token Magic." });
+    }
+    if (operation !== "remove" && !preset && !rawFilters) {
+      issues.push({ path: path + ".preset", message: "Escolha um preset Token Magic ou informe os filtros em JSON." });
+    }
+    if (rawFilters) {
+      try {
+        const filters = JSON.parse(rawFilters);
+        if (!Array.isArray(filters) || filters.length === 0) {
+          issues.push({ path: path + ".filters", message: "Os filtros Token Magic precisam ser uma lista JSON não vazia." });
+        }
+      } catch (_error) {
+        issues.push({ path: path + ".filters", message: "Os filtros Token Magic precisam ser um JSON válido." });
+      }
+    }
+  }
   static #normalizeSummon(step, path, issues) {
     if (typeof step.actorId !== "string" || !step.actorId) {
       issues.push({ path: path + ".actorId", message: "Escolha o Ator que será invocado." });

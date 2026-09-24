@@ -45,6 +45,24 @@ function visageChoices(actorId, selectedId) {
   return [...unique.values()].sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { numeric: true }));
 }
 
+function tokenMagicPresets() {
+  const module = game.modules?.get?.("tokenmagic");
+  const api = module?.active ? (globalThis.TokenMagic ?? module.api) : null;
+  if (!api?.getPresets) return [];
+  try {
+    const entries = api.getPresets();
+    const values = entries instanceof Map
+      ? [...entries.keys()]
+      : Array.isArray(entries)
+        ? entries
+        : Object.keys(entries ?? {});
+    return [...new Set(values.map((entry) => typeof entry === "string" ? entry : entry?.name).filter(Boolean))]
+      .sort((left, right) => left.localeCompare(right, "pt-BR", { numeric: true }));
+  } catch (_error) {
+    return [];
+  }
+}
+
 function setPath(object, path, value) {
   const keys = path.split(".");
   const last = keys.pop();
@@ -231,6 +249,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         isRemovePersistent: step.type === "removePersistent",
         isAssetPreset: step.type === "assetPreset",
         isSummon: step.type === "summon",
+        isTokenMagic: step.type === "tokenMagic",
         visageChoices: visageChoices(step.actorId, step.visageId)
       })),
       hasMacro: Boolean(this.macroUuid),
@@ -240,6 +259,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       summonActors: summonActors(),
       massEditActive: Boolean(game.modules?.get?.("multi-token-edit")?.active),
       visageActive: Boolean(game.modules?.get?.("visage")?.active),
+      tokenMagicActive: Boolean(game.modules?.get?.("tokenmagic")?.active),
+      tokenMagicPresets: tokenMagicPresets(),
       migrationPending: this.migrationPending,
       folders: folderChoices(game.folders ?? []),
       users: (game.users ?? []).map((user) => ({ id: user.id, name: user.name, active: user.active })),

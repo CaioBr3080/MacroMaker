@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.17 - 2026-09-24
+
+- Nova etapa Efeito Token Magic FX: aplica presets ou uma lista JSON de filtros ao executante, alvo ou template medido.
+- A etapa permite aplicar, atualizar e remover filtros por Filter ID, com substituição opcional dos filtros existentes.
+- Token Magic FX é uma integração opcional recomendada: a configuração é preservada sem o módulo, e a execução informa claramente quando ele não estiver ativo.
 ## 0.9.16 - 2026-09-24
 
 - Corrigida a orientação de animações sem esticar executadas por jogadores: o Sequencer agora recebe as coordenadas do centro do destino, em vez da referência ao Token que pode exigir permissão adicional.

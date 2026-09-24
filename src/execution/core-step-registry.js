@@ -1,6 +1,7 @@
 import { STEP_TYPES } from "../constants.js";
 import { SequencerAdapter } from "../integrations/sequencer-adapter.js";
 import { MassEditAdapter } from "../integrations/mass-edit-adapter.js";
+import { TokenMagicAdapter } from "../integrations/token-magic-adapter.js";
 import { SummonExecutor } from "./executors/summon-executor.js";
 import { MenuExecutor } from "./executors/menu-executor.js";
 import { RollExecutor } from "./executors/roll-executor.js";
@@ -166,6 +167,22 @@ export function createCoreStepRegistry() {
     },
     schema: {},
     execute: (step, context) => MassEditAdapter.spawnPreset(step, context)
+  });
+
+  registry.register(STEP_TYPES.TOKEN_MAGIC, {
+    label: "Efeito Token Magic FX",
+    icon: "fas fa-wand-sparkles",
+    defaults: {
+      label: "Efeito Token Magic",
+      destination: "target",
+      operation: "add",
+      preset: "",
+      filters: "",
+      filterId: "",
+      replace: false
+    },
+    schema: {},
+    execute: (step, context) => TokenMagicAdapter.apply(step, context)
   });
 
   registry.register(STEP_TYPES.SUMMON, {

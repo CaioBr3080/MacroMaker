@@ -226,3 +226,22 @@ test("valida as etapas opcionais de asset e invocação", () => {
     ]
   }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
 });
+test("valida a etapa opcional Token Magic FX", () => {
+  const project = ProjectValidator.normalize({
+    name: "Efeito",
+    variables: {},
+    steps: [{
+      type: "tokenMagic",
+      destination: "target",
+      operation: "add",
+      filters: '[{"filterType":"glow","filterId":"aura","color":65280}]'
+    }]
+  }, { stepRegistry: createCoreStepRegistry() });
+  assert.equal(project.steps[0].type, "tokenMagic");
+
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Efeito",
+    variables: {},
+    steps: [{ type: "tokenMagic", destination: "location", operation: "remove" }]
+  }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
+});

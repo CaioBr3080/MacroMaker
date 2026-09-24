@@ -4,7 +4,7 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.16` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.17` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - uma aba própria **Macro Maker** na sidebar e um botão de fallback no diretório de Macros;
 - árvore de pastas e subpastas recolhível na própria aba Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
@@ -15,7 +15,7 @@ Esta versão `0.9.16` entrega a base do MVP até importação, compartilhamento 
 - comando compilado pequeno, chamando `game.macroMaker.executeMacro(uuid)`;
 - alvos marcados com `T`, seleção interativa de tokens, ponto, círculo, cone, linha e template medido;
 - filtros de aliado/inimigo, mínimo, máximo, alcance e visualização do alcance no canvas;
-- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit e invocação de token;
+- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit, invocação de token e efeitos do Token Magic FX;
 - validação e normalização centralizadas antes de salvar ou executar;
 - registro público e extensível de tipos de etapa em `game.macroMaker.steps`;
 - adição, duplicação, exclusão, ativação e reordenação de etapas;
@@ -44,7 +44,7 @@ Etapas aninhadas aparecem nas faixas visuais da ramificação e continuam dispon
 ## Instalação para teste
 
 1. Extraia a pasta `macro-maker` dentro de `FoundryVTT/Data/modules/`.
-2. Ative **Sequencer** e depois **Macro Maker** no mundo. Para assets, ative também **Baileywiki Mass Edit**; para variações de invocação, ative **Visage**.
+2. Ative **Sequencer** e depois **Macro Maker** no mundo. Para assets, ative também **Baileywiki Mass Edit**; para variações de invocação, ative **Visage**; para filtros visuais, ative **Token Magic FX**.
 3. Abra a aba **Macro Maker** na sidebar. Se ela não estiver disponível, use o botão **Macro Maker** no diretório de Macros.
 4. Crie um projeto, edite o JSON e salve.
 5. Selecione o token executante, marque um alvo com `T` e execute.

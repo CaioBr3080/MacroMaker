@@ -333,6 +333,28 @@
                   </fieldset>
                 {{/if}}
 
+                {{#if isTokenMagic}}
+                  <fieldset class="macro-maker-integration-settings full">
+                    <legend><i class="fas fa-wand-sparkles"></i> Efeito Token Magic FX</legend>
+                    {{#unless ../tokenMagicActive}}<p class="macro-maker-integration-warning">Ative Token Magic FX para executar este efeito. A configuração continua salva no projeto.</p>{{/unless}}
+                    <label>Aplicar em
+                      <select data-step-index="{{index}}" data-step-path="destination" data-value="{{destination}}"><option value="target">Alvo</option><option value="source">Executante</option><option value="template">Template</option></select>
+                    </label>
+                    <label>Ação
+                      <select data-step-index="{{index}}" data-step-path="operation" data-value="{{operation}}"><option value="add">Aplicar filtro</option><option value="update">Atualizar filtro</option><option value="remove">Remover filtro</option></select>
+                    </label>
+                    <label class="full">Preset Token Magic
+                      <input type="text" list="token-magic-presets-{{index}}" value="{{preset}}" placeholder="Ex.: glow, fire ou um preset próprio" data-step-index="{{index}}" data-step-path="preset">
+                      <datalist id="token-magic-presets-{{index}}">{{#each ../tokenMagicPresets}}<option value="{{this}}">{{this}}</option>{{/each}}</datalist>
+                    </label>
+                    <label>Filter ID <input type="text" value="{{filterId}}" placeholder="Obrigatório para remover" data-step-index="{{index}}" data-step-path="filterId"></label>
+                    <label><input type="checkbox" {{#if replace}}checked{{/if}} data-step-index="{{index}}" data-step-path="replace" data-value-type="boolean"> Substituir filtros Token Magic existentes</label>
+                    <label class="full">Filtros avançados (JSON)
+                      <textarea rows="7" placeholder='[{"filterType":"glow","filterId":"aura","color":65280,"outerStrength":4}]' data-step-index="{{index}}" data-step-path="filters">{{filters}}</textarea>
+                    </label>
+                    <p class="full macro-maker-help-note">Use um Preset ou a lista JSON de filtros. O preset tem prioridade. Para atualizar, envie a lista JSON com o mesmo Filter ID; para remover, preencha somente o Filter ID.</p>
+                  </fieldset>
+                {{/if}}
                 {{#if isSummon}}
                   <fieldset class="macro-maker-integration-settings full">
                     <legend><i class="fas fa-dragon"></i> Invocar token</legend>
