@@ -15,7 +15,7 @@ Esta versão `0.9.30` entrega a base do MVP até importação, compartilhamento 
 - comando compilado pequeno, chamando `game.macroMaker.executeMacro(uuid)`;
 - alvos marcados com `T`, seleção interativa de tokens com busca digitável por nome, ponto, círculo, cone, linha e template medido;
 - filtros de aliado/inimigo, mínimo, máximo, alcance e visualização do alcance no canvas;
-- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit, invocação de token com busca por nome, efeitos do Token Magic FX, aplicação de Visage global ou local e modificação segura do token da cena;
+- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit, invocação de token com busca por nome, Mover token (teleporte ou movimento animado), efeitos do Token Magic FX, aplicação de Visage global ou local e modificação segura do token da cena;
 - validação e normalização centralizadas antes de salvar ou executar;
 - registro público e extensível de tipos de etapa em `game.macroMaker.steps`;
 - adição, duplicação, exclusão, ativação e reordenação de etapas;
@@ -83,6 +83,7 @@ macro-maker/
 - **Menus:** cada opção aceita rótulo, valor, descrição, imagem, ícone e coluna (1–6). Cada coluna pode ter título e padronizar visualmente os rótulos como original, MAIÚSCULAS, minúsculas ou Iniciais Maiúsculas, sem mudar o valor salvo. O menu grava a escolha na variável de saída; em uma Ramificação, use a condição Opção de menu com essa variável e o valor escolhido.
 - **Nome no chat:** em Formatação da mensagem, use Complemento após o nome para manter o alias original e anexar texto livre. `Aldine destrói com sua lâmina` resulta no nome original seguido de ` destrói com sua lâmina`; o nome e o complemento têm controles próprios de fonte, tamanho, cor, alinhamento e estilo. Espaços e quebras de linha são preservados.
 - **Alvos e áreas:** a seleção no canvas não troca o token executante. Círculo, cone e linha mostram uma prévia antes do clique; ao marcar a lista de alvos na etapa de rolagem, o chat informa quantidade e nomes dos tokens atingidos. Desmarcar alvos ao terminar é opcional.
+- **Mover token:** escolha o executante, alvo principal ou todos os alvos; mova para executante, alvo ou ponto escolhido. Teleporte altera a posição imediatamente; Movimento animado usa a animação nativa do Foundry. Para um ponto livre, configure o targeting do projeto como **Ponto no canvas**. Jogadores movem tokens editáveis diretamente; nos demais, o GM ativo valida e executa a solicitação.
 - **Etapas:** use a seta de recolher para deixar só o cabeçalho. Edite o número para mudar a posição; Enter ou sair do campo confirma. A lista lateral permite navegar pela sequência sem expandir todos os cartões.
 - **Distâncias:** os campos cinza não se aplicam ao método selecionado. Seus valores são mantidos para quando você voltar àquele método. Passe o mouse sobre `?` para consultar exemplos e unidades.
 - **Imagens e cores:** o botão de pasta ao lado da imagem do Macro abre o seletor do Foundry. Cores aceitam o seletor RGB e valores `#RRGGBB`.

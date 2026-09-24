@@ -337,6 +337,23 @@
                   </fieldset>
                 {{/if}}
 
+                {{#if isMoveToken}}
+                  <fieldset class="macro-maker-token-mutation-settings full">
+                    <legend><i class="fas fa-person-walking-arrow-right"></i> Mover token</legend>
+                    <p class="full macro-maker-help-note">Move somente o token da cena, sem alterar o protótipo do Ator. Para usar um ponto, configure a seleção de alvos do projeto como <strong>Ponto no canvas</strong>.</p>
+                    <label>Mover
+                      <select data-step-index="{{index}}" data-step-path="scope" data-value="{{scope}}"><option value="target">Alvo principal</option><option value="targets">Todos os alvos</option><option value="source">Executante</option></select>
+                    </label>
+                    <label>Para
+                      <select data-step-index="{{index}}" data-step-path="destination" data-value="{{destination}}"><option value="location">Ponto escolhido</option><option value="target">Alvo principal</option><option value="source">Executante</option></select>
+                    </label>
+                    <label>Modo
+                      <select data-step-index="{{index}}" data-step-path="mode" data-value="{{mode}}"><option value="teleport">Teleportar instantaneamente</option><option value="move">Mover com animação do Foundry</option></select>
+                    </label>
+                    <label><input type="checkbox" {{#if snapToGrid}}checked{{/if}} data-step-index="{{index}}" data-step-path="snapToGrid" data-value-type="boolean"> Ajustar à grade</label>
+                    <p class="full macro-maker-help-note">Exemplo: para teletransportar o executante até um ponto, selecione <em>Executante</em>, <em>Ponto escolhido</em> e configure o projeto para pedir um ponto no canvas.</p>
+                  </fieldset>
+                {{/if}}
                 {{#if isModifyToken}}
                   <fieldset class="macro-maker-token-mutation-settings full">
                     <legend><i class="fas fa-user-gear"></i> Modificar token da cena</legend>

@@ -26,6 +26,7 @@ export const STEP_TYPES = Object.freeze({
   SUMMON: "summon",
   TOKEN_MAGIC: "tokenMagic",
   MODIFY_TOKEN: "modifyToken",
+  MOVE_TOKEN: "moveToken",
   APPLY_VISAGE: "applyVisage"
 });
 

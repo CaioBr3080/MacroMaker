@@ -339,3 +339,19 @@ test("valida a etapa Pedir valor e seus modos de salvamento", () => {
     steps: [{ type: "promptVariable", variable: "FOR", valueType: "date", saveMode: "world" }]
   }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
 });
+test("valida a etapa Mover token", () => {
+  const project = ProjectValidator.normalize({
+    name: "Avanço",
+    targeting: { source: "controlled", mode: "point" },
+    steps: [{ type: "moveToken", scope: "source", destination: "location", mode: "move", snapToGrid: false }]
+  }, { stepRegistry: createCoreStepRegistry() });
+  assert.deepEqual(project.steps[0], {
+    type: "moveToken", scope: "source", destination: "location", mode: "move", snapToGrid: false, id: project.steps[0].id
+  });
+
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Inválido",
+    targeting: { source: "none", mode: "none" },
+    steps: [{ type: "moveToken", scope: "other", destination: "elsewhere", mode: "slide" }]
+  }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
+});

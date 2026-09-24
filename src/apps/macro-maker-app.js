@@ -307,6 +307,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         isSummon: step.type === "summon",
         isTokenMagic: step.type === "tokenMagic",
         isModifyToken: step.type === "modifyToken",
+        isMoveToken: step.type === "moveToken",
         isApplyVisage: step.type === "applyVisage",
         isVisageGlobal: step.mode !== "local",
         isVisageLocal: step.mode === "local",

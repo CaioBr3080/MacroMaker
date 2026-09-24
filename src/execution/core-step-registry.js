@@ -10,6 +10,7 @@ import { RuntimeStepExecutor } from "./executors/runtime-step-executor.js";
 import { VariableExecutor } from "./executors/variable-executor.js";
 import { PromptVariableExecutor } from "./executors/prompt-variable-executor.js";
 import { TokenUpdateExecutor } from "./executors/token-update-executor.js";
+import { MoveTokenExecutor } from "./executors/move-token-executor.js";
 import { VisageExecutor } from "./executors/visage-executor.js";
 import { StepRegistry } from "./step-registry.js";
 
@@ -198,6 +199,19 @@ export function createCoreStepRegistry() {
     },
     schema: {},
     execute: (step, context) => TokenUpdateExecutor.execute(step, context)
+  });
+  registry.register(STEP_TYPES.MOVE_TOKEN, {
+    label: "Mover token",
+    icon: "fas fa-person-walking-arrow-right",
+    defaults: {
+      label: "Mover token",
+      scope: "target",
+      destination: "location",
+      mode: "teleport",
+      snapToGrid: true
+    },
+    schema: {},
+    execute: (step, context) => MoveTokenExecutor.execute(step, context)
   });
   registry.register(STEP_TYPES.TOKEN_MAGIC, {
     label: "Efeito Token Magic FX",

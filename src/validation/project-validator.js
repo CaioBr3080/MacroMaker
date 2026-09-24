@@ -261,6 +261,7 @@ export class ProjectValidator {
     if (step.type === STEP_TYPES.APPLY_VISAGE) this.#normalizeApplyVisage(step, path, issues);
     if (step.type === STEP_TYPES.TOKEN_MAGIC) this.#normalizeTokenMagic(step, path, issues);
     if (step.type === STEP_TYPES.MODIFY_TOKEN) this.#normalizeTokenMutation(step, path, issues);
+    if (step.type === STEP_TYPES.MOVE_TOKEN) this.#normalizeMoveToken(step, path, issues);
 
     const rollTypes = [STEP_TYPES.ATTACK, STEP_TYPES.TEST, STEP_TYPES.DAMAGE, STEP_TYPES.HEALING, STEP_TYPES.ROLL];
     if (!rollTypes.includes(step.type)) return;
@@ -594,6 +595,24 @@ export class ProjectValidator {
       }
     };
     visit(step.changes);
+  }
+  static #normalizeMoveToken(step, path, issues) {
+    step.scope ??= "target";
+    step.destination ??= "location";
+    step.mode ??= "teleport";
+    step.snapToGrid ??= true;
+    if (!["source", "target", "targets"].includes(step.scope)) {
+      issues.push({ path: `${path}.scope`, message: "O escopo do movimento deve ser executante, alvo ou todos os alvos." });
+    }
+    if (!["source", "target", "location"].includes(step.destination)) {
+      issues.push({ path: `${path}.destination`, message: "O destino do movimento deve ser executante, alvo ou ponto escolhido." });
+    }
+    if (!["teleport", "move"].includes(step.mode)) {
+      issues.push({ path: `${path}.mode`, message: "O modo do movimento deve ser teleporte ou movimento animado." });
+    }
+    if (typeof step.snapToGrid !== "boolean") {
+      issues.push({ path: `${path}.snapToGrid`, message: "A opção de ajustar à grade precisa ser verdadeiro ou falso." });
+    }
   }
   static #normalizeTokenMagic(step, path, issues) {
     if (step.destination != null && !["source", "target", "template"].includes(step.destination)) {
