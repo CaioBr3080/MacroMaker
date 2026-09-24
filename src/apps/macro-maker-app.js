@@ -7,6 +7,7 @@ import { createId } from "../utils/ids.js";
 import { FIELD_HELP, folderChoices, targetingFieldActive, moveStepTo, validateVariableName, parseVariableValue } from "./editor-controls.js";
 import { MESSAGE_FONTS, messageStyleCSS } from "../utils/message-style.js";
 import { interpolate } from "../utils/safe-values.js";
+import { rollFormulaText } from "../utils/roll-formula.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const DELETE_VALUE = Symbol("delete-value");
@@ -179,10 +180,15 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     return foundry.utils.mergeObject(context, {
       project: this.project,
-      variables: Object.entries(this.project.variables ?? {}).map(([name, value], index) => ({
-        name, index, value: typeof value === "object" ? JSON.stringify(value) : String(value),
-        valueType: value !== null && ["number", "boolean", "string"].includes(typeof value) ? typeof value : "json"
-      })),
+      variables: Object.entries(this.project.variables ?? {}).map(([name, value], index) => {
+        const formula = rollFormulaText(value);
+        return {
+          name,
+          index,
+          value: formula ?? (typeof value === "object" ? JSON.stringify(value) : String(value)),
+          valueType: formula != null ? "formula" : (value !== null && ["number", "boolean", "string"].includes(typeof value) ? typeof value : "json")
+        };
+      }),
       messageFonts: Object.entries(MESSAGE_FONTS).map(([value, label]) => ({ value, label })),
       steps: (this.project.steps ?? []).map((step, index, steps) => ({
         ...step,

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.15 - 2026-09-24
+
+- Variáveis do projeto e a etapa Definir variável agora oferecem o tipo Fórmula de rolagem. Exemplos como DANO = 2d6 + FOR e ATAQUE = 1d20 + 5 são expandidos na própria rolagem do Foundry.
+- Fórmulas nomeadas podem ser usadas como DANO ou @DANO nos campos de ataque, dano, cura e rolagem genérica; referências numéricas aninhadas também são resolvidas.
+
 ## 0.9.14 - 2026-09-24
 
 - Corrigido o comportamento dos modos do Sequencer: escala base e escala ao objeto valem somente sem esticar; Esticar sempre e Esticar somente após distância ignoram ambas as escalas.

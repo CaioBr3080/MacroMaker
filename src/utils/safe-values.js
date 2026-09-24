@@ -1,3 +1,4 @@
+import { rollFormulaText } from "./roll-formula.js";
 const UNSAFE_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 export const VARIABLE_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_.-]*$/;
 
@@ -52,7 +53,8 @@ export function escapeHtml(value) {
 export function interpolate(value, variables, { escape = false } = {}) {
   const output = String(value ?? "").replace(/\{\{\s*variables\.([A-Za-z_][A-Za-z0-9_.-]*)\s*\}\}/g, (_match, path) => {
     const resolved = getPath(variables, path, "");
-    return resolved == null ? "" : String(resolved);
+    const formula = rollFormulaText(resolved);
+    return formula ?? (resolved == null ? "" : String(resolved));
   });
   return escape ? escapeHtml(output) : output;
 }

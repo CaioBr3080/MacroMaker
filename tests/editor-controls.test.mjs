@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { folderChoices, targetingFieldActive, moveStepTo, validateVariableName, parseVariableValue } from "../src/apps/editor-controls.js";
 import { resolveFormulaVariables } from "../src/utils/formula-variables.js";
+import { createRollFormulaVariable } from "../src/utils/roll-formula.js";
 import { messageFlavor, messageStyleCSS } from "../src/utils/message-style.js";
 
 test("campos de geometria acompanham o método sem modificar os valores", () => {
@@ -66,4 +67,16 @@ test("formatação usa apenas estilos permitidos e escapa o conteúdo formatado"
   assert.doesNotMatch(html, /<img/);
   assert.equal(messageStyleCSS({ font: "x;position:fixed", color: "red;display:none", size: 999, bold: "true" }), "white-space:pre-wrap");
   assert.equal(messageFlavor({ flavor: "<b>Legado</b>" }, ""), "<b>Legado</b>");
+});
+
+test("fórmulas guardadas em variáveis são expandidas na rolagem do Foundry", () => {
+  const variables = {
+    FOR: 4,
+    ATAQUE: createRollFormulaVariable("1d20 + FOR"),
+    DANO: createRollFormulaVariable("2d6 + @FOR")
+  };
+  assert.deepEqual(parseVariableValue("1d8 + FOR", "formula"), createRollFormulaVariable("1d8 + FOR"));
+  assert.equal(resolveFormulaVariables("ATAQUE + DANO", variables), "(1d20 + @FOR) + (2d6 + @FOR)");
+  assert.equal(resolveFormulaVariables("@DANO", variables), "(2d6 + @FOR)");
+  assert.throws(() => resolveFormulaVariables("TEXTO", { TEXTO: "não numérica" }), /numérica ou uma fórmula/);
 });

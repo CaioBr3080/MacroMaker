@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { RollExecutor } from "../src/execution/executors/roll-executor.js";
 import { messageFlavor, speakerConfig } from "../src/utils/message-style.js";
+import { createRollFormulaVariable } from "../src/utils/roll-formula.js";
 
 class MockRoll {
   static messages = [];
@@ -159,4 +160,28 @@ test("anexa os alvos resolvidos depois da mensagem personalizada", async (t) => 
   assert.match(MockRoll.messages[0].data.flavor, /Alvos atingidos \(2\):/);
   assert.match(MockRoll.messages[0].data.flavor, /Goblin &lt;1&gt;/);
   assert.match(MockRoll.messages[0].data.flavor, /Orc/);
+});
+test("variáveis de fórmula funcionam nos campos de acerto e dano", async (t) => {
+  globalThis.CONFIG = { Dice: { rolls: [MockRoll] } };
+  globalThis.ChatMessage = { getSpeaker: () => ({}) };
+  MockRoll.messages = [];
+  MockRoll.evaluations = [];
+  t.after(() => {
+    delete globalThis.CONFIG;
+    delete globalThis.ChatMessage;
+  });
+  const execution = context({
+    variables: {
+      FOR: 4,
+      ATAQUE: createRollFormulaVariable("1d20 + FOR"),
+      DANO: createRollFormulaVariable("2d6 + @FOR")
+    }
+  });
+
+  await RollExecutor.attack({ formula: "ATAQUE" }, execution);
+  const damage = await RollExecutor.damage({ formula: "@DANO", damageType: "corte" }, execution);
+
+  assert.deepEqual(MockRoll.evaluations, ["(1d20 + @FOR)", "(2d6 + @FOR)"]);
+  assert.equal(execution.attack.formula, "(1d20 + @FOR)");
+  assert.equal(damage.parts[0].formula, "(2d6 + @FOR)");
 });

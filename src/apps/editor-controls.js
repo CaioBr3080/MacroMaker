@@ -1,3 +1,5 @@
+import { createRollFormulaVariable } from "../utils/roll-formula.js";
+
 export function targetingFieldActive(field, targeting = {}) {
   const { mode, source } = targeting;
   if (field === "radius") return ["circle", "cone"].includes(mode);
@@ -47,6 +49,7 @@ export function parseVariableValue(value, type) {
     if (!String(value).trim() || !Number.isFinite(Number(value))) throw new Error("Informe um número válido para a variável.");
     return Number(value);
   }
+  if (type === "formula") return createRollFormulaVariable(value);
   if (type === "boolean") {
     if (!["true", "false"].includes(value)) throw new Error("Use true ou false para booleanos.");
     return value === "true";
@@ -89,7 +92,7 @@ export const FIELD_HELP = {
   defaultValue: "Valor atribuído à variável quando o menu é cancelado com a opção Usar padrão.",
   image: "Caminho de imagem no servidor Foundry para ilustrar o menu ou uma opção.",
   operation: "Definir substitui o valor. Somar, subtrair e multiplicar calculam a partir do valor atual. Alternar inverte true/false.",
-  valueType: "Número para cálculos, texto para rótulos, booleano para true/false e lista para múltiplos valores.",
+  valueType: "Número para cálculos, texto para rótulos, booleano para true/false, lista para múltiplos valores ou Fórmula de rolagem para uma expressão aceita pelo Foundry.",
   value: "Valor da condição, opção ou variável. Na etapa Definir variável, o tipo escolhido determina a conversão.",
   operator: "Comparação da condição: igual, diferente, maior, menor ou contém. Grupos combinam condições com AND, OR ou NOT.",
   key: "Nome da variável ou chave consultada pela condição. Ex.: FOR ou damage.total.",
@@ -108,7 +111,7 @@ export const FIELD_HELP = {
   minTargets: "Quantidade mínima de alvos. Em Escolher ponto, o ponto conta como uma seleção.",
   maxTargets: "Quantidade máxima permitida de alvos (não é o raio da área).",
   filter: "Todos, aliados ou inimigos. A relação é comparada com o token de origem.",
-  formula: "Ex.: 1d20 + FOR ou 2d6 + @FOR. Cadastre FOR nas Variáveis do projeto. Componentes na mesma etapa são somados em uma rolagem.",
+  formula: "Ex.: 1d20 + FOR, 2d6 + @FOR ou DANO. Cadastre FOR numérico ou DANO como Fórmula de rolagem nas Variáveis do projeto. Componentes na mesma etapa são somados em uma rolagem.",
   criticalFormula: "Fórmula usada quando houver crítico. Vazio mantém a fórmula normal e aplica o multiplicador, se informado.",
   criticalMultiplier: "Multiplica o resultado do componente no crítico; 2 dobra o total. Para dobrar apenas os dados, use uma fórmula crítica como 2d6 + FOR.",
   criticalThreshold: "Resultado natural do d20 a partir do qual a rolagem é crítica. Ex.: 20 ou 19.",

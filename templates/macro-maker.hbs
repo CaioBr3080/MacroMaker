@@ -166,13 +166,13 @@
 
       <fieldset class="macro-maker-project-fields">
         <legend>Variáveis do projeto</legend>
-        <p class="full">Defina <strong>FOR = 4</strong> e use <code>1d20 + FOR</code> ou <code>1d20 + @FOR</code> nas fórmulas. Alterar o valor aqui atualiza todas as fórmulas que o usam. Renomear ou excluir exige revisar as referências.</p>
+        <p class="full">Defina <strong>FOR = 4</strong> e use <code>1d20 + FOR</code> ou <code>1d20 + @FOR</code>. Para reutilizar dados, crie <strong>DANO</strong> como <em>Fórmula de rolagem</em> com <code>2d6 + FOR</code> e use <code>DANO</code> ou <code>@DANO</code> nos campos de ataque, dano, cura e rolagem. Alterar o valor aqui atualiza todas as fórmulas que o usam.</p>
         <div class="macro-maker-variables full">
           {{#each variables}}
             <div class="macro-maker-variable">
               <label>Nome <input type="text" value="{{name}}" data-variable-name data-variable-index="{{index}}" title="Ex.: FOR ou BONUS. Letras, números e _, sem espaços."></label>
-              <label>Tipo <select data-variable-type data-variable-index="{{index}}" data-value="{{valueType}}"><option value="number">Número</option><option value="string">Texto</option><option value="boolean">Booleano</option><option value="json">Objeto/lista (JSON)</option></select></label>
-              <label>Valor <input type="text" value="{{value}}" data-variable-value data-variable-index="{{index}}" title="Número: 4. Booleano: true ou false. JSON: [1,2] ou um objeto."></label>
+              <label>Tipo <select data-variable-type data-variable-index="{{index}}" data-value="{{valueType}}"><option value="number">Número</option><option value="formula">Fórmula de rolagem</option><option value="string">Texto</option><option value="boolean">Booleano</option><option value="json">Objeto/lista (JSON)</option></select></label>
+              <label>Valor <input type="text" value="{{value}}" data-variable-value data-variable-index="{{index}}" title="Número: 4. Fórmula: 2d6 + FOR ou 1d20 + 5. Booleano: true ou false. JSON: [1,2] ou um objeto."></label>
               <button type="button" data-action="delete-variable" data-index="{{index}}" title="Excluir variável"><i class="fas fa-trash"></i></button>
             </div>
           {{else}}<p>Você ainda não definiu variáveis.</p>{{/each}}
@@ -533,7 +533,7 @@
                 {{#if isSetVariable}}
                   <label>Variável <input type="text" value="{{variable}}" data-step-index="{{index}}" data-step-path="variable"></label>
                   <label>Operação <select data-step-index="{{index}}" data-step-path="operation" data-value="{{operation}}"><option value="set">Definir</option><option value="add">Somar</option><option value="subtract">Subtrair</option><option value="multiply">Multiplicar</option><option value="append">Adicionar à lista</option><option value="toggle">Alternar booleano</option></select></label>
-                  <label>Tipo <select data-step-index="{{index}}" data-step-path="valueType" data-value="{{valueType}}"><option value="auto">Automático</option><option value="string">Texto</option><option value="number">Número</option><option value="boolean">Booleano</option><option value="array">Lista</option></select></label>
+                  <label>Tipo <select data-step-index="{{index}}" data-step-path="valueType" data-value="{{valueType}}"><option value="auto">Automático</option><option value="string">Texto</option><option value="number">Número</option><option value="boolean">Booleano</option><option value="array">Lista</option><option value="formula">Fórmula de rolagem</option></select></label>
                   <label>Valor <input type="text" value="{{value}}" data-step-index="{{index}}" data-step-path="value"></label>
                 {{/if}}
 

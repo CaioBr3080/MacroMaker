@@ -419,7 +419,7 @@ export class ProjectValidator {
     if (!["set", "add", "subtract", "multiply", "append", "toggle"].includes(step.operation ?? "set")) {
       issues.push({ path: `${path}.operation`, message: "Transformação de variável inválida." });
     }
-    if (!["auto", "string", "number", "boolean", "array"].includes(step.valueType ?? "auto")) {
+    if (!["auto", "string", "number", "boolean", "array", "formula"].includes(step.valueType ?? "auto")) {
       issues.push({ path: `${path}.valueType`, message: "Tipo de variável inválido." });
     }
   }
