@@ -1,4 +1,5 @@
 import { escapeHtml, interpolate, setPath } from "../../utils/safe-values.js";
+import { messageStyleCSS } from "../../utils/message-style.js";
 
 function selectedIndexes(root) {
   if (root?.querySelectorAll) {
@@ -23,6 +24,19 @@ function transformOptionText(value, transform) {
   return text;
 }
 
+function styledText(tag, className, value, style, variables, extraCSS = "") {
+  const text = escapeHtml(interpolate(value ?? "", variables));
+  if (!text) return "";
+  return "<" + tag + " class=\"" + className + "\" style=\"" + extraCSS + messageStyleCSS(style) + "\">" + text + "</" + tag + ">";
+}
+
+function dialogWidth(columns) {
+  const desired = 360 + (columns * 270);
+  const viewport = Number(globalThis.window?.innerWidth);
+  const maximum = Number.isFinite(viewport) ? Math.max(440, Math.floor(viewport * 0.9)) : 1400;
+  return Math.min(maximum, Math.max(560, desired));
+}
+
 export class MenuExecutor {
   static async execute(step, context) {
     const columns = Math.min(6, Math.max(1, Number(step.columns ?? 1)));
@@ -41,16 +55,20 @@ export class MenuExecutor {
       };
     });
     if (!options.length) throw new Error("A etapa de menu não possui opções.");
+
     const columnHeaders = Array.from({ length: columns }, (_value, index) => {
       const number = index + 1;
+      const settings = step.columnSettings?.[number] ?? {};
       return {
         number,
-        title: escapeHtml(interpolate(step.columnSettings?.[number]?.title ?? "", context.variables))
+        title: settings.title ?? "",
+        titleStyle: settings.titleStyle ?? {}
       };
     });
     const columnHeaderMarkup = columnHeaders.some((column) => column.title)
-      ? '<div class="macro-maker-menu-column-titles" style="--macro-maker-menu-columns:' + columns + '">'
-        + columnHeaders.map((column) => '<strong style="grid-column:' + column.number + '">' + column.title + "</strong>").join("")
+      ? '<div class="macro-maker-menu-column-titles">'
+        + columnHeaders.map((column) => styledText("strong", "macro-maker-menu-column-title", column.title, column.titleStyle, context.variables, "grid-column:" + column.number + ";"))
+          .join("")
         + "</div>"
       : "";
 
@@ -59,23 +77,30 @@ export class MenuExecutor {
       ?.filter?.((value) => value !== undefined) ?? []);
     if (!multiple && defaults.size === 0) defaults.add(options[0].value);
     const inputType = multiple ? "checkbox" : "radio";
+    const gridStyle = "--macro-maker-menu-columns:" + columns + ";--macro-maker-menu-min-width:" + (columns * 250) + "px";
+    const title = step.title ?? step.label ?? context.project.name;
     const content = `
       <form class="macro-maker-menu">
-        ${step.description ? `<p>${interpolate(step.description, context.variables, { escape: true })}</p>` : ""}
+        <header class="macro-maker-menu-heading">
+          ${styledText("h2", "macro-maker-menu-title", title, step.titleStyle ?? {}, context.variables)}
+          ${styledText("p", "macro-maker-menu-description", step.description, step.descriptionStyle ?? {}, context.variables)}
+        </header>
         ${step.image ? `<img class="macro-maker-menu-image" src="${escapeHtml(step.image)}" alt="">` : ""}
-        ${columnHeaderMarkup}
-        <div class="macro-maker-menu-options" style="--macro-maker-menu-columns:${columns}">
-          ${options.map((option) => `<label class="macro-maker-menu-card"${option.column ? ` style="grid-column:${option.column}"` : ""}>
-            <input type="${inputType}" name="choice" value="${option.index}" ${defaults.has(option.value) ? "checked" : ""}>
-            ${option.image ? `<img src="${option.image}" alt="">` : ""}
-            <strong>${option.icon ? `<i class="${option.icon}"></i> ` : ""}${option.label}</strong>
-            ${option.description ? `<small>${option.description}</small>` : ""}
-          </label>`).join("")}
+        <div class="macro-maker-menu-grid-scroll" style="${gridStyle}">
+          ${columnHeaderMarkup}
+          <div class="macro-maker-menu-options">
+            ${options.map((option) => `<label class="macro-maker-menu-card"${option.column ? ` style="grid-column:${option.column}"` : ""}>
+              <input type="${inputType}" name="choice" value="${option.index}" ${defaults.has(option.value) ? "checked" : ""}>
+              ${option.image ? `<img src="${option.image}" alt="">` : ""}
+              <strong>${option.icon ? `<i class="${option.icon}"></i> ` : ""}${option.label}</strong>
+              ${option.description ? `<small>${option.description}</small>` : ""}
+            </label>`).join("")}
+          </div>
         </div>
       </form>`;
 
     const indexes = await Dialog.wait({
-      title: escapeHtml(interpolate(step.title ?? step.label ?? context.project.name, context.variables)),
+      title: escapeHtml(interpolate(title, context.variables)),
       content,
       buttons: {
         confirm: {
@@ -85,6 +110,10 @@ export class MenuExecutor {
         }
       },
       close: () => null
+    }, {
+      width: dialogWidth(columns),
+      height: "auto",
+      resizable: true
     });
 
     let value;

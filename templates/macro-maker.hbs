@@ -592,6 +592,29 @@
                       <span><input type="text" value="{{image}}" data-step-index="{{index}}" data-step-path="image"><button type="button" data-action="browse-file" data-index="{{index}}" data-step-field="image" data-file-type="image" title="Escolher imagem do menu"><i class="fas fa-folder-open"></i></button></span>
                     </label>
                   </fieldset>
+                  <fieldset class="macro-maker-menu-text-styles full">
+                    <legend>Formatação dos textos do menu</legend>
+                    <section>
+                      <strong>Título do menu</strong>
+                      <label>Fonte <select data-step-index="{{index}}" data-step-path="titleStyle.font" data-value="{{menuTitleStyle.font}}">{{#each ../messageFonts}}<option value="{{value}}">{{label}}</option>{{/each}}</select></label>
+                      <label>Tamanho (px) <input type="number" min="8" max="72" value="{{menuTitleStyle.size}}" data-step-index="{{index}}" data-step-path="titleStyle.size" data-value-type="optional-number"></label>
+                      <label>Cor <input type="text" value="{{menuTitleStyle.color}}" placeholder="#ffffff" data-step-index="{{index}}" data-step-path="titleStyle.color" data-value-type="optional-string"></label>
+                      <label>Alinhamento <select data-step-index="{{index}}" data-step-path="titleStyle.align" data-value="{{menuTitleStyle.align}}"><option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option></select></label>
+                      <label><input type="checkbox" {{#if menuTitleStyle.bold}}checked{{/if}} data-step-index="{{index}}" data-step-path="titleStyle.bold" data-value-type="boolean"> Negrito</label>
+                      <label><input type="checkbox" {{#if menuTitleStyle.italic}}checked{{/if}} data-step-index="{{index}}" data-step-path="titleStyle.italic" data-value-type="boolean"> Itálico</label>
+                      <label><input type="checkbox" {{#if menuTitleStyle.underline}}checked{{/if}} data-step-index="{{index}}" data-step-path="titleStyle.underline" data-value-type="boolean"> Sublinhado</label>
+                    </section>
+                    <section>
+                      <strong>Descrição do menu</strong>
+                      <label>Fonte <select data-step-index="{{index}}" data-step-path="descriptionStyle.font" data-value="{{menuDescriptionStyle.font}}">{{#each ../messageFonts}}<option value="{{value}}">{{label}}</option>{{/each}}</select></label>
+                      <label>Tamanho (px) <input type="number" min="8" max="72" value="{{menuDescriptionStyle.size}}" data-step-index="{{index}}" data-step-path="descriptionStyle.size" data-value-type="optional-number"></label>
+                      <label>Cor <input type="text" value="{{menuDescriptionStyle.color}}" placeholder="#ffffff" data-step-index="{{index}}" data-step-path="descriptionStyle.color" data-value-type="optional-string"></label>
+                      <label>Alinhamento <select data-step-index="{{index}}" data-step-path="descriptionStyle.align" data-value="{{menuDescriptionStyle.align}}"><option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option></select></label>
+                      <label><input type="checkbox" {{#if menuDescriptionStyle.bold}}checked{{/if}} data-step-index="{{index}}" data-step-path="descriptionStyle.bold" data-value-type="boolean"> Negrito</label>
+                      <label><input type="checkbox" {{#if menuDescriptionStyle.italic}}checked{{/if}} data-step-index="{{index}}" data-step-path="descriptionStyle.italic" data-value-type="boolean"> Itálico</label>
+                      <label><input type="checkbox" {{#if menuDescriptionStyle.underline}}checked{{/if}} data-step-index="{{index}}" data-step-path="descriptionStyle.underline" data-value-type="boolean"> Sublinhado</label>
+                    </section>
+                  </fieldset>
                   <fieldset class="macro-maker-menu-columns full">
                     <legend>Títulos e texto por coluna</legend>
                     <p class="full">Dê um título a cada coluna e escolha como os textos das opções dela serão exibidos. Isso altera só a apresentação do menu, não os valores usados nas condições.</p>
@@ -609,6 +632,16 @@
                             <option value="capitalize">Iniciais maiúsculas</option>
                           </select>
                         </label>
+                        <details class="macro-maker-menu-column-style">
+                          <summary>Estilo do título da coluna</summary>
+                          <label>Fonte <select data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.titleStyle.font" data-value="{{titleStyle.font}}">{{#each ../../messageFonts}}<option value="{{value}}">{{label}}</option>{{/each}}</select></label>
+                          <label>Tamanho (px) <input type="number" min="8" max="72" value="{{titleStyle.size}}" data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.titleStyle.size" data-value-type="optional-number"></label>
+                          <label>Cor <input type="text" value="{{titleStyle.color}}" placeholder="#ffffff" data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.titleStyle.color" data-value-type="optional-string"></label>
+                          <label>Alinhamento <select data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.titleStyle.align" data-value="{{titleStyle.align}}"><option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option></select></label>
+                          <label><input type="checkbox" {{#if titleStyle.bold}}checked{{/if}} data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.titleStyle.bold" data-value-type="boolean"> Negrito</label>
+                          <label><input type="checkbox" {{#if titleStyle.italic}}checked{{/if}} data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.titleStyle.italic" data-value-type="boolean"> Itálico</label>
+                          <label><input type="checkbox" {{#if titleStyle.underline}}checked{{/if}} data-step-index="{{../index}}" data-step-path="columnSettings.{{number}}.titleStyle.underline" data-value-type="boolean"> Sublinhado</label>
+                        </details>
                       </section>
                     {{/each}}
                   </fieldset>

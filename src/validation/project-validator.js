@@ -365,7 +365,24 @@ export class ProjectValidator {
     }
   }
 
+  static #normalizeMenuTextStyle(style, path, issues) {
+    if (style == null) return;
+    if (!isRecord(style)) {
+      issues.push({ path, message: "A formatação do menu precisa ser um objeto." });
+      return;
+    }
+    if (style.font != null && !Object.hasOwn(MESSAGE_FONTS, style.font)) issues.push({ path: path + ".font", message: "Fonte do menu inválida." });
+    if (style.color != null && !/^#[0-9a-f]{6}$/i.test(style.color)) issues.push({ path: path + ".color", message: "Use uma cor no formato #RRGGBB." });
+    this.#normalizeOptionalNumber(style, "size", path + ".size", issues, { minimum: 8, maximum: 72 });
+    if (style.align != null && !["left", "center", "right"].includes(style.align)) issues.push({ path: path + ".align", message: "Alinhamento inválido." });
+    for (const key of ["bold", "italic", "underline"]) {
+      if (style[key] != null && typeof style[key] !== "boolean") issues.push({ path: path + "." + key, message: "O estilo precisa ser booleano." });
+    }
+  }
+
   static #normalizeMenu(step, path, issues) {
+    this.#normalizeMenuTextStyle(step.titleStyle, path + ".titleStyle", issues);
+    this.#normalizeMenuTextStyle(step.descriptionStyle, path + ".descriptionStyle", issues);
     if (!safePath(step.variable ?? "choice")) {
       issues.push({ path: `${path}.variable`, message: "O menu precisa de um nome de variável válido." });
     }
@@ -408,6 +425,7 @@ export class ProjectValidator {
             if (settings.title != null && typeof settings.title !== "string") {
               issues.push({ path: settingsPath + ".title", message: "O título da coluna precisa ser texto." });
             }
+            this.#normalizeMenuTextStyle(settings.titleStyle, settingsPath + ".titleStyle", issues);
             if (settings.textTransform != null && !["none", "upper", "lower", "capitalize"].includes(settings.textTransform)) {
               issues.push({ path: settingsPath + ".textTransform", message: "A padronização de texto da coluna é inválida." });
             }

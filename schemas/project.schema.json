@@ -53,6 +53,8 @@
           "label": { "type": "string" },
           "enabled": { "type": "boolean" },
           "formula": { "type": "string" },
+          "titleStyle": { "type": "object", "additionalProperties": true },
+          "descriptionStyle": { "type": "object", "additionalProperties": true },
           "messageStyle": {
             "type": "object",
             "properties": {

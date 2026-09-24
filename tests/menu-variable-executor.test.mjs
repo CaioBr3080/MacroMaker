@@ -73,3 +73,36 @@ test("cancelamento pode usar padrão e variáveis não vazam entre contextos", a
   assert.equal(first.variables.uses, 1);
   assert.deepEqual(second.variables, {});
 });
+
+test("menu aplica estilo ao título, descrição e cabeçalho de coluna e dimensiona a janela", async (t) => {
+  let rendered = "";
+  let options = null;
+  globalThis.window = { innerWidth: 1300 };
+  globalThis.Dialog = {
+    wait: async (config, dialogOptions) => {
+      rendered = config.content;
+      options = dialogOptions;
+      return null;
+    }
+  };
+  t.after(() => { delete globalThis.Dialog; delete globalThis.window; });
+
+  await MenuExecutor.execute({
+    title: "Escolha seu poder",
+    description: "Uma descrição longa que precisa continuar legível sem ser cortada.",
+    titleStyle: { font: "Georgia", size: 24, color: "#ffcc00", bold: true, align: "center" },
+    descriptionStyle: { size: 16, italic: true },
+    columns: 3,
+    columnSettings: { 2: { title: "Poderes especiais", titleStyle: { size: 19, color: "#00ffcc", underline: true } } },
+    options: [{ label: "A", value: "a" }]
+  }, { project: { name: "Teste" }, variables: {} });
+
+  assert.match(rendered, /font-family:Georgia/);
+  assert.match(rendered, /font-size:24px/);
+  assert.match(rendered, /color:#ffcc00/);
+  assert.match(rendered, /Poderes especiais/);
+  assert.match(rendered, /grid-column:2/);
+  assert.match(rendered, /--macro-maker-menu-min-width:750px/);
+  assert.equal(options.width, 1170);
+  assert.equal(options.resizable, true);
+});

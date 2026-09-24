@@ -1,3 +1,8 @@
+## 0.9.24 - 2026-09-24
+
+- Menus agora permitem personalizar fonte, tamanho, cor, alinhamento, negrito, itálico e sublinhado no título, descrição e em cada título de coluna.
+- A janela do menu calcula a largura pela quantidade de colunas, é redimensionável e mantém cartões com largura legível; quando a tela não comporta a grade inteira, ela rola horizontalmente em vez de comprimir ou cortar o texto.
+- Rótulos e descrições das opções passam a quebrar linhas normalmente, preservando a leitura de textos longos.
 ## 0.9.23 - 2026-09-24
 
 - O campo Crítico a partir de nas etapas Ataque e Teste agora aceita uma variável numérica do projeto, com ou sem `@` (por exemplo, CRITICO ou @CRITICO). O valor é resolvido no momento da rolagem.

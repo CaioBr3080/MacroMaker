@@ -294,3 +294,24 @@ test("aceita variável no limiar crítico e rejeita texto arbitrário", () => {
     steps: [{ type: "attack", formula: "1d20", criticalThreshold: "20 + FOR" }]
   }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
 });
+test("valida estilos textuais do menu", () => {
+  const project = ProjectValidator.normalize({
+    name: "Menu estilizado",
+    variables: {},
+    steps: [{
+      type: "menu",
+      titleStyle: { font: "Georgia", size: "22", color: "#ffcc00", bold: true, align: "center" },
+      descriptionStyle: { italic: true },
+      columnSettings: { 1: { title: "Ações", titleStyle: { size: 18, underline: true } } },
+      options: [{ label: "Atacar", value: "attack" }]
+    }]
+  });
+  assert.equal(project.steps[0].titleStyle.size, 22);
+  assert.equal(project.steps[0].columnSettings[1].titleStyle.size, 18);
+
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Menu inválido",
+    variables: {},
+    steps: [{ type: "menu", titleStyle: { color: "blue" }, options: [{ label: "A", value: "a" }] }]
+  }), ProjectValidationError);
+});

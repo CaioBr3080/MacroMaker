@@ -4,7 +4,7 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.23` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.24` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - botão próprio **Macro Maker** na barra esquerda do canvas, abrindo uma janela redimensionável de gerenciamento;
 - árvore de pastas e subpastas recolhível na janela do Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
@@ -26,7 +26,7 @@ Esta versão `0.9.23` entrega a base do MVP até importação, compartilhamento 
 - eventos `onStart`, `onTarget`, `onAttack`, `onHit`, `onMiss`, `onCritical`, `onDamage` e `onEnd`;
 - grupos de condições `AND`, `OR` e `NOT`, com crítico, acerto, distância, rolagens, dano, dado natural, HP, itens, efeitos, tags, quantidade de alvos e variáveis;
 - ramificações visuais `então/senão`, mutações temporárias de etapas e explicação da última execução;
-- menus simples ou em cartões, seleção única/múltipla, padrões, cancelamento configurável e interpolação segura;
+- menus simples ou em cartões, seleção única/múltipla, padrões, cancelamento configurável, títulos/descrições/colunas estilizados e grade responsiva sem textos comprimidos;
 - variáveis locais com operações de atribuição, soma, subtração, multiplicação, lista e alternância; variáveis também podem guardar fórmulas de rolagem reutilizáveis do Foundry;
 - IDs estáveis por projeto/etapa, políticas de duplicação, duração, vínculo por UUID e remoção de persistentes por escopo;
 - painel de persistentes ativos para o GM, inclusive efeitos órfãos, e limpeza ao excluir token/cena;
