@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.19 - 2026-09-24
+
+- Etapas desabilitadas continuam totalmente editáveis e podem ser reativadas pelo checkbox. A interface deixou de usar a classe genérica disabled do Foundry, que bloqueava os cliques.
 ## 0.9.18 - 2026-09-24
 
 - Corrigidas condições de Dado natural após etapas de dano, espera, animação ou som: elas preservam o d20 da última etapa Ataque, em vez de consultar a última rolagem auxiliar.

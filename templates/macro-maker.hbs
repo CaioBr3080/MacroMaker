@@ -199,7 +199,7 @@
 
         <ol class="macro-maker-steps">
           {{#each steps}}
-            <li class="macro-maker-step {{#unless isEnabled}}disabled{{/unless}}" data-step-index="{{index}}" draggable="true">
+            <li class="macro-maker-step {{#unless isEnabled}}macro-maker-step-disabled{{/unless}}" data-step-index="{{index}}" draggable="true">
               <header class="macro-maker-step-header">
                 <i class="fas fa-grip-vertical drag-handle" title="Arraste para reordenar"></i>
                 <input class="step-number" type="number" min="1" max="{{../steps.length}}" value="{{number}}" data-step-position="{{index}}" aria-label="Posição da etapa" title="Digite a posição desejada e confirme saindo do campo">

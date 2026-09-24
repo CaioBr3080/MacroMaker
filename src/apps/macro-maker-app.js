@@ -897,7 +897,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       if (heading) heading.textContent = element.value || "Projeto sem nome";
     }
     if (element.dataset.stepPath === "enabled") {
-      element.closest(".macro-maker-step")?.classList.toggle("disabled", !element.checked);
+      element.closest(".macro-maker-step")?.classList.toggle("macro-maker-step-disabled", !element.checked);
     }
     if (element.dataset.projectPath?.startsWith("targeting.")) this.#updateTargetingControls();
     if (element.dataset.stepPath === "label") {
