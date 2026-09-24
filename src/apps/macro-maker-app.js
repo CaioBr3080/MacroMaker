@@ -50,6 +50,25 @@ function movementActions() {
     .map(([id, action]) => ({ id, label: action?.label ?? action?.name ?? id }))
     .sort((left, right) => String(left.label).localeCompare(String(right.label), "pt-BR", { numeric: true }));
 }
+function configChoices(values) {
+  const entries = values instanceof Map ? [...values.entries()] : Object.entries(values ?? {});
+  return entries.map(([id, config]) => ({
+    id,
+    label: config?.label ?? config?.name ?? id
+  })).sort((left, right) => String(left.label).localeCompare(String(right.label), "pt-BR", { numeric: true }));
+}
+
+function visionModes() {
+  return configChoices(globalThis.CONFIG?.Canvas?.visionModes);
+}
+
+function lightAnimations() {
+  return configChoices(globalThis.CONFIG?.Canvas?.lightAnimations);
+}
+
+function summonActorName(actorId) {
+  return actorId ? game.actors?.get?.(actorId)?.name ?? "" : "";
+}
 function tokenMagicPresets() {
   const module = game.modules?.get?.("tokenmagic");
   const api = module?.active ? (globalThis.TokenMagic ?? module.api) : null;
@@ -256,7 +275,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         isSummon: step.type === "summon",
         isTokenMagic: step.type === "tokenMagic",
         isModifyToken: step.type === "modifyToken",
-        visageChoices: visageChoices(step.actorId, step.visageId)
+        visageChoices: visageChoices(step.actorId, step.visageId),
+        summonActorName: summonActorName(step.actorId)
       })),
       hasMacro: Boolean(this.macroUuid),
       canManageMacro: Boolean(this.macroUuid) && this.canEdit,
@@ -268,6 +288,8 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       tokenMagicActive: Boolean(game.modules?.get?.("tokenmagic")?.active),
       tokenMagicPresets: tokenMagicPresets(),
       movementActions: movementActions(),
+      visionModes: visionModes(),
+      lightAnimations: lightAnimations(),
       migrationPending: this.migrationPending,
       folders: folderChoices(game.folders ?? []),
       users: (game.users ?? []).map((user) => ({ id: user.id, name: user.name, active: user.active })),
@@ -313,6 +335,15 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateMessagePreviews();
     this.element.querySelectorAll("[data-variable-index]").forEach((element) => {
       element.addEventListener("change", () => this.#changeVariable(element));
+    });
+    this.element.querySelectorAll("[data-summon-actor-name]").forEach((element) => {
+      element.addEventListener("change", () => this.#selectSummonActor(element));
+    });
+    this.element.querySelectorAll("[data-range-output]").forEach((element) => {
+      element.addEventListener("input", () => {
+        const output = this.element.querySelector("[data-range-output-value=\"" + element.dataset.rangeOutput + "\"]");
+        if (output) output.value = element.value;
+      });
     });
     this.element.querySelectorAll("[data-step-position]").forEach((element) => {
       element.addEventListener("keydown", (event) => {
@@ -787,6 +818,16 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     return this.#mutate((project) => project.steps[index]?.options?.splice(optionIndex, 1));
   }
 
+  #selectSummonActor(element) {
+    const index = Number(element.dataset.index);
+    const query = String(element.value ?? "").trim().toLocaleLowerCase("pt-BR");
+    if (!query) return this.#mutate((project) => { project.steps[index].actorId = ""; });
+    const matches = summonActors().filter((actor) => actor.name.toLocaleLowerCase("pt-BR") === query);
+    if (matches.length !== 1) {
+      return ui.notifications.warn("Escolha um ator da lista pelo nome completo.");
+    }
+    return this.#mutate((project) => { project.steps[index].actorId = matches[0].id; });
+  }
   #addBranchStep(target) {
     const index = Number(target.dataset.index);
     const lane = target.dataset.lane;

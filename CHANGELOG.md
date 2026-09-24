@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.21 - 2026-09-24
+
+- A etapa Invocar token agora pesquisa o ator/token por nome digitado, evitando listas extensas.
+- Modos de visão e de animação de luz agora oferecem listas sugeridas pela configuração ativa do Foundry, incluindo tipos como internal burn quando disponíveis.
+- Intensidade e velocidade da animação, além dos ajustes de atenuação, brilho, saturação e contraste, receberam sliders com leitura do valor selecionado.
 ## 0.9.20 - 2026-09-24
 
 - O seletor de tokens do canvas agora permite pesquisar por nome, ignorando maiúsculas e acentos, sem trocar o token controlado pelo GM.

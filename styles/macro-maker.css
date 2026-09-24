@@ -784,6 +784,19 @@
   margin: 0.6rem 0 0;
 }
 
+.macro-maker-token-mutation-settings input[type="range"] {
+  width: calc(100% - 3.25rem);
+  vertical-align: middle;
+}
+
+.macro-maker-token-mutation-settings output {
+  display: inline-block;
+  width: 3rem;
+  margin-left: 0.2rem;
+  color: var(--color-text-light-highlight, #d9e9ff);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
 .macro-maker-token-mutation-settings > fieldset > legend {
   padding: 0 0.25rem;
 }

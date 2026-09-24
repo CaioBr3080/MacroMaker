@@ -192,6 +192,9 @@
           <span class="spacer"></span>
           <label for="macro-maker-step-type">Adicionar</label>
 <datalist id="macro-maker-movement-actions">{{#each movementActions}}<option value="{{id}}">{{label}}</option>{{/each}}</datalist>
+<datalist id="macro-maker-vision-modes">{{#each visionModes}}<option value="{{id}}">{{label}}</option>{{/each}}</datalist>
+<datalist id="macro-maker-light-animations">{{#each lightAnimations}}<option value="{{id}}">{{label}}</option>{{/each}}</datalist>
+<datalist id="macro-maker-summon-actors">{{#each summonActors}}<option value="{{name}}">{{id}}</option>{{/each}}</datalist>
                     <select id="macro-maker-step-type" name="newStepType">
             {{#each stepTypes}}<option value="{{type}}">{{label}}</option>{{/each}}
           </select>
@@ -375,12 +378,12 @@
                       </label>
                       <label>Alcance <input type="number" min="0" step="any" value="{{changes.sight.range}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.range" data-value-type="optional-number"></label>
                       <label>Ângulo <input type="number" min="0" max="360" step="any" value="{{changes.sight.angle}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.angle" data-value-type="optional-number"></label>
-                      <label>Modo de visão <input type="text" value="{{changes.sight.visionMode}}" placeholder="Não alterar (ex.: basic)" data-step-index="{{index}}" data-step-path="changes.sight.visionMode" data-value-type="optional-string"></label>
+                      <label>Modo de visão <input type="text" list="macro-maker-vision-modes" value="{{changes.sight.visionMode}}" placeholder="Não alterar (ex.: basic)" data-step-index="{{index}}" data-step-path="changes.sight.visionMode" data-value-type="optional-string"></label>
                       <label>Cor da visão <input type="text" value="{{changes.sight.color}}" placeholder="#RRGGBB" data-step-index="{{index}}" data-step-path="changes.sight.color" data-value-type="optional-string"></label>
-                      <label>Atenuação <input type="number" step="0.05" value="{{changes.sight.attenuation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.attenuation" data-value-type="optional-number"></label>
-                      <label>Brilho <input type="number" step="0.05" value="{{changes.sight.brightness}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.brightness" data-value-type="optional-number"></label>
-                      <label>Saturação <input type="number" step="0.05" value="{{changes.sight.saturation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.saturation" data-value-type="optional-number"></label>
-                      <label>Contraste <input type="number" step="0.05" value="{{changes.sight.contrast}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.contrast" data-value-type="optional-number"></label>
+                      <label>Atenuação <input type="range" min="-1" max="1" step="0.05" value="{{changes.sight.attenuation}}" data-range-output="sight-attenuation-{{index}}" data-step-index="{{index}}" data-step-path="changes.sight.attenuation" data-value-type="optional-number"><output data-range-output-value="sight-attenuation-{{index}}">{{changes.sight.attenuation}}</output></label>
+                      <label>Brilho <input type="range" min="-1" max="1" step="0.05" value="{{changes.sight.brightness}}" data-range-output="sight-brightness-{{index}}" data-step-index="{{index}}" data-step-path="changes.sight.brightness" data-value-type="optional-number"><output data-range-output-value="sight-brightness-{{index}}">{{changes.sight.brightness}}</output></label>
+                      <label>Saturação <input type="range" min="-1" max="1" step="0.05" value="{{changes.sight.saturation}}" data-range-output="sight-saturation-{{index}}" data-step-index="{{index}}" data-step-path="changes.sight.saturation" data-value-type="optional-number"><output data-range-output-value="sight-saturation-{{index}}">{{changes.sight.saturation}}</output></label>
+                      <label>Contraste <input type="range" min="-1" max="1" step="0.05" value="{{changes.sight.contrast}}" data-range-output="sight-contrast-{{index}}" data-step-index="{{index}}" data-step-path="changes.sight.contrast" data-value-type="optional-number"><output data-range-output-value="sight-contrast-{{index}}">{{changes.sight.contrast}}</output></label>
                     </fieldset>
 
                     <fieldset class="full"><legend>Luz emitida</legend>
@@ -391,13 +394,13 @@
                       <label>Opacidade <input type="number" min="0" max="1" step="0.05" value="{{changes.light.alpha}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.alpha" data-value-type="optional-number"></label>
                       <label>Coloração <input type="number" step="1" value="{{changes.light.coloration}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.coloration" data-value-type="optional-number"></label>
                       <label>Luminosidade <input type="number" step="0.05" value="{{changes.light.luminosity}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.luminosity" data-value-type="optional-number"></label>
-                      <label>Atenuação <input type="number" step="0.05" value="{{changes.light.attenuation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.attenuation" data-value-type="optional-number"></label>
+                      <label>Atenuação <input type="range" min="-1" max="1" step="0.05" value="{{changes.light.attenuation}}" data-range-output="light-attenuation-{{index}}" data-step-index="{{index}}" data-step-path="changes.light.attenuation" data-value-type="optional-number"><output data-range-output-value="light-attenuation-{{index}}">{{changes.light.attenuation}}</output></label>
                       <label>Saturação <input type="number" step="0.05" value="{{changes.light.saturation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.saturation" data-value-type="optional-number"></label>
                       <label>Contraste <input type="number" step="0.05" value="{{changes.light.contrast}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.contrast" data-value-type="optional-number"></label>
                       <label>Sombras <input type="number" step="0.05" value="{{changes.light.shadows}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.shadows" data-value-type="optional-number"></label>
-                      <label>Tipo de animação <input type="text" value="{{changes.light.animation.type}}" placeholder="Não alterar (ex.: torch)" data-step-index="{{index}}" data-step-path="changes.light.animation.type" data-value-type="optional-string"></label>
-                      <label>Velocidade da animação <input type="number" min="0" step="1" value="{{changes.light.animation.speed}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.animation.speed" data-value-type="optional-number"></label>
-                      <label>Intensidade da animação <input type="number" min="0" step="1" value="{{changes.light.animation.intensity}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.animation.intensity" data-value-type="optional-number"></label>
+                      <label>Tipo de animação <input type="text" list="macro-maker-light-animations" value="{{changes.light.animation.type}}" placeholder="Não alterar (ex.: torch)" data-step-index="{{index}}" data-step-path="changes.light.animation.type" data-value-type="optional-string"></label>
+                      <label>Velocidade da animação <input type="range" min="0" max="10" step="1" value="{{changes.light.animation.speed}}" data-range-output="light-speed-{{index}}" data-step-index="{{index}}" data-step-path="changes.light.animation.speed" data-value-type="optional-number"><output data-range-output-value="light-speed-{{index}}">{{changes.light.animation.speed}}</output></label>
+                      <label>Intensidade da animação <input type="range" min="0" max="10" step="1" value="{{changes.light.animation.intensity}}" data-range-output="light-intensity-{{index}}" data-step-index="{{index}}" data-step-path="changes.light.animation.intensity" data-value-type="optional-number"><output data-range-output-value="light-intensity-{{index}}">{{changes.light.animation.intensity}}</output></label>
                       <label>Inverter animação
                         <select data-step-index="{{index}}" data-step-path="changes.light.animation.reverse" data-value="{{changes.light.animation.reverse}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Sim</option><option value="false">Não</option></select>
                       </label>
@@ -430,8 +433,8 @@
                   <fieldset class="macro-maker-integration-settings full">
                     <legend><i class="fas fa-dragon"></i> Invocar token</legend>
                     <p class="macro-maker-integration-note">Um jogador pode executar esta etapa. O GM ativo cria o token usando somente o ator e as opções salvos neste macro.</p>
-                    <label>Ator
-                      <select data-step-index="{{index}}" data-step-path="actorId" data-value="{{actorId}}" data-render-on-change="true"><option value="">Selecione um ator</option>{{#each ../summonActors}}<option value="{{id}}">{{name}}</option>{{/each}}</select>
+                    <label>Ator/token a invocar
+                      <input type="search" list="macro-maker-summon-actors" value="{{summonActorName}}" placeholder="Digite o nome do ator" autocomplete="off" data-summon-actor-name data-index="{{index}}">
                     </label>
                     <label>Nome do token <input type="text" value="{{tokenName}}" placeholder="Usar nome do ator" data-step-index="{{index}}" data-step-path="tokenName"></label>
                     <label>Quantidade <input type="number" min="1" max="20" value="{{count}}" data-step-index="{{index}}" data-step-path="count" data-value-type="number"></label>
