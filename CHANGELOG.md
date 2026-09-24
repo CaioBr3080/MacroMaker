@@ -1,9 +1,14 @@
 # Changelog
 
+## 0.9.14 - 2026-09-24
+
+- Corrigido o comportamento dos modos do Sequencer: escala base e escala ao objeto valem somente sem esticar; Esticar sempre e Esticar somente após distância ignoram ambas as escalas.
+- Apontar para o destino permanece disponível para a animação não esticada, permitindo definir tamanho e ajuste de orientação até alcançar a distância escolhida.
+
 ## 0.9.13 - 2026-09-24
 
-- Animações agora mantêm a escala base mesmo ao esticar até o destino; escala ao objeto também não é descartada pelo esticamento.
-- Nova opção Apontar para o destino: orienta o asset da origem para o alvo/ponto, inclusive durante o esticamento; o campo de rotação passa a ser o ajuste fino dessa direção.
+- Animações receberam controles de escala base, orientação automática ao destino e limite de distância para o esticamento.
+- Nova opção Apontar para o destino: orienta o asset da origem para o alvo/ponto; o campo de rotação passa a ser o ajuste fino dessa direção.
 - Esticar sempre e Esticar somente após distância foram separados. Assim, um projétil pode usar tamanho fixo até a distância escolhida e só então alongar até o alvo.
 
 ## 0.9.12 - 2026-09-24

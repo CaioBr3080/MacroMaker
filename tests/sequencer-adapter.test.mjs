@@ -222,12 +222,6 @@ test("mantém a escala, orientação e esticamento condicional", async (t) => {
   await SequencerAdapter.playAnimation(step, context);
 
   assert.deepEqual(calls.find((call) => call[1] === "stretchTo"), ["effect", "stretchTo", target, {}]);
-  assert.deepEqual(calls.find((call) => call[1] === "scale"), ["effect", "scale", 1.5]);
-  assert.deepEqual(calls.find((call) => call[1] === "rotateTowards"), [
-    "effect",
-    "rotateTowards",
-    target,
-    { rotationOffset: 20 }
-  ]);
-  assert.ok(!calls.some((call) => call[1] === "rotate"));
+  assert.ok(!calls.some((call) => call[1] === "scale" || call[1] === "scaleToObject"));
+  assert.ok(!calls.some((call) => call[1] === "rotateTowards" || call[1] === "rotate"));
 });

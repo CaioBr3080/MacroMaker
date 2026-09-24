@@ -39,17 +39,21 @@ export class SequencerAdapter {
       || (Number.isFinite(stretchThreshold) && distance > stretchThreshold)
     );
 
-    // Stretch defines the length; scale still controls the asset's base size/width.
-    if (shouldStretch) effect.stretchTo(target, step.stretchOptions ?? {});
-    if (step.scaleToObject != null && source) effect.scaleToObject(Number(step.scaleToObject), { uniform: true });
-    else if (step.scale != null) effect.scale(Number(step.scale));
+    if (shouldStretch) {
+      // Sequencer owns the scale and orientation while it stretches to the target.
+      effect.stretchTo(target, step.stretchOptions ?? {});
+    } else {
+      if (step.scaleToObject != null && source) effect.scaleToObject(Number(step.scaleToObject), { uniform: true });
+      else if (step.scale != null) effect.scale(Number(step.scale));
+
+      if (step.rotateTowardsTarget && target) {
+        const rotationOffset = Number(step.rotation);
+        effect.rotateTowards(target, Number.isFinite(rotationOffset) ? { rotationOffset } : {});
+      } else if (step.rotation != null) effect.rotate(Number(step.rotation));
+    }
 
     if (step.opacity != null) effect.opacity(Number(step.opacity));
     if (step.tint) effect.tint(step.tint);
-    if (step.rotateTowardsTarget && target) {
-      const rotationOffset = Number(step.rotation);
-      effect.rotateTowards(target, Number.isFinite(rotationOffset) ? { rotationOffset } : {});
-    } else if (step.rotation != null) effect.rotate(Number(step.rotation));
     if (step.playbackRate != null) effect.playbackRate(Number(step.playbackRate));
     if (step.belowTokens) effect.belowTokens();
     if (step.randomRotation) effect.randomRotation();
