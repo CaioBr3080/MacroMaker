@@ -292,7 +292,7 @@ export class ProjectValidator {
     } else if (step.defense != null && step.defense !== "") {
       step.defense = Number(step.defense);
     }
-    this.#normalizeOptionalNumber(step, "criticalThreshold", `${path}.criticalThreshold`, issues, { minimum: 1 });
+    this.#normalizeOptionalNumberOrVariable(step, "criticalThreshold", `${path}.criticalThreshold`, issues, { minimum: 1 });
     this.#normalizeOptionalNumber(step, "criticalMargin", `${path}.criticalMargin`, issues, { minimum: 0 });
     this.#normalizeOptionalNumber(step, "criticalMultiplier", `${path}.criticalMultiplier`, issues, { minimum: 1 });
 
@@ -639,6 +639,25 @@ export class ProjectValidator {
       }
     }
   }
+  static #normalizeOptionalNumberOrVariable(object, key, path, issues, { minimum = -Infinity } = {}) {
+    const value = object[key];
+    if (value == null || value === "") return;
+    if (typeof value === "string") {
+      const text = value.trim();
+      const numeric = Number(text);
+      if (text && !Number.isFinite(numeric)) {
+        if (!/^@?[A-Za-z_][A-Za-z0-9_]*$/.test(text)) {
+          issues.push({ path, message: `${path} precisa ser um número ou o nome de uma variável numérica.` });
+        } else object[key] = text;
+        return;
+      }
+      object[key] = numeric;
+    }
+    if (!Number.isFinite(object[key]) || object[key] < minimum) {
+      issues.push({ path, message: `${path} precisa ser um número maior ou igual a ${minimum}.` });
+    }
+  }
+
   static #normalizeOptionalNumber(object, key, path, issues, { minimum = -Infinity, maximum = Infinity } = {}) {
     if (object[key] == null || object[key] === "") return;
     const number = Number(object[key]);

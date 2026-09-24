@@ -4,7 +4,7 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.22` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.23` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - botão próprio **Macro Maker** na barra esquerda do canvas, abrindo uma janela redimensionável de gerenciamento;
 - árvore de pastas e subpastas recolhível na janela do Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
@@ -75,7 +75,7 @@ macro-maker/
 
 ### Controles do editor
 
-- **Variáveis do projeto:** adicione uma variável, renomeie para `FOR`, escolha Número e informe `4`. Use `1d20 + FOR` (ou `1d20 + @FOR`) na fórmula. Basta alterar o valor de FOR e salvar para atualizar as próximas execuções. Os nomes diferenciam maiúsculas de minúsculas. Renomear/excluir uma variável exige atualizar suas referências. OWNER pode editar; campos bloqueados pelo GM continuam protegidos.
+- **Variáveis do projeto:** adicione uma variável, renomeie para `FOR`, escolha Número e informe `4`. Use `1d20 + FOR` (ou `1d20 + @FOR`) na fórmula. O limiar de crítico também aceita `FOR` ou `@FOR` quando a variável for numérica. Basta alterar o valor de FOR e salvar para atualizar as próximas execuções. Os nomes diferenciam maiúsculas de minúsculas. Renomear/excluir uma variável exige atualizar suas referências. OWNER pode editar; campos bloqueados pelo GM continuam protegidos.
 - **Dano e cura:** componentes dentro da mesma etapa aparecem em uma única rolagem, com total e discriminação dos tipos. Crie outra etapa se quiser uma segunda rolagem. Resistências são indicadas separadamente do total bruto dos dados; o módulo não altera HP automaticamente.
 - **Mensagens:** o texto aceita várias linhas e preserva espaços no início, no fim e repetidos ao salvar. Os controles de formatação alteram a mensagem inteira e mostram uma prévia. No texto, use `{{variables.FOR}}` para mostrar o valor de uma variável.
 - **Menus:** cada opção aceita rótulo, valor, descrição, imagem, ícone e coluna (1–6). Cada coluna pode ter título e padronizar visualmente os rótulos como original, MAIÚSCULAS, minúsculas ou Iniciais Maiúsculas, sem mudar o valor salvo. O menu grava a escolha na variável de saída; em uma Ramificação, use a condição Opção de menu com essa variável e o valor escolhido.

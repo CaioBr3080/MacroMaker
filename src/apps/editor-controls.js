@@ -118,7 +118,7 @@ export const FIELD_HELP = {
   formula: "Ex.: 1d20 + FOR, 2d6 + @FOR ou DANO. Cadastre FOR numérico ou DANO como Fórmula de rolagem nas Variáveis do projeto. Componentes na mesma etapa são somados em uma rolagem.",
   criticalFormula: "Fórmula usada quando houver crítico. Vazio mantém a fórmula normal e aplica o multiplicador, se informado.",
   criticalMultiplier: "Multiplica o resultado do componente no crítico; 2 dobra o total. Para dobrar apenas os dados, use uma fórmula crítica como 2d6 + FOR.",
-  criticalThreshold: "Resultado natural do d20 a partir do qual a rolagem é crítica. Ex.: 20 ou 19.",
+  criticalThreshold: "Resultado natural do d20 a partir do qual a rolagem é crítica. Use um número (20 ou 19) ou uma variável numérica do projeto, como CRITICO ou @CRITICO.",
   criticalMargin: "Também considera crítico ao superar a defesa por esta diferença. Opcional.",
   defense: "Valor numérico contra o qual o ataque é comparado. Vazio consulta o adaptador do sistema.",
   defenseKey: "Chave reconhecida pelo adaptador do seu sistema para consultar a defesa. Não é uma fórmula.",

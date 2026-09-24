@@ -1,3 +1,17 @@
+function numericCriticalSetting(value, variables, { fallback, minimum, label }) {
+  let resolved = value ?? fallback;
+  if (typeof resolved === "string") {
+    const text = resolved.trim();
+    const reference = text.match(/^@?([A-Za-z_][A-Za-z0-9_]*)$/);
+    if (reference && Object.hasOwn(variables ?? {}, reference[1])) resolved = variables[reference[1]];
+    else resolved = text;
+  }
+  const number = Number(resolved);
+  if (!Number.isFinite(number) || number < minimum) {
+    throw new Error(label + " precisa ser um número válido ou uma variável numérica.");
+  }
+  return number;
+}
 export class RollAnalysis {
   static activeNaturalResults(roll, { faces = 20 } = {}) {
     return (roll?.dice ?? [])
@@ -8,9 +22,9 @@ export class RollAnalysis {
       .filter(Number.isFinite);
   }
 
-  static isCritical(roll, step = {}, { defense = null } = {}) {
+  static isCritical(roll, step = {}, { defense = null, variables = {} } = {}) {
     const config = step.critical ?? {};
-    const threshold = Number(config.threshold ?? step.criticalThreshold ?? 20);
+    const threshold = numericCriticalSetting(config.threshold ?? step.criticalThreshold, variables, { fallback: 20, minimum: 1, label: "O limiar crítico" });
     const faces = Number(config.faces ?? 20);
     const operator = config.operator ?? "gte";
     const naturalCritical = this.activeNaturalResults(roll, { faces }).some((result) => {

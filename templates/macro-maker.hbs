@@ -494,7 +494,7 @@
 
                 {{#if isAttack}}
                   <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
-                  <label>Crítico a partir de <input type="number" value="{{criticalThreshold}}" data-step-index="{{index}}" data-step-path="criticalThreshold" data-value-type="number"></label>
+                  <label>Crítico a partir de <input type="text" value="{{criticalThreshold}}" placeholder="20 ou CRITICO" data-step-index="{{index}}" data-step-path="criticalThreshold"></label>
                   <label>Margem crítica <input type="number" min="0" value="{{criticalMargin}}" placeholder="Opcional" data-step-index="{{index}}" data-step-path="criticalMargin" data-value-type="optional-number"></label>
                   <label>Defesa opcional <input type="number" value="{{defense}}" data-step-index="{{index}}" data-step-path="defense" data-value-type="optional-number"></label>
                   <label>Chave de defesa <input type="text" value="{{defenseKey}}" placeholder="Ex.: ac" data-step-index="{{index}}" data-step-path="defenseKey"></label>
@@ -514,7 +514,7 @@
 
                 {{#if isTest}}
                   <label>Fórmula <input type="text" value="{{formula}}" data-step-index="{{index}}" data-step-path="formula"></label>
-                  <label>Crítico a partir de <input type="number" value="{{criticalThreshold}}" data-step-index="{{index}}" data-step-path="criticalThreshold" data-value-type="number"></label>
+                  <label>Crítico a partir de <input type="text" value="{{criticalThreshold}}" placeholder="20 ou CRITICO" data-step-index="{{index}}" data-step-path="criticalThreshold"></label>
                   <label>Margem crítica <input type="number" min="0" value="{{criticalMargin}}" placeholder="Opcional" data-step-index="{{index}}" data-step-path="criticalMargin" data-value-type="optional-number"></label>
                   <label>Visibilidade
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>

@@ -2,7 +2,7 @@
   "id": "macro-maker",
   "title": "Macro Maker",
   "description": "Construtor visual e executor de macros com Sequencer para Foundry VTT.",
-  "version": "0.9.22",
+  "version": "0.9.23",
   "compatibility": {
     "minimum": "13",
     "verified": "13"

@@ -1,3 +1,6 @@
+## 0.9.23 - 2026-09-24
+
+- O campo Crítico a partir de nas etapas Ataque e Teste agora aceita uma variável numérica do projeto, com ou sem `@` (por exemplo, CRITICO ou @CRITICO). O valor é resolvido no momento da rolagem.
 ## 0.9.22 - 2026-09-24
 
 - O Macro Maker saiu da sidebar: a varinha na barra esquerda do canvas abre um gerenciador próprio, redimensionável e minimizável, com árvore de pastas à esquerda e painel de configuração à direita.

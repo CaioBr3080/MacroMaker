@@ -16,7 +16,7 @@ export class RollExecutor {
   static async attack(step, context) {
     const roll = await this.#evaluate(step.formula, context);
     const defense = await this.#resolveDefense(step, context);
-    const critical = RollAnalysis.isCritical(roll, step, { defense });
+    const critical = RollAnalysis.isCritical(roll, step, { defense, variables: context.variables });
     let hit = null;
     if (step.hitMode === "manual") {
       hit = await ManualHitResolver.confirm({ step, context, roll });
@@ -120,7 +120,7 @@ export class RollExecutor {
 
   static async #simpleRoll(step, context, kind, label) {
     const roll = await this.#evaluate(step.formula, context);
-    const critical = RollAnalysis.isCritical(roll, step);
+    const critical = RollAnalysis.isCritical(roll, step, { variables: context.variables });
     const result = this.#record(context, kind, roll, { critical });
     context.critical = critical;
     await this.#toMessage(roll, step, context, label);

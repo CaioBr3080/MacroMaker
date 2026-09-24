@@ -278,3 +278,19 @@ test("valida Visage global e exige token para Visage local", () => {
     steps: [{ type: "applyVisage", mode: "local", visageId: "local-form" }]
   }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
 });
+test("aceita variável no limiar crítico e rejeita texto arbitrário", () => {
+  const project = ProjectValidator.normalize({
+    name: "Crítico variável",
+    targeting: { source: "none", mode: "none" },
+    variables: { CRITICO: 19 },
+    steps: [{ type: "attack", formula: "1d20", criticalThreshold: "@CRITICO" }]
+  }, { stepRegistry: createCoreStepRegistry() });
+  assert.equal(project.steps[0].criticalThreshold, "@CRITICO");
+
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Crítico inválido",
+    targeting: { source: "none", mode: "none" },
+    variables: {},
+    steps: [{ type: "attack", formula: "1d20", criticalThreshold: "20 + FOR" }]
+  }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
+});

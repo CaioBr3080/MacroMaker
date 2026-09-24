@@ -185,3 +185,25 @@ test("variáveis de fórmula funcionam nos campos de acerto e dano", async (t) =
   assert.equal(execution.attack.formula, "(1d20 + @FOR)");
   assert.equal(damage.parts[0].formula, "(2d6 + @FOR)");
 });
+test("limiar crítico do ataque aceita variável numérica", async (t) => {
+  globalThis.CONFIG = { Dice: { rolls: [MockRoll] } };
+  globalThis.ChatMessage = { getSpeaker: () => ({}) };
+  MockRoll.messages = [];
+  t.after(() => { delete globalThis.CONFIG; delete globalThis.ChatMessage; });
+
+  const execution = context({ variables: { CRITICO: 17 } });
+  const result = await RollExecutor.attack({ formula: "1d20", criticalThreshold: "@CRITICO" }, execution);
+  assert.equal(result.critical, true);
+  assert.equal(execution.critical, true);
+});
+
+test("limiar crítico rejeita variável que não é numérica", async (t) => {
+  globalThis.CONFIG = { Dice: { rolls: [MockRoll] } };
+  globalThis.ChatMessage = { getSpeaker: () => ({}) };
+  t.after(() => { delete globalThis.CONFIG; delete globalThis.ChatMessage; });
+
+  await assert.rejects(
+    RollExecutor.attack({ formula: "1d20", criticalThreshold: "CRITICO" }, context({ variables: { CRITICO: "alto" } })),
+    /limiar crítico.*variável numérica/i
+  );
+});

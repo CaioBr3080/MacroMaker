@@ -81,7 +81,7 @@
             "additionalProperties": true
           },
           "criticalFormula": { "type": "string" },
-          "criticalThreshold": { "type": "number", "minimum": 1 },
+          "criticalThreshold": { "oneOf": [{ "type": "number", "minimum": 1 }, { "type": "string", "pattern": "^@?[A-Za-z_][A-Za-z0-9_]*$" }] },
           "criticalMargin": { "type": "number", "minimum": 0 },
           "criticalMultiplier": { "type": "number", "minimum": 1 },
           "defense": { "type": "number" },
