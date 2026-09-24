@@ -647,7 +647,7 @@
                   </fieldset>
                   <p class="macro-maker-menu-help full"><strong>Como ligar a uma condição:</strong> este menu grava a escolha em <code>{{variable}}</code>. Para executar etapas diferentes, coloque uma etapa <strong>Ramificação</strong> depois dele e escolha a condição <strong>Opção de menu</strong>, usando essa variável na chave e o valor da opção no campo Valor.</p>
                   <div class="macro-maker-menu-editor full">
-                    <header><strong>Opções do menu</strong><small>Defina rótulo, valor e imagem. Coluna vazia usa o preenchimento automático.</small></header>
+                    <header><strong>Opções do menu</strong><small>Defina rótulo, valor e imagem. Na descrição, use {DT} ou {DT + 5} para mostrar variáveis e cálculos. Coluna vazia usa o preenchimento automático.</small></header>
                     {{#each options}}
                       <div class="macro-maker-menu-option">
                         <label>Rótulo <input type="text" value="{{label}}" placeholder="Ex.: Ataque forte" data-step-index="{{../index}}" data-step-path="options.{{optionIndex}}.label"></label>

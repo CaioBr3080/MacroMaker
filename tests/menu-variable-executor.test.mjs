@@ -106,3 +106,25 @@ test("menu aplica estilo ao título, descrição e cabeçalho de coluna e dimens
   assert.equal(options.width, 1170);
   assert.equal(options.resizable, true);
 });
+test("descrição da opção resolve variáveis e fórmulas entre chaves", async (t) => {
+  let rendered = "";
+  class DescriptionRoll {
+    constructor(formula, data) { this.formula = formula; this.data = data; this.total = 0; }
+    async evaluate() {
+      assert.equal(this.formula, "@DT + 5");
+      this.total = this.data.DT + 5;
+      return this;
+    }
+  }
+  globalThis.CONFIG = { Dice: { rolls: [DescriptionRoll] } };
+  globalThis.Dialog = { wait: async (config) => { rendered = config.content; return null; } };
+  t.after(() => { delete globalThis.CONFIG; delete globalThis.Dialog; });
+
+  await MenuExecutor.execute({
+    variable: "choice",
+    options: [{ label: "Teste", value: "test", description: "DT atual: {DT + 5}; base {{variables.DT}}" }]
+  }, { project: { name: "Teste" }, variables: { DT: 12 } });
+
+  assert.match(rendered, /DT atual: 17; base 12/);
+  assert.doesNotMatch(rendered, /\{DT \+ 5\}/);
+});

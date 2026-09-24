@@ -1,5 +1,6 @@
 import { escapeHtml, interpolate, setPath } from "../../utils/safe-values.js";
 import { messageStyleCSS } from "../../utils/message-style.js";
+import { resolveFormulaVariables } from "../../utils/formula-variables.js";
 
 function selectedIndexes(root) {
   if (root?.querySelectorAll) {
@@ -30,6 +31,33 @@ function styledText(tag, className, value, style, variables, extraCSS = "") {
   return "<" + tag + " class=\"" + className + "\" style=\"" + extraCSS + messageStyleCSS(style) + "\">" + text + "</" + tag + ">";
 }
 
+async function interpolateOptionDescription(value, variables) {
+  const text = interpolate(value, variables);
+  const expressions = [...text.matchAll(/\{([^{}]+)\}/g)];
+  if (!expressions.length) return escapeHtml(text);
+
+  let result = "";
+  let cursor = 0;
+  for (const match of expressions) {
+    result += text.slice(cursor, match.index);
+    const expression = match[1].trim();
+    if (!expression) throw new Error("A expressão {} na descrição de uma opção não pode ficar vazia.");
+    const RollClass = globalThis.CONFIG?.Dice?.rolls?.[0] ?? globalThis.Roll;
+    if (!RollClass) throw new Error("A classe de rolagem do Foundry não está disponível para calcular {" + expression + "}.");
+    let roll;
+    try {
+      roll = await new RollClass(resolveFormulaVariables(expression, variables), variables).evaluate();
+    } catch (error) {
+      throw new Error("Não foi possível calcular {" + expression + "} na descrição da opção: " + error.message);
+    }
+    const total = Number(roll?.total);
+    if (!Number.isFinite(total)) throw new Error("A expressão {" + expression + "} não produziu um número.");
+    result += String(total);
+    cursor = match.index + match[0].length;
+  }
+  return escapeHtml(result + text.slice(cursor));
+}
+
 function dialogWidth(columns) {
   const desired = 360 + (columns * 270);
   const viewport = Number(globalThis.window?.innerWidth);
@@ -40,7 +68,7 @@ function dialogWidth(columns) {
 export class MenuExecutor {
   static async execute(step, context) {
     const columns = Math.min(6, Math.max(1, Number(step.columns ?? 1)));
-    const options = (step.options ?? []).map((option, index) => {
+    const options = await Promise.all((step.options ?? []).map(async (option, index) => {
       const configuredColumn = optionColumn(option.column, columns);
       const effectiveColumn = configuredColumn ?? (index % columns) + 1;
       const textTransform = step.columnSettings?.[effectiveColumn]?.textTransform ?? "none";
@@ -48,12 +76,12 @@ export class MenuExecutor {
         index,
         value: option.value,
         label: transformOptionText(interpolate(option.label, context.variables, { escape: true }), textTransform),
-        description: interpolate(option.description, context.variables, { escape: true }),
+        description: await interpolateOptionDescription(option.description, context.variables),
         image: escapeHtml(option.image ?? ""),
         icon: escapeHtml(option.icon ?? ""),
         column: configuredColumn
       };
-    });
+    }));
     if (!options.length) throw new Error("A etapa de menu não possui opções.");
 
     const columnHeaders = Array.from({ length: columns }, (_value, index) => {

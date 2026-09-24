@@ -1,3 +1,6 @@
+## 0.9.25 - 2026-09-24
+
+- A descrição de cada opção de menu agora resolve fórmulas entre chaves ao abrir o menu. Use `{DT}` para uma variável e `{DT + 5}` para cálculos do Foundry; por exemplo, `DT: {DT + 5}` acompanha mudanças em DT automaticamente.
 ## 0.9.24 - 2026-09-24
 
 - Menus agora permitem personalizar fonte, tamanho, cor, alinhamento, negrito, itálico e sublinhado no título, descrição e em cada título de coluna.
