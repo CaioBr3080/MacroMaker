@@ -945,7 +945,11 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       const value = Number(element.value);
       return Number.isFinite(value) ? value : DELETE_VALUE;
     }
-    return element.value;
+    const text = element.value;
+    if (element.dataset.preserveLeadingNewline !== undefined && text.charCodeAt(0) === 0xfeff) {
+      return text.slice(1);
+    }
+    return text;
   }
 
   #populateSelects() {

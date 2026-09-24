@@ -1,3 +1,5 @@
+import { canvasEventTarget, lockTokenInteraction, stopCanvasEvent } from "./canvas-interaction-lock.js";
+
 export class CanvasPointPicker {
   static async pick({ source = null, range = null, blockOutOfRange = false, label = "Escolha um ponto", shape = null } = {}) {
     if (!canvas?.ready) throw new Error("O canvas precisa estar ativo para escolher um ponto.");
@@ -5,7 +7,10 @@ export class CanvasPointPicker {
     if (!canvasElement) throw new Error("O elemento do canvas não está disponível.");
 
     const originalControlledIds = new Set((canvas.tokens.controlled ?? []).map((token) => token.id));
+    const unlockTokenInteraction = lockTokenInteraction();
     let restoringControl = false;
+    let finished = false;
+    let cleanupTimer = null;
 
     return new Promise((resolve) => {
       const overlay = document.createElement("div");
@@ -33,38 +38,43 @@ export class CanvasPointPicker {
           restoringControl = false;
         }
       };
-      const onControl = () => {
-        if (!restoringControl) queueMicrotask(restoreControlled);
-      };
-      const stopEvent = (event) => {
-        event.preventDefault();
-        event.stopImmediatePropagation();
+      const blockCanvasEvent = (event) => {
+        if (canvasEventTarget(canvasElement, event)) stopCanvasEvent(event);
       };
       const cleanup = () => {
-        canvasElement.removeEventListener("pointermove", onMove, true);
-        canvasElement.removeEventListener("pointerdown", onClick, true);
-        canvasElement.removeEventListener("pointerup", stopEvent, true);
-        canvasElement.removeEventListener("click", stopEvent, true);
+        if (cleanupTimer) window.clearTimeout(cleanupTimer);
+        window.removeEventListener("pointermove", onMove, true);
+        window.removeEventListener("pointerdown", onPointerDown, true);
+        for (const type of ["pointerup", "pointercancel", "mousedown", "mouseup", "click", "dblclick", "contextmenu"]) {
+          window.removeEventListener(type, blockCanvasEvent, true);
+        }
         window.removeEventListener("keydown", onKey, true);
         Hooks.off("controlToken", controlHookId);
         overlay.remove();
         crosshair.remove();
         rangePreview?.remove();
         shapePreview?.remove();
+        unlockTokenInteraction();
         restoreControlled();
       };
-      const finish = (result) => {
-        cleanup();
+      const finish = (result, deferCleanup = false) => {
+        if (finished) return;
+        finished = true;
+        if (deferCleanup) cleanupTimer = window.setTimeout(cleanup, 0);
+        else cleanup();
         resolve(result);
       };
       const onMove = (event) => {
+        if (!canvasEventTarget(canvasElement, event)) return;
+        stopCanvasEvent(event);
         crosshair.style.left = event.clientX + "px";
         crosshair.style.top = event.clientY + "px";
         this.#renderShapePreview(shapePreview, source, range, event);
       };
-      const onClick = (event) => {
+      const onPointerDown = (event) => {
+        if (!canvasEventTarget(canvasElement, event)) return;
+        stopCanvasEvent(event);
         if (event.button !== 0) return;
-        stopEvent(event);
         const point = canvas.canvasCoordinatesFromClient({ x: event.clientX, y: event.clientY });
         if (blockOutOfRange && source && range != null && Number.isFinite(Number(range))) {
           const distance = canvas.grid.measurePath([source.center, point]).distance;
@@ -73,20 +83,24 @@ export class CanvasPointPicker {
             return;
           }
         }
-        finish({ cancelled: false, point });
+        finish({ cancelled: false, point }, true);
       };
       const onKey = (event) => {
         if (event.key !== "Escape") return;
         event.preventDefault();
-        event.stopPropagation();
+        event.stopImmediatePropagation();
         finish({ cancelled: true, point: null });
+      };
+      const onControl = () => {
+        if (!restoringControl) queueMicrotask(restoreControlled);
       };
       const controlHookId = Hooks.on("controlToken", onControl);
 
-      canvasElement.addEventListener("pointermove", onMove, true);
-      canvasElement.addEventListener("pointerdown", onClick, true);
-      canvasElement.addEventListener("pointerup", stopEvent, true);
-      canvasElement.addEventListener("click", stopEvent, true);
+      window.addEventListener("pointermove", onMove, true);
+      window.addEventListener("pointerdown", onPointerDown, true);
+      for (const type of ["pointerup", "pointercancel", "mousedown", "mouseup", "click", "dblclick", "contextmenu"]) {
+        window.addEventListener(type, blockCanvasEvent, true);
+      }
       window.addEventListener("keydown", onKey, true);
     });
   }

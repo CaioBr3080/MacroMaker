@@ -1,11 +1,17 @@
+import { canvasEventTarget, lockTokenInteraction, stopCanvasEvent } from "./canvas-interaction-lock.js";
+
 export class CanvasTargetPicker {
   static async pick({ minTargets = 0, maxTargets = Infinity } = {}) {
     if (!canvas?.ready) throw new Error("O canvas precisa estar ativo para selecionar tokens.");
     const canvasElement = canvas.app?.canvas ?? canvas.app?.view;
     if (!canvasElement) throw new Error("O elemento do canvas não está disponível.");
+
     const originalIds = new Set([...game.user.targets].map((token) => token.id));
     const originalControlledIds = new Set((canvas.tokens.controlled ?? []).map((token) => token.id));
+    const unlockTokenInteraction = lockTokenInteraction();
     let restoringControl = false;
+    let finished = false;
+    let cleanupTimer = null;
 
     return new Promise((resolve) => {
       const overlay = document.createElement("div");
@@ -40,12 +46,15 @@ export class CanvasTargetPicker {
           return point.x >= token.x && point.x <= token.x + width && point.y >= token.y && point.y <= token.y + height;
         }) ?? null;
       };
-      const onCanvasClick = (event) => {
+      const blockCanvasEvent = (event) => {
+        if (canvasEventTarget(canvasElement, event)) stopCanvasEvent(event);
+      };
+      const onPointerDown = (event) => {
+        if (!canvasEventTarget(canvasElement, event)) return;
+        stopCanvasEvent(event);
         if (event.button !== 0) return;
         const token = tokenAt(event);
         if (!token || originalControlledIds.has(token.id)) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
         token.setTarget?.(!game.user.targets.has(token), { user: game.user, releaseOthers: false });
         updateCount();
         queueMicrotask(restoreControlled);
@@ -62,28 +71,36 @@ export class CanvasTargetPicker {
         }
       };
       const cleanup = () => {
+        if (cleanupTimer) window.clearTimeout(cleanupTimer);
         Hooks.off("targetToken", targetHookId);
         Hooks.off("controlToken", controlHookId);
-        canvasElement.removeEventListener("pointerdown", onCanvasClick, true);
+        window.removeEventListener("pointerdown", onPointerDown, true);
+        for (const type of ["pointerup", "pointercancel", "mousedown", "mouseup", "click", "dblclick", "contextmenu"]) {
+          window.removeEventListener(type, blockCanvasEvent, true);
+        }
         window.removeEventListener("keydown", onKey, true);
         overlay.remove();
+        unlockTokenInteraction();
         restoreControlled();
       };
-      const finish = (cancelled) => {
+      const finish = (cancelled, deferCleanup = false) => {
+        if (finished) return;
         const targets = [...game.user.targets];
         if (!cancelled && (targets.length < minTargets || targets.length > maxTargets)) {
           const expected = Number.isFinite(maxTargets) ? minTargets + "–" + maxTargets : "pelo menos " + minTargets;
           ui.notifications.warn("Selecione " + expected + " alvo(s).");
           return;
         }
+        finished = true;
         if (cancelled) restoreTargets();
-        cleanup();
+        if (deferCleanup) cleanupTimer = window.setTimeout(cleanup, 0);
+        else cleanup();
         resolve({ cancelled, targets: cancelled ? [] : targets });
       };
       const onKey = (event) => {
         if (!["Escape", "Enter"].includes(event.key)) return;
         event.preventDefault();
-        event.stopPropagation();
+        event.stopImmediatePropagation();
         if (event.key === "Escape") finish(true);
         if (event.key === "Enter") finish(false);
       };
@@ -91,7 +108,10 @@ export class CanvasTargetPicker {
       const controlHookId = Hooks.on("controlToken", onControl);
       overlay.querySelector("[data-confirm]").addEventListener("click", () => finish(false));
       overlay.querySelector("[data-cancel]").addEventListener("click", () => finish(true));
-      canvasElement.addEventListener("pointerdown", onCanvasClick, true);
+      window.addEventListener("pointerdown", onPointerDown, true);
+      for (const type of ["pointerup", "pointercancel", "mousedown", "mouseup", "click", "dblclick", "contextmenu"]) {
+        window.addEventListener(type, blockCanvasEvent, true);
+      }
       window.addEventListener("keydown", onKey, true);
     });
   }

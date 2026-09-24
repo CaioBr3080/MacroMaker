@@ -87,7 +87,7 @@
           <span><input type="text" value="{{project.icon}}" data-project-path="icon"><button type="button" data-action="browse-file" data-project-field="icon" data-file-type="image" title="Selecionar imagem"><i class="fas fa-folder-open"></i></button></span>
         </label>
         <label class="full">Descrição
-          <textarea rows="2" data-project-path="description">{{project.description}}</textarea>
+          <textarea rows="2" data-project-path="description" data-preserve-leading-newline>&#xfeff;{{project.description}}</textarea>
         </label>
       </fieldset>
 
@@ -382,7 +382,7 @@
                       <option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option>
                     </select>
                   </label>
-                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor" data-preserve-leading-newline>&#xfeff;{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isTest}}
@@ -392,7 +392,7 @@
                   <label>Visibilidade
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
-                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor" data-preserve-leading-newline>&#xfeff;{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isDamage}}
@@ -416,7 +416,7 @@
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
                   <button type="button" data-action="add-part" data-index="{{index}}" data-kind="damage"><i class="fas fa-plus"></i> Componente de dano</button>
-                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor" data-preserve-leading-newline>&#xfeff;{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isHealing}}
@@ -436,7 +436,7 @@
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
                   <button type="button" data-action="add-part" data-index="{{index}}" data-kind="healing"><i class="fas fa-plus"></i> Componente de cura</button>
-                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor" data-preserve-leading-newline>&#xfeff;{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isRoll}}
@@ -444,7 +444,7 @@
                   <label>Visibilidade
                     <select data-step-index="{{index}}" data-step-path="rollMode" data-value="{{rollMode}}"><option value="publicroll">Pública</option><option value="gmroll">Privada ao GM</option><option value="blindroll">Cega</option><option value="selfroll">Somente eu</option></select>
                   </label>
-                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor">{{flavor}}</textarea></label>
+                  <label class="full">Mensagem <textarea rows="4" data-step-index="{{index}}" data-step-path="flavor" data-preserve-leading-newline>&#xfeff;{{flavor}}</textarea></label>
                 {{/if}}
 
                 {{#if isMenu}}
@@ -460,7 +460,7 @@
                       <select data-step-index="{{index}}" data-step-path="cancelBehavior" data-value="{{cancelBehavior}}"><option value="abort">Abortar macro</option><option value="default">Usar padrão</option><option value="continue">Continuar sem atribuir</option></select>
                     </label>
                     <label>Valor padrão <input type="text" value="{{defaultValue}}" data-step-index="{{index}}" data-step-path="defaultValue" data-value-type="optional-string"></label>
-                    <label class="full">Descrição do menu <textarea rows="2" data-step-index="{{index}}" data-step-path="description">{{description}}</textarea></label>
+                    <label class="full">Descrição do menu <textarea rows="2" data-step-index="{{index}}" data-step-path="description" data-preserve-leading-newline>&#xfeff;{{description}}</textarea></label>
                     <label class="full file-field">Imagem do menu
                       <span><input type="text" value="{{image}}" data-step-index="{{index}}" data-step-path="image"><button type="button" data-action="browse-file" data-index="{{index}}" data-step-field="image" data-file-type="image" title="Escolher imagem do menu"><i class="fas fa-folder-open"></i></button></span>
                     </label>
@@ -558,7 +558,7 @@
                     <fieldset class="macro-maker-speaker-style full">
                       <legend>Nome do usuário no chat</legend>
                       <label class="full">Complemento após o nome
-                        <textarea rows="2" data-step-index="{{index}}" data-step-path="speakerAppend" placeholder="Aldine destrói com sua lâmina">{{speakerAppend}}</textarea>
+                        <textarea rows="2" data-step-index="{{index}}" data-step-path="speakerAppend" placeholder="Aldine destrói com sua lâmina" data-preserve-leading-newline>&#xfeff;{{speakerAppend}}</textarea>
                       </label>
                       <p class="full macro-maker-help-note">Isso preserva o nome original do token e anexa o texto. Você pode digitar a frase completa (ex.: “Aldine destrói com sua lâmina”) ou apenas o complemento (ex.: “ — destrói com sua lâmina”).</p>
                       <label>Fonte <select data-step-index="{{index}}" data-step-path="speakerStyle.font" data-value="{{speakerStyle.font}}">{{#each ../messageFonts}}<option value="{{value}}">{{label}}</option>{{/each}}</select></label>

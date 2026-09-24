@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.12 - 2026-09-24
+
+- Textareas de descrição, menu, mensagem e complemento do chat preservam quebras de linha inclusive antes do primeiro e depois do último caractere, sem inserir marcador no texto salvo.
+- Escolher alvo no canvas, escolher ponto, círculo, cone e linha bloqueiam temporariamente a interação nativa dos tokens e capturam a sequência completa de pointer/mouse/click; clicar no alvo não troca mais o token controlado do GM.
+
 ## 0.9.11 - 2026-09-24
 
 - A aba Macro Maker agora gerencia pastas como uma árvore: criar, renomear, colorir, atribuir acesso, mover pastas e projetos por arrastar-e-soltar e devolver itens à raiz.
