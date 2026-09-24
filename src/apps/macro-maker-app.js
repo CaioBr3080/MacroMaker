@@ -123,6 +123,11 @@ function setPath(object, path, value) {
   else cursor[last] = value;
 }
 
+function isColorFieldPath(path) {
+  return ["tint", "messageStyle.color", "speakerStyle.color", "changes.texture.tint", "changes.sight.color", "changes.light.color", "titleStyle.color", "descriptionStyle.color"].includes(path)
+    || /^columnSettings\.\d+\.titleStyle\.color$/.test(path ?? "");
+}
+
 function getPath(object, path) {
   return path.split(".").reduce((value, key) => value?.[key], object);
 }
@@ -985,7 +990,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       if (label) label.textContent = element.value || this.project.steps[index].type;
     }
     if (element.dataset.stepPath === "flavor" || element.dataset.stepPath?.startsWith("messageStyle.")) this.#updateMessagePreviews();
-    if (["tint", "messageStyle.color", "speakerStyle.color", "changes.texture.tint", "changes.sight.color", "changes.light.color"].includes(element.dataset.stepPath)) {
+    if (isColorFieldPath(element.dataset.stepPath)) {
       const picker = element.closest("label")?.querySelector("[data-color-for]");
       if (picker && /^#[0-9a-f]{6}$/i.test(element.value)) picker.value = element.value;
     }
@@ -1019,7 +1024,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         help.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); });
         label.append(help);
       }
-      if (["tint", "messageStyle.color", "speakerStyle.color", "changes.texture.tint", "changes.sight.color", "changes.light.color"].includes(path) && !label.querySelector("[data-color-for]")) {
+      if (isColorFieldPath(path) && !label.querySelector("[data-color-for]")) {
         const picker = document.createElement("input");
         picker.type = "color";
         picker.dataset.colorFor = path;

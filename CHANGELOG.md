@@ -1,3 +1,6 @@
+## 0.9.26 - 2026-09-24
+
+- Todos os campos de cor da etapa Menu agora recebem seletor RGB visual sincronizado ao valor #RRGGBB: título, descrição e títulos de coluna.
 ## 0.9.25 - 2026-09-24
 
 - A descrição de cada opção de menu agora resolve fórmulas entre chaves ao abrir o menu. Use `{DT}` para uma variável e `{DT + 5}` para cálculos do Foundry; por exemplo, `DT: {DT + 5}` acompanha mudanças em DT automaticamente.

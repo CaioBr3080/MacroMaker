@@ -4,7 +4,7 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.25` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.26` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - botão próprio **Macro Maker** na barra esquerda do canvas, abrindo uma janela redimensionável de gerenciamento;
 - árvore de pastas e subpastas recolhível na janela do Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
