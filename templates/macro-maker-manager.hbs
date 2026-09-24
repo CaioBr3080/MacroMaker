@@ -16,55 +16,7 @@
         <strong><i class="fas fa-sitemap"></i> Organização</strong>
         <small>Arraste macros ou pastas para reorganizar.</small>
       </header>
-      <section class="macro-maker-manager-favorites" aria-label="Variáveis frequentes">
-        <header>
-          <div>
-            <strong><i class="fas fa-star"></i> Variáveis frequentes</strong>
-            <small>Altere valores dos seus macros sem procurar pelas pastas.</small>
-          </div>
-          <button type="button" data-action="add-favorite-variable" title="Adicionar variável frequente"><i class="fas fa-plus"></i></button>
-        </header>
 
-        {{#if addingFavoriteVariable}}
-          <div class="macro-maker-favorite-picker">
-            <label>Buscar variável ou macro
-              <input type="search" data-favorite-variable-search placeholder="Ex.: FOR ou Ataque flamejante" autocomplete="off">
-            </label>
-            <ol>
-              {{#each favoriteVariableCandidates}}
-                <li data-favorite-variable-candidate data-favorite-search-text="{{searchText}}">
-                  <button type="button" data-action="add-favorite-variable" data-uuid="{{uuid}}" data-variable-name="{{name}}" title="Adicionar {{name}} de {{macroName}}">
-                    <strong>{{name}}</strong> <small>({{macroName}})</small>
-                  </button>
-                </li>
-              {{else}}
-                <li class="macro-maker-favorite-empty">Você não tem variáveis editáveis em macros disponíveis.</li>
-              {{/each}}
-            </ol>
-            <button type="button" data-action="cancel-favorite-variable"><i class="fas fa-xmark"></i> Fechar busca</button>
-          </div>
-        {{/if}}
-
-        <ol class="macro-maker-favorite-list">
-          {{#each favoriteVariables}}
-            <li data-favorite-variable data-uuid="{{uuid}}" data-variable-name="{{name}}">
-              <header>
-                <span title="{{name}} em {{macroName}}"><strong>{{name}}</strong> <small>({{macroName}})</small></span>
-                <button type="button" data-action="remove-favorite-variable" data-uuid="{{uuid}}" data-variable-name="{{name}}" title="Remover das variáveis frequentes"><i class="fas fa-star"></i></button>
-              </header>
-              <div class="macro-maker-favorite-edit">
-                <input type="text" data-favorite-variable-value value="{{value}}" aria-label="Valor de {{name}}">
-                <select data-favorite-variable-type aria-label="Tipo de {{name}}">
-                  {{#each typeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-                </select>
-                <button type="button" data-action="save-favorite-variable" title="Salvar {{name}}"><i class="fas fa-floppy-disk"></i></button>
-              </div>
-            </li>
-          {{else}}
-            <li class="macro-maker-favorite-empty">Clique em + para fixar uma variável de um macro que você pode editar.</li>
-          {{/each}}
-        </ol>
-      </section>
 
       {{#if isGM}}
         <div class="macro-maker-manager-root-drop" data-folder-drop="">
@@ -156,8 +108,59 @@
         </section>
       {{/if}}
 
+      <section class="macro-maker-manager-favorites" aria-label="Variáveis frequentes">
+        <header>
+          <div>
+            <strong><i class="fas fa-star"></i> Variáveis frequentes</strong>
+            <small>Altere valores dos seus macros sem procurar pelas pastas.</small>
+          </div>
+          <button type="button" data-action="add-favorite-variable" title="Adicionar variável frequente"><i class="fas fa-plus"></i></button>
+        </header>
+
+        {{#if addingFavoriteVariable}}
+          <div class="macro-maker-favorite-picker">
+            <label>Buscar variável ou macro
+              <input type="search" data-favorite-variable-search placeholder="Ex.: FOR ou Ataque flamejante" autocomplete="off">
+            </label>
+            <ol>
+              {{#each favoriteVariableCandidates}}
+                <li data-favorite-variable-candidate data-favorite-search-text="{{searchText}}">
+                  <button type="button" data-action="add-favorite-variable" data-uuid="{{uuid}}" data-variable-name="{{name}}" title="Adicionar {{name}} de {{macroName}}">
+                    <strong>{{name}}</strong> <small>({{macroName}})</small>
+                  </button>
+                </li>
+              {{else}}
+                <li class="macro-maker-favorite-empty">Você não tem variáveis editáveis em macros disponíveis.</li>
+              {{/each}}
+            </ol>
+            <button type="button" data-action="cancel-favorite-variable"><i class="fas fa-xmark"></i> Fechar busca</button>
+          </div>
+        {{/if}}
+
+        <ol class="macro-maker-favorite-list">
+          {{#each favoriteVariables}}
+            <li data-favorite-variable data-uuid="{{uuid}}" data-variable-name="{{name}}">
+              <header>
+                <span title="{{name}} em {{macroName}}"><strong>{{name}}</strong> <small>({{macroName}})</small></span>
+                <button type="button" data-action="remove-favorite-variable" data-uuid="{{uuid}}" data-variable-name="{{name}}" title="Remover das variáveis frequentes"><i class="fas fa-star"></i></button>
+              </header>
+              <div class="macro-maker-favorite-edit">
+                <input type="text" data-favorite-variable-value value="{{value}}" aria-label="Valor de {{name}}">
+                <select data-favorite-variable-type aria-label="Tipo de {{name}}">
+                  {{#each typeOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+                </select>
+                <button type="button" data-action="save-favorite-variable" title="Salvar {{name}}"><i class="fas fa-floppy-disk"></i></button>
+              </div>
+            </li>
+          {{else}}
+            <li class="macro-maker-favorite-empty">Clique em + para fixar uma variável de um macro que você pode editar.</li>
+          {{/each}}
+        </ol>
+      </section>
+
       {{#if isGM}}
         <section class="macro-maker-manager-persistents">
+
           <header><h3><i class="fas fa-link"></i> Persistentes ativos</h3><button type="button" data-action="open-persistent-manager" title="Abrir gerenciador do Sequencer"><i class="fas fa-up-right-from-square"></i></button></header>
           <ol>
             {{#each persistents}}
