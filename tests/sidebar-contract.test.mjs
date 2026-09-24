@@ -36,5 +36,6 @@ test("a sidebar não recebe mais a aba do Macro Maker e o gerenciador possui lay
   assert.match(css, /\.macro-maker-manager-layout\s*\{/);
   assert.match(template, /macro-maker-manager-tree/);
   assert.match(template, /macro-maker-manager-inspector/);
+  assert.ok(template.indexOf("macro-maker-manager-favorites") < template.indexOf("macro-maker-manager-entries"));
   assert.match(editorTemplate, /<aside class="macro-maker-editor-sidebar">/);
 });

@@ -16,42 +16,6 @@
         <strong><i class="fas fa-sitemap"></i> Organização</strong>
         <small>Arraste macros ou pastas para reorganizar.</small>
       </header>
-      {{#if isGM}}
-        <div class="macro-maker-manager-root-drop" data-folder-drop="">
-          <i class="fas fa-inbox"></i> Solte aqui para mover à raiz
-        </div>
-      {{/if}}
-      <ol class="macro-maker-manager-entries">
-        {{#each managerEntries}}
-          {{#if isFolder}}
-            <li class="macro-maker-manager-folder" style="--macro-maker-indent: {{indent}}px; --macro-maker-folder-color: {{color}}">
-              <article class="macro-maker-manager-folder-row" data-folder-drop="{{id}}" data-macro-maker-drag data-entry-kind="folder" data-entry-id="{{id}}" draggable="{{#if canManageFolder}}true{{else}}false{{/if}}">
-                {{#if hasChildren}}
-                  <button type="button" class="macro-maker-folder-toggle" data-action="toggle-folder" data-folder-id="{{id}}" aria-expanded="{{#if collapsed}}false{{else}}true{{/if}}" title="{{#if collapsed}}Abrir pasta{{else}}Fechar pasta{{/if}}">
-                    <i class="fas fa-chevron-{{#if collapsed}}right{{else}}down{{/if}}"></i>
-                  </button>
-                {{else}}<i class="macro-maker-folder-toggle-spacer" aria-hidden="true"></i>{{/if}}
-                <span class="macro-maker-folder-color" title="Cor da pasta"></span>
-                <i class="fas fa-folder{{#unless collapsed}}-open{{/unless}}"></i>
-                <span class="macro-maker-manager-entry-name" title="{{name}}">{{name}}</span>
-                <small title="Quem pode acessar">{{ownership}}</small>
-                {{#if canManageFolder}}<button type="button" data-action="configure-folder" data-folder-id="{{id}}" title="Configurar pasta"><i class="fas fa-gear"></i></button>{{/if}}
-              </article>
-            </li>
-          {{else}}
-            <li class="macro-maker-manager-project" style="--macro-maker-indent: {{indent}}px" data-macro-maker-drag data-entry-kind="project" data-entry-id="{{uuid}}" draggable="{{#if canManageOrganization}}true{{else}}false{{/if}}">
-              {{#if canManageOrganization}}<i class="fas fa-grip-vertical macro-maker-folder-drag" title="Arraste para outra pasta"></i>{{else}}<i class="macro-maker-folder-toggle-spacer" aria-hidden="true"></i>{{/if}}
-              <img src="{{img}}" alt="">
-              <button type="button" class="macro-maker-manager-entry-name" data-action="open" data-uuid="{{uuid}}" title="Editar {{name}}">{{name}}</button>
-              <button type="button" data-action="run" data-uuid="{{uuid}}" title="Executar {{name}}"><i class="fas fa-play"></i></button>
-              {{#if canEdit}}<button type="button" data-action="delete" data-uuid="{{uuid}}" title="Excluir {{name}}"><i class="fas fa-trash"></i></button>{{else}}<i class="fas fa-eye" title="Somente leitura"></i>{{/if}}
-            </li>
-          {{/if}}
-        {{else}}
-          <li class="macro-maker-manager-empty"><i class="fas fa-wand-magic-sparkles"></i> Nenhum projeto ou pasta ainda.</li>
-        {{/each}}
-      </ol>
-
       <section class="macro-maker-manager-favorites" aria-label="Variáveis frequentes">
         <header>
           <div>
@@ -101,6 +65,43 @@
           {{/each}}
         </ol>
       </section>
+
+      {{#if isGM}}
+        <div class="macro-maker-manager-root-drop" data-folder-drop="">
+          <i class="fas fa-inbox"></i> Solte aqui para mover à raiz
+        </div>
+      {{/if}}
+      <ol class="macro-maker-manager-entries">
+        {{#each managerEntries}}
+          {{#if isFolder}}
+            <li class="macro-maker-manager-folder" style="--macro-maker-indent: {{indent}}px; --macro-maker-folder-color: {{color}}">
+              <article class="macro-maker-manager-folder-row" data-folder-drop="{{id}}" data-macro-maker-drag data-entry-kind="folder" data-entry-id="{{id}}" draggable="{{#if canManageFolder}}true{{else}}false{{/if}}">
+                {{#if hasChildren}}
+                  <button type="button" class="macro-maker-folder-toggle" data-action="toggle-folder" data-folder-id="{{id}}" aria-expanded="{{#if collapsed}}false{{else}}true{{/if}}" title="{{#if collapsed}}Abrir pasta{{else}}Fechar pasta{{/if}}">
+                    <i class="fas fa-chevron-{{#if collapsed}}right{{else}}down{{/if}}"></i>
+                  </button>
+                {{else}}<i class="macro-maker-folder-toggle-spacer" aria-hidden="true"></i>{{/if}}
+                <span class="macro-maker-folder-color" title="Cor da pasta"></span>
+                <i class="fas fa-folder{{#unless collapsed}}-open{{/unless}}"></i>
+                <span class="macro-maker-manager-entry-name" title="{{name}}">{{name}}</span>
+                <small title="Quem pode acessar">{{ownership}}</small>
+                {{#if canManageFolder}}<button type="button" data-action="configure-folder" data-folder-id="{{id}}" title="Configurar pasta"><i class="fas fa-gear"></i></button>{{/if}}
+              </article>
+            </li>
+          {{else}}
+            <li class="macro-maker-manager-project" style="--macro-maker-indent: {{indent}}px" data-macro-maker-drag data-entry-kind="project" data-entry-id="{{uuid}}" draggable="{{#if canManageOrganization}}true{{else}}false{{/if}}">
+              {{#if canManageOrganization}}<i class="fas fa-grip-vertical macro-maker-folder-drag" title="Arraste para outra pasta"></i>{{else}}<i class="macro-maker-folder-toggle-spacer" aria-hidden="true"></i>{{/if}}
+              <img src="{{img}}" alt="">
+              <button type="button" class="macro-maker-manager-entry-name" data-action="open" data-uuid="{{uuid}}" title="Editar {{name}}">{{name}}</button>
+              <button type="button" data-action="run" data-uuid="{{uuid}}" title="Executar {{name}}"><i class="fas fa-play"></i></button>
+              {{#if canEdit}}<button type="button" data-action="delete" data-uuid="{{uuid}}" title="Excluir {{name}}"><i class="fas fa-trash"></i></button>{{else}}<i class="fas fa-eye" title="Somente leitura"></i>{{/if}}
+            </li>
+          {{/if}}
+        {{else}}
+          <li class="macro-maker-manager-empty"><i class="fas fa-wand-magic-sparkles"></i> Nenhum projeto ou pasta ainda.</li>
+        {{/each}}
+      </ol>
+
     </nav>
 
     <aside class="macro-maker-manager-inspector">
