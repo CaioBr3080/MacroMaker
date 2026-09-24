@@ -87,7 +87,7 @@ macro-maker/
 - **Distâncias:** os campos cinza não se aplicam ao método selecionado. Seus valores são mantidos para quando você voltar àquele método. Passe o mouse sobre `?` para consultar exemplos e unidades.
 - **Imagens e cores:** o botão de pasta ao lado da imagem do Macro abre o seletor do Foundry. Cores aceitam o seletor RGB e valores `#RRGGBB`.
 - **Pastas da aba:** o GM cria e edita nome, cor, destino e permissões diretamente na aba. Arraste um projeto ou uma pasta para outra pasta; use “Solte aqui para mover à raiz” para remover o vínculo.
-- **Assets e invocações:** a etapa Asset abre o navegador do Baileywiki Mass Edit e executa o preset salvo. A etapa Invocar token usa o protótipo do Ator selecionado; jogadores podem executar o macro, mas o GM ativo cria o token e somente o GM pode configurar essa etapa. Com Visage ativo, selecione uma variação do ator.
+- **Assets e invocações:** a etapa Asset abre o navegador do Baileywiki Mass Edit e executa o preset salvo. A etapa Invocar token usa o protótipo do Ator selecionado; jogadores podem executar o macro, mas o GM ativo cria o token e somente o GM pode configurar essa etapa. Com Visage ativo, selecione uma variação do ator. Na etapa Aplicar Visage, jogadores aplicam diretamente apenas em tokens que podem editar; para os demais, o GM ativo recebe, valida e executa a solicitação.
 - **Compartilhamento:** Todos aplica o acesso selecionado a todos, incluindo usuários offline e futuros. Não alterar atribuição preserva permissões existentes. Pastas mostram o caminho completo; Raiz remove a pasta do Macro.
 
 O Macro Document contém duas partes:
