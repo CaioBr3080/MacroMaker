@@ -212,7 +212,7 @@ test("mantém a escala, orientação e esticamento condicional", async (t) => {
   assert.deepEqual(calls.find((call) => call[1] === "rotateTowards"), [
     "effect",
     "rotateTowards",
-    target,
+    { x: 110, y: 10 },
     { rotationOffset: 20 }
   ]);
   assert.ok(!calls.some((call) => call[1] === "rotate"));

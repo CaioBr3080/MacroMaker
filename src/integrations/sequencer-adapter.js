@@ -1,6 +1,13 @@
 import { MODULE_ID } from "../constants.js";
 import { slug } from "../utils/ids.js";
 
+function canvasPoint(location) {
+  const point = location?.center ?? location;
+  const x = Number(point?.x);
+  const y = Number(point?.y);
+  return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : location;
+}
+
 export class SequencerAdapter {
   static assertReady() {
     if (!globalThis.Sequence || !globalThis.Sequencer) {
@@ -48,7 +55,7 @@ export class SequencerAdapter {
 
       if (step.rotateTowardsTarget && target) {
         const rotationOffset = Number(step.rotation);
-        effect.rotateTowards(target, Number.isFinite(rotationOffset) ? { rotationOffset } : {});
+        effect.rotateTowards(canvasPoint(target), Number.isFinite(rotationOffset) ? { rotationOffset } : {});
       } else if (step.rotation != null) effect.rotate(Number(step.rotation));
     }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.16 - 2026-09-24
+
+- Corrigida a orientação de animações sem esticar executadas por jogadores: o Sequencer agora recebe as coordenadas do centro do destino, em vez da referência ao Token que pode exigir permissão adicional.
+
 ## 0.9.15 - 2026-09-24
 
 - Variáveis do projeto e a etapa Definir variável agora oferecem o tipo Fórmula de rolagem. Exemplos como DANO = 2d6 + FOR e ATAQUE = 1d20 + 5 são expandidos na própria rolagem do Foundry.
