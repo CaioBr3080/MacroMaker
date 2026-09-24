@@ -48,6 +48,7 @@ test("o registro principal contém todos os tipos do schema atual", () => {
     "menu",
     "branch",
     "setVariable",
+    "promptVariable",
     "mutateSteps",
     "removePersistent",
     "assetPreset",

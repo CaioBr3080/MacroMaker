@@ -696,6 +696,16 @@
                   <label>Valor <input type="text" value="{{value}}" data-step-index="{{index}}" data-step-path="value"></label>
                 {{/if}}
 
+                {{#if isPromptVariable}}
+                  <label>Variável <input type="text" value="{{variable}}" data-step-index="{{index}}" data-step-path="variable"></label>
+                  <label>Título <input type="text" value="{{title}}" data-step-index="{{index}}" data-step-path="title"></label>
+                  <label>Rótulo do campo <input type="text" value="{{inputLabel}}" placeholder="Valor" data-step-index="{{index}}" data-step-path="inputLabel"></label>
+                  <label>Tipo <select data-step-index="{{index}}" data-step-path="valueType" data-value="{{valueType}}"><option value="auto">Automático</option><option value="string">Texto</option><option value="number">Número</option><option value="boolean">Booleano</option><option value="array">Lista</option><option value="formula">Fórmula de rolagem</option></select></label>
+                  <label>Salvar resposta <select data-step-index="{{index}}" data-step-path="saveMode" data-value="{{saveMode}}"><option value="execution">Somente nesta execução</option><option value="permanent">Permanentemente no macro</option></select></label>
+                  <label>Ao cancelar <select data-step-index="{{index}}" data-step-path="cancelBehavior" data-value="{{cancelBehavior}}"><option value="abort">Cancelar macro</option><option value="continue">Manter valor e continuar</option></select></label>
+                  <label class="full">Orientação <input type="text" value="{{description}}" placeholder="Explique qual valor deve ser informado" data-step-index="{{index}}" data-step-path="description"></label>
+                  <p class="macro-maker-step-note full"><i class="fas fa-circle-info"></i> A resposta inicia com o valor atual da variável. Salvar permanentemente só funciona para quem pode editar este macro.</p>
+                {{/if}}
                 {{#if isMutateSteps}}
                   <label>Ação <select data-step-index="{{index}}" data-step-path="action" data-value="{{action}}"><option value="modify">Modificar</option><option value="remove">Remover</option><option value="replace">Substituir</option><option value="add">Adicionar</option></select></label>
                   <label>ID da etapa alvo <input type="text" value="{{targetId}}" data-step-index="{{index}}" data-step-path="targetId"></label>

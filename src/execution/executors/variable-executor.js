@@ -1,7 +1,7 @@
 import { clone, getPath, interpolate, setPath } from "../../utils/safe-values.js";
 import { createRollFormulaVariable } from "../../utils/roll-formula.js";
 
-function typedValue(value, type = "auto") {
+export function typedValue(value, type = "auto") {
   if (type === "string") return String(value ?? "");
   if (type === "formula") return createRollFormulaVariable(value);
   if (type === "number") {

@@ -300,6 +300,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         isMenu: step.type === "menu",
         isBranch: step.type === "branch",
         isSetVariable: step.type === "setVariable",
+        isPromptVariable: step.type === "promptVariable",
         isMutateSteps: step.type === "mutateSteps",
         isRemovePersistent: step.type === "removePersistent",
         isAssetPreset: step.type === "assetPreset",

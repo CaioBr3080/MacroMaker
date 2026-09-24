@@ -237,6 +237,7 @@ export class ProjectValidator {
 
     if (step.type === STEP_TYPES.MENU) this.#normalizeMenu(step, path, issues);
     if (step.type === STEP_TYPES.SET_VARIABLE) this.#normalizeVariableStep(step, path, issues);
+    if (step.type === STEP_TYPES.PROMPT_VARIABLE) this.#normalizePromptVariableStep(step, path, issues);
     if (step.type === STEP_TYPES.BRANCH) {
       this.#normalizeCondition(step.condition, `${path}.condition`, issues, depth);
       for (const branch of ["then", "else"]) {
@@ -445,6 +446,23 @@ export class ProjectValidator {
     }
   }
 
+  static #normalizePromptVariableStep(step, path, issues) {
+    if (!safePath(step.variable)) issues.push({ path: `${path}.variable`, message: "Nome de variável inválido." });
+    for (const key of ["title", "description", "inputLabel"]) {
+      if (step[key] != null && typeof step[key] !== "string") {
+        issues.push({ path: `${path}.${key}`, message: `${key} da resposta precisa ser texto.` });
+      }
+    }
+    if (!["auto", "string", "number", "boolean", "array", "formula"].includes(step.valueType ?? "string")) {
+      issues.push({ path: `${path}.valueType`, message: "Tipo de resposta inválido." });
+    }
+    if (!["execution", "permanent"].includes(step.saveMode ?? "execution")) {
+      issues.push({ path: `${path}.saveMode`, message: "Modo de salvamento da resposta inválido." });
+    }
+    if (!["abort", "continue"].includes(step.cancelBehavior ?? "abort")) {
+      issues.push({ path: `${path}.cancelBehavior`, message: "Comportamento ao cancelar a resposta inválido." });
+    }
+  }
   static #normalizeMutation(step, path, issues, stepRegistry, depth, stepIds) {
     if (!["add", "remove", "replace", "modify"].includes(step.action ?? "modify")) {
       issues.push({ path: `${path}.action`, message: "Ação de alteração de etapa inválida." });

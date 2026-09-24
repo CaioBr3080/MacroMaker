@@ -4,7 +4,7 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.27` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.28` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - botão próprio **Macro Maker** na barra esquerda do canvas, abrindo uma janela redimensionável de gerenciamento;
 - árvore de pastas e subpastas recolhível na janela do Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
@@ -27,7 +27,7 @@ Esta versão `0.9.27` entrega a base do MVP até importação, compartilhamento 
 - grupos de condições `AND`, `OR` e `NOT`, com crítico, acerto, distância, rolagens, dano, dado natural, HP, itens, efeitos, tags, quantidade de alvos e variáveis;
 - ramificações visuais `então/senão`, mutações temporárias de etapas e explicação da última execução;
 - menus simples ou em cartões, seleção única/múltipla, padrões, cancelamento configurável, títulos/descrições/colunas estilizados e grade responsiva sem textos comprimidos;
-- variáveis locais com operações de atribuição, soma, subtração, multiplicação, lista e alternância; variáveis também podem guardar fórmulas de rolagem reutilizáveis do Foundry;
+- variáveis locais com operações de atribuição, soma, subtração, multiplicação, lista e alternância; a etapa Pedir valor recebe uma resposta tipada e pode usá-la somente na execução ou gravá-la permanentemente no macro; variáveis também podem guardar fórmulas de rolagem reutilizáveis do Foundry;
 - IDs estáveis por projeto/etapa, políticas de duplicação, duração, vínculo por UUID e remoção de persistentes por escopo;
 - painel de persistentes ativos para o GM, inclusive efeitos órfãos, e limpeza ao excluir token/cena;
 - pastas, ownership por usuário, OWNER/OBSERVER/NONE, atribuição a usuários offline, hotbar, campos bloqueados e exclusão confirmada;
@@ -76,6 +76,7 @@ macro-maker/
 ### Controles do editor
 
 - **Variáveis do projeto:** adicione uma variável, renomeie para `FOR`, escolha Número e informe `4`. Use `1d20 + FOR` (ou `1d20 + @FOR`) na fórmula. O limiar de crítico também aceita `FOR` ou `@FOR` quando a variável for numérica. Basta alterar o valor de FOR e salvar para atualizar as próximas execuções. Os nomes diferenciam maiúsculas de minúsculas. Renomear/excluir uma variável exige atualizar suas referências. OWNER pode editar; campos bloqueados pelo GM continuam protegidos.
+- **Pedir valor:** abre um campo para quem executa o macro informar o novo valor de uma variável. Escolha o mesmo tipo usado em **Definir variável**. “Somente nesta execução” não altera o macro salvo; “Permanentemente no macro” grava o valor para as próximas execuções e exige permissão de edição. Ao fechar a janela, você pode cancelar o macro ou manter o valor anterior e continuar.
 - **Dano e cura:** componentes dentro da mesma etapa aparecem em uma única rolagem, com total e discriminação dos tipos. Crie outra etapa se quiser uma segunda rolagem. Resistências são indicadas separadamente do total bruto dos dados; o módulo não altera HP automaticamente.
 - **Mensagens:** o texto aceita várias linhas e preserva espaços no início, no fim e repetidos ao salvar. Os controles de formatação alteram a mensagem inteira e mostram uma prévia. No texto, use `{FOR}` (ou o formato legado `{{variables.FOR}}`) para mostrar o valor de uma variável. A descrição de opção de menu também calcula fórmulas como `{DT + 5}`.
 - **Descrição de opção do menu:** use `{DT}` para exibir uma variável numérica ou `{DT + 5}` para calcular uma fórmula do Foundry quando o menu abrir. Assim, `DT: {DT + 5}` atualiza automaticamente quando DT muda.

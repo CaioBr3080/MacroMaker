@@ -1620,3 +1620,15 @@
   .macro-maker-favorite-edit { grid-template-columns: 1fr auto; }
   .macro-maker-favorite-edit select { grid-column: 1 / -1; }
 }
+/* Resposta de variável durante a execução. */
+.macro-maker-variable-prompt {
+  display: grid;
+  gap: 0.7rem;
+  min-width: min(100%, 340px);
+}
+
+.macro-maker-variable-prompt p { margin: 0; white-space: pre-wrap; }
+.macro-maker-variable-prompt label { display: grid; gap: 0.3rem; font-weight: 600; }
+.macro-maker-variable-prompt label small { font-weight: normal; opacity: 0.68; }
+.macro-maker-variable-prompt input,
+.macro-maker-variable-prompt select { width: 100%; }

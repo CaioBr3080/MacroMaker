@@ -19,6 +19,7 @@ export const STEP_TYPES = Object.freeze({
   MENU: "menu",
   BRANCH: "branch",
   SET_VARIABLE: "setVariable",
+  PROMPT_VARIABLE: "promptVariable",
   MUTATE_STEPS: "mutateSteps",
   REMOVE_PERSISTENT: "removePersistent",
   ASSET_PRESET: "assetPreset",

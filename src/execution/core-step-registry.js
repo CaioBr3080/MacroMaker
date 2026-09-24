@@ -8,6 +8,7 @@ import { RollExecutor } from "./executors/roll-executor.js";
 import { BranchExecutor } from "./executors/branch-executor.js";
 import { RuntimeStepExecutor } from "./executors/runtime-step-executor.js";
 import { VariableExecutor } from "./executors/variable-executor.js";
+import { PromptVariableExecutor } from "./executors/prompt-variable-executor.js";
 import { TokenUpdateExecutor } from "./executors/token-update-executor.js";
 import { VisageExecutor } from "./executors/visage-executor.js";
 import { StepRegistry } from "./step-registry.js";
@@ -132,6 +133,22 @@ export function createCoreStepRegistry() {
     execute: (step, context) => VariableExecutor.execute(step, context)
   });
 
+  registry.register(STEP_TYPES.PROMPT_VARIABLE, {
+    label: "Pedir valor",
+    icon: "fas fa-comment-dots",
+    defaults: {
+      label: "Pedir valor",
+      title: "Informar valor",
+      description: "",
+      inputLabel: "Valor",
+      variable: "value",
+      valueType: "string",
+      saveMode: "execution",
+      cancelBehavior: "abort"
+    },
+    schema: {},
+    execute: (step, context) => PromptVariableExecutor.execute(step, context)
+  });
   registry.register(STEP_TYPES.MUTATE_STEPS, {
     label: "Alterar etapa nesta execução",
     icon: "fas fa-pen-to-square",

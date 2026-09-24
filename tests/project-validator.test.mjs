@@ -315,3 +315,27 @@ test("valida estilos textuais do menu", () => {
     steps: [{ type: "menu", titleStyle: { color: "blue" }, options: [{ label: "A", value: "a" }] }]
   }), ProjectValidationError);
 });
+test("valida a etapa Pedir valor e seus modos de salvamento", () => {
+  const project = ProjectValidator.normalize({
+    name: "Resposta",
+    targeting: { source: "none", mode: "none" },
+    variables: { FOR: 4 },
+    steps: [{
+      type: "promptVariable",
+      variable: "FOR",
+      title: "Novo bônus",
+      description: "Informe o bônus.",
+      inputLabel: "FOR",
+      valueType: "number",
+      saveMode: "permanent",
+      cancelBehavior: "continue"
+    }]
+  }, { stepRegistry: createCoreStepRegistry() });
+  assert.equal(project.steps[0].saveMode, "permanent");
+
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Resposta inválida",
+    variables: {},
+    steps: [{ type: "promptVariable", variable: "FOR", valueType: "date", saveMode: "world" }]
+  }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
+});
