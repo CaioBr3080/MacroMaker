@@ -52,3 +52,18 @@ test("consulta HP, item, efeito e tag somente através do adapter", async () => 
   assert.equal(await ConditionEngine.matches({ type: "hasTag", value: "boss" }, context), true);
   assert.deepEqual(calls, ["hp", "item", "effect", "tag"]);
 });
+
+test("preserva o dado natural do ataque após dano e respeita limites numéricos de crítico", async () => {
+  const context = {
+    critical: true,
+    attack: { dice: [{ faces: 20, results: [{ result: 20, active: true }] }] },
+    lastRoll: { dice: [{ faces: 12, results: [{ result: 12, active: true }] }] }
+  };
+
+  assert.equal(await ConditionEngine.matches({ type: "naturalDie", operator: "eq", value: 20 }, context), true);
+  assert.equal(await ConditionEngine.matches({ type: "critical", operator: "lte", value: 19 }, context), false);
+  assert.equal(await ConditionEngine.matches({ type: "critical", operator: "eq", value: 20 }, context), true);
+
+  context.attack = { dice: [{ faces: 20, results: [{ result: 19, active: true }] }] };
+  assert.equal(await ConditionEngine.matches({ type: "critical", operator: "lte", value: 19 }, context), true);
+});

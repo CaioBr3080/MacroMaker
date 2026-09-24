@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.18 - 2026-09-24
+
+- Corrigidas condições de Dado natural após etapas de dano, espera, animação ou som: elas preservam o d20 da última etapa Ataque, em vez de consultar a última rolagem auxiliar.
+- Condições Crítico com Valor agora respeitam o limite do d20. Por exemplo, Crítico ≤ 19 exclui um 20 natural; sem Valor, Crítico continua significando qualquer crítico.
 ## 0.9.17 - 2026-09-24
 
 - Nova etapa Efeito Token Magic FX: aplica presets ou uma lista JSON de filtros ao executante, alvo ou template medido.

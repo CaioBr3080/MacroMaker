@@ -39,10 +39,18 @@ export class ConditionEngine {
     const operator = condition.operator ?? "eq";
 
     switch (condition.type) {
-      case "critical":
-        actual = context.critical === true;
-        matched = actual;
+      case "critical": {
+        const isCritical = context.critical === true;
+        const hasNaturalLimit = condition.value !== undefined && String(condition.value).trim() !== "";
+        const values = hasNaturalLimit
+          ? RollAnalysis.activeNaturalResults(context.attack ?? context.lastRoll, { faces: condition.faces ?? 20 })
+          : null;
+        actual = values ?? isCritical;
+        matched = hasNaturalLimit
+          ? isCritical && values.some((value) => compare(value, operator, expected))
+          : isCritical;
         break;
+      }
       case "notCritical":
         actual = context.critical === true;
         matched = !actual;
@@ -78,7 +86,7 @@ export class ConditionEngine {
         matched = actual != null && compare(actual, operator, expected);
         break;
       case "naturalDie": {
-        const values = RollAnalysis.activeNaturalResults(context.lastRoll, { faces: condition.faces ?? 20 });
+        const values = RollAnalysis.activeNaturalResults(context.attack ?? context.lastRoll, { faces: condition.faces ?? 20 });
         actual = values;
         matched = values.some((value) => compare(value, operator, expected));
         break;
