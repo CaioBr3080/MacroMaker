@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.11 - 2026-09-24
+
+- A aba Macro Maker agora gerencia pastas como uma árvore: criar, renomear, colorir, atribuir acesso, mover pastas e projetos por arrastar-e-soltar e devolver itens à raiz.
+- As abas, cartões de etapa e blocos de configuração receberam bordas e variações de tom mais claras para separar melhor as áreas no tema escuro.
+- Nova etapa **Asset do Mass Edit**: abre o seletor de presets do Baileywiki Mass Edit e cria o preset no executante, alvo ou ponto, com prévia, grade e ocultação.
+- Nova etapa **Invocar token**: o GM define ator, nome, quantidade, disposição, posição e opcionalmente uma variação Visage. Jogadores autorizados executam o macro, enquanto a criação é realizada pelo GM ativo e a configuração da invocação permanece exclusiva do GM.
+- Manifesto declara socket e recomenda Baileywiki Mass Edit e Visage; sem eles, apenas as funcionalidades correspondentes mostram uma mensagem clara em vez de afetar o restante do módulo.
+
 ## 0.9.10 - 2026-09-23
 
 - O campo simples de Mensagem voltou ao editor, com altura para editar parágrafos.

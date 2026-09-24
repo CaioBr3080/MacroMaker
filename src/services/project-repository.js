@@ -12,6 +12,15 @@ function lockedFields(project) {
   return (Array.isArray(value) ? value : String(value).split(",")).map((path) => path.trim()).filter(Boolean);
 }
 
+function summonSteps(steps, result = []) {
+  for (const step of steps ?? []) {
+    if (step?.type === "summon") result.push(step);
+    summonSteps(step?.then, result);
+    summonSteps(step?.else, result);
+    if (step?.step) summonSteps([step.step], result);
+  }
+  return result;
+}
 function assignOwnership(ownership, userId, level) {
   if (![0, 2, 3].includes(Number(level))) throw new Error("Nível de acesso inválido.");
   const result = { ...ownership };
@@ -53,6 +62,10 @@ export class ProjectRepository {
       throw new Error("Você não possui permissão para criar macros de script.");
     }
 
+    if (!game.user.isGM && summonSteps(project?.steps).length) {
+      throw new Error("Somente o GM pode criar projetos com etapas de invocação.");
+    }
+
     const now = Date.now();
     project = foundry.utils.deepClone(project);
     project.metadata ??= {};
@@ -88,6 +101,9 @@ export class ProjectRepository {
     if (!macro.isOwner) throw new Error("Você não pode editar este projeto.");
     const previous = migrateProject(macro.getFlag(MODULE_ID, PROJECT_FLAG)).project;
     if (!game.user.isGM) {
+      if (JSON.stringify(summonSteps(previous.steps)) !== JSON.stringify(summonSteps(project.steps))) {
+        throw new Error("Somente o GM pode criar ou alterar etapas de invocação.");
+      }
       for (const path of lockedFields(previous)) {
         if (JSON.stringify(getPath(previous, path)) !== JSON.stringify(getPath(project, path))) {
           throw new Error(`O campo ${path} foi bloqueado pelo GM.`);
@@ -147,6 +163,15 @@ export class ProjectRepository {
     return macro;
   }
 
+  static async moveToFolder(uuid, folderId = null) {
+    if (!game.user.isGM) throw new Error("Somente o GM pode organizar a pasta de projetos.");
+    if (folderId && game.folders.get(folderId)?.type !== "Macro") {
+      throw new Error("A pasta escolhida não é uma pasta de Macros.");
+    }
+    const { macro } = await this.get(uuid);
+    await macro.update({ folder: folderId || null });
+    return macro;
+  }
   static async assignHotbar(macro, slot, user = game.user) {
     const number = Number(slot);
     if (!Number.isInteger(number) || number < 1 || number > 50) throw new Error("O slot da hotbar deve estar entre 1 e 50.");

@@ -1,5 +1,7 @@
 import { STEP_TYPES } from "../constants.js";
 import { SequencerAdapter } from "../integrations/sequencer-adapter.js";
+import { MassEditAdapter } from "../integrations/mass-edit-adapter.js";
+import { SummonExecutor } from "./executors/summon-executor.js";
 import { MenuExecutor } from "./executors/menu-executor.js";
 import { RollExecutor } from "./executors/roll-executor.js";
 import { BranchExecutor } from "./executors/branch-executor.js";
@@ -146,6 +148,41 @@ export function createCoreStepRegistry() {
     defaults: { label: "Remover persistente", scope: "name", object: "target", name: "efeito" },
     schema: {},
     execute: (step, context) => SequencerAdapter.removePersistent(step, context)
+  });
+
+  registry.register(STEP_TYPES.ASSET_PRESET, {
+    label: "Asset do Mass Edit",
+    icon: "fas fa-cubes",
+    defaults: {
+      label: "Asset configurado",
+      presetUuid: "",
+      presetName: "",
+      presetType: "ALL",
+      destination: "location",
+      pickPosition: true,
+      snapToGrid: true,
+      hidden: false
+    },
+    schema: {},
+    execute: (step, context) => MassEditAdapter.spawnPreset(step, context)
+  });
+
+  registry.register(STEP_TYPES.SUMMON, {
+    label: "Invocar token",
+    icon: "fas fa-dragon",
+    defaults: {
+      label: "Invocar token",
+      actorId: "",
+      tokenName: "",
+      destination: "location",
+      count: 1,
+      disposition: 0,
+      hidden: false,
+      snapToGrid: true,
+      visageId: ""
+    },
+    schema: {},
+    execute: (step, context) => SummonExecutor.execute(step, context)
   });
 
   return registry;

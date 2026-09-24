@@ -168,3 +168,15 @@ test("criação por jogador não aplica atribuição Todos herdada do projeto", 
   await ProjectRepository.create({ name: "Cópia", steps: [], sharing: { userId: "*", level: 3 } });
   assert.deepEqual(creates[0].ownership, { default: 0, "player-id": 3 });
 });
+
+test("jogador não cria invocação, inclusive em uma mutação aninhada", async (t) => {
+  t.after(clearFoundryMock);
+  installFoundryMock();
+  await assert.rejects(
+    ProjectRepository.create({
+      name: "Invocação",
+      steps: [{ type: "mutateSteps", step: { type: "summon", actorId: "boss" } }]
+    }),
+    /Somente o GM/
+  );
+});

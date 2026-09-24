@@ -2,6 +2,7 @@ import { MODULE_ID, PROJECT_FLAG } from "./constants.js";
 import { MacroMakerAPI } from "./api.js";
 import { MacroMakerApp } from "./apps/macro-maker-app.js";
 import { MacroMakerSidebar } from "./apps/macro-maker-sidebar.js";
+import { SummonExecutor } from "./execution/executors/summon-executor.js";
 
 Hooks.once("init", () => {
   console.info("Macro Maker | inicializando");
@@ -42,6 +43,7 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
+  SummonExecutor.registerSocket();
   const api = new MacroMakerAPI(MacroMakerApp);
   game.macroMaker = api;
   game.modules.get(MODULE_ID).api = api;

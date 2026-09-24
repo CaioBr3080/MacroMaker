@@ -255,6 +255,8 @@ export class ProjectValidator {
     if (step.type === STEP_TYPES.MUTATE_STEPS) this.#normalizeMutation(step, path, issues, stepRegistry, depth, stepIds);
     if (step.type === STEP_TYPES.ANIMATION) this.#normalizePersistence(step, path, issues);
     if (step.type === STEP_TYPES.REMOVE_PERSISTENT) this.#normalizePersistentRemoval(step, path, issues);
+    if (step.type === STEP_TYPES.ASSET_PRESET) this.#normalizeAssetPreset(step, path, issues);
+    if (step.type === STEP_TYPES.SUMMON) this.#normalizeSummon(step, path, issues);
 
     const rollTypes = [STEP_TYPES.ATTACK, STEP_TYPES.TEST, STEP_TYPES.DAMAGE, STEP_TYPES.HEALING, STEP_TYPES.ROLL];
     if (!rollTypes.includes(step.type)) return;
@@ -457,6 +459,52 @@ export class ProjectValidator {
     }
   }
 
+  static #normalizeAssetPreset(step, path, issues) {
+    if ((!step.presetUuid || typeof step.presetUuid !== "string") && (!step.presetName || typeof step.presetName !== "string")) {
+      issues.push({ path: path + ".presetUuid", message: "Escolha um preset do Baileywiki Mass Edit." });
+    }
+    if (step.presetName != null && typeof step.presetName !== "string") {
+      issues.push({ path: path + ".presetName", message: "O nome do preset precisa ser texto." });
+    }
+    if (step.presetType != null && typeof step.presetType !== "string") {
+      issues.push({ path: path + ".presetType", message: "O tipo do preset precisa ser texto." });
+    }
+    if (step.destination != null && !["source", "target", "location"].includes(step.destination)) {
+      issues.push({ path: path + ".destination", message: "Posição do asset inválida." });
+    }
+    for (const key of ["pickPosition", "snapToGrid", "hidden"]) {
+      if (step[key] != null && typeof step[key] !== "boolean") {
+        issues.push({ path: path + "." + key, message: "A opção do asset precisa ser booleano." });
+      }
+    }
+  }
+
+  static #normalizeSummon(step, path, issues) {
+    if (typeof step.actorId !== "string" || !step.actorId) {
+      issues.push({ path: path + ".actorId", message: "Escolha o Ator que será invocado." });
+    }
+    if (step.tokenName != null && typeof step.tokenName !== "string") {
+      issues.push({ path: path + ".tokenName", message: "O nome do token precisa ser texto." });
+    }
+    this.#normalizeOptionalNumber(step, "count", path + ".count", issues, { minimum: 1, maximum: 20 });
+    if (step.count != null && Number.isFinite(Number(step.count)) && !Number.isInteger(Number(step.count))) {
+      issues.push({ path: path + ".count", message: "A quantidade invocada precisa ser inteira." });
+    }
+    if (step.destination != null && !["source", "target", "location"].includes(step.destination)) {
+      issues.push({ path: path + ".destination", message: "Posição da invocação inválida." });
+    }
+    if (step.disposition != null && ![-1, 0, 1].includes(Number(step.disposition))) {
+      issues.push({ path: path + ".disposition", message: "Disposição da invocação inválida." });
+    } else if (step.disposition != null) step.disposition = Number(step.disposition);
+    if (step.visageId != null && typeof step.visageId !== "string") {
+      issues.push({ path: path + ".visageId", message: "A variação do Visage precisa ser texto." });
+    }
+    for (const key of ["snapToGrid", "hidden"]) {
+      if (step[key] != null && typeof step[key] !== "boolean") {
+        issues.push({ path: path + "." + key, message: "A opção de invocação precisa ser booleano." });
+      }
+    }
+  }
   static #normalizeOptionalNumber(object, key, path, issues, { minimum = -Infinity, maximum = Infinity } = {}) {
     if (object[key] == null || object[key] === "") return;
     const number = Number(object[key]);

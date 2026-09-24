@@ -2,7 +2,7 @@
   "id": "macro-maker",
   "title": "Macro Maker",
   "description": "Construtor visual e executor de macros com Sequencer para Foundry VTT.",
-  "version": "0.9.10",
+  "version": "0.9.11",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
@@ -12,6 +12,7 @@
       "name": "Caio Alexandre"
     }
   ],
+  "socket": true,
   "esmodules": [
     "src/main.js"
   ],
@@ -45,6 +46,16 @@
         "id": "jb2a_patreon",
         "type": "module",
         "reason": "Biblioteca recomendada de animações, mas não obrigatória."
+      },
+      {
+        "id": "multi-token-edit",
+        "type": "module",
+        "reason": "Necessário somente para as etapas de assets configurados do Baileywiki Mass Edit."
+      },
+      {
+        "id": "visage",
+        "type": "module",
+        "reason": "Necessário somente para aplicar variações Visage aos tokens invocados."
       }
     ]
   },

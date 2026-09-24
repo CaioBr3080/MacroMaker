@@ -16,6 +16,34 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function summonActors() {
+  return [...(game.actors?.contents ?? [])]
+    .filter((actor) => actor.visible !== false)
+    .map((actor) => ({ id: actor.id, name: actor.name, img: actor.img }))
+    .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { numeric: true }));
+}
+
+function visageChoices(actorId, selectedId) {
+  const module = game.modules?.get?.("visage");
+  const data = module?.active ? module.api?.Data : null;
+  const actor = actorId ? game.actors?.get?.(actorId) : null;
+  const entries = [
+    ...(data?.globals ?? []),
+    ...(actor && data?.getLocal ? data.getLocal(actor) : [])
+  ];
+  const unique = new Map();
+  for (const entry of entries) {
+    const id = entry?.id ?? entry?._id;
+    if (!id || unique.has(id)) continue;
+    unique.set(id, {
+      id,
+      name: entry.label ?? entry.name ?? id,
+      selected: id === selectedId
+    });
+  }
+  return [...unique.values()].sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { numeric: true }));
+}
+
 function setPath(object, path, value) {
   const keys = path.split(".");
   const last = keys.pop();
@@ -98,6 +126,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       "duplicate-step": this.#onDuplicateStep,
       "delete-step": this.#onDeleteStep,
       "browse-file": this.#onBrowseFile,
+      "choose-asset-preset": this.#onChooseAssetPreset,
       "add-part": this.#onAddPart,
       "delete-part": this.#onDeletePart,
       "add-menu-option": this.#onAddMenuOption,
@@ -193,12 +222,18 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         isBranch: step.type === "branch",
         isSetVariable: step.type === "setVariable",
         isMutateSteps: step.type === "mutateSteps",
-        isRemovePersistent: step.type === "removePersistent"
+        isRemovePersistent: step.type === "removePersistent",
+        isAssetPreset: step.type === "assetPreset",
+        isSummon: step.type === "summon",
+        visageChoices: visageChoices(step.actorId, step.visageId)
       })),
       hasMacro: Boolean(this.macroUuid),
       canManageMacro: Boolean(this.macroUuid) && this.canEdit,
       canEdit: this.canEdit,
       isGM: game.user.isGM,
+      summonActors: summonActors(),
+      massEditActive: Boolean(game.modules?.get?.("multi-token-edit")?.active),
+      visageActive: Boolean(game.modules?.get?.("visage")?.active),
       migrationPending: this.migrationPending,
       folders: folderChoices(game.folders ?? []),
       users: (game.users ?? []).map((user) => ({ id: user.id, name: user.name, active: user.active })),
@@ -255,7 +290,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     });
     if (!this.canEdit) {
-      this.element.querySelectorAll("[data-project-path], [data-step-path], [data-variable-index], [data-step-position], [data-color-for], [data-action='browse-file'], [data-action='add-variable'], [data-action='delete-variable']")
+      this.element.querySelectorAll("[data-project-path], [data-step-path], [data-variable-index], [data-step-position], [data-color-for], [data-action='browse-file'], [data-action='choose-asset-preset'], [data-action='add-variable'], [data-action='delete-variable']")
         .forEach((element) => { element.disabled = true; });
     }
     this.#applyActiveTab();
@@ -298,6 +333,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onDuplicateStep(_event, target) { return this.#duplicateStep(target); }
   static #onDeleteStep(_event, target) { return this.#deleteStep(target); }
   static #onBrowseFile(_event, target) { return this.#browseFile(target); }
+  static #onChooseAssetPreset(_event, target) { return this.#chooseAssetPreset(target); }
   static #onAddPart(_event, target) { return this.#addPart(target); }
   static #onDeletePart(_event, target) { return this.#deletePart(target); }
   static #onAddMenuOption(_event, target) { return this.#addMenuOption(target); }
@@ -825,7 +861,9 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       if (element.dataset.projectPath) setPath(project, element.dataset.projectPath, value);
       if (element.dataset.stepPath) setPath(project.steps[index], element.dataset.stepPath, value);
-    }, { render: false });
+    }, { render: element.dataset.renderOnChange === "true" });
+
+    if (element.dataset.renderOnChange === "true") return;
 
     if (element.dataset.projectPath === "name") {
       const heading = this.#query(".macro-maker-toolbar h1");
@@ -943,6 +981,31 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#mutate((project) => {
       moveStepTo(project.steps, from, to);
     });
+  }
+
+  #chooseAssetPreset(target) {
+    const api = game.modules?.get?.("multi-token-edit")?.api ?? globalThis.MassEdit;
+    if (!api?.openPresetBrowser) {
+      return ui.notifications.error("Ative Baileywiki Mass Edit para escolher um asset configurado.");
+    }
+    const index = Number(target.dataset.index);
+    const stepId = this.project.steps[index]?.id;
+    if (!stepId) return;
+    try {
+      api.openPresetBrowser({
+        documentName: "ALL",
+        closeOnPick: true,
+        callback: (preset) => this.#mutate((project) => {
+          const step = project.steps.find((entry) => entry.id === stepId);
+          if (!step) return;
+          step.presetUuid = preset?.uuid ?? preset?._id ?? "";
+          step.presetName = preset?.name ?? preset?.label ?? "";
+          step.presetType = preset?.documentName ?? preset?.type ?? "ALL";
+        })
+      });
+    } catch (error) {
+      this.#reportError("abrir o seletor de assets", error);
+    }
   }
 
   #browseFile(target) {

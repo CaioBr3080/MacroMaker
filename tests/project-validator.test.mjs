@@ -205,3 +205,24 @@ test("normaliza a limpeza opcional de alvos e rejeita valor inválido", () => {
     steps: []
   }), ProjectValidationError);
 });
+test("valida as etapas opcionais de asset e invocação", () => {
+  const project = ProjectValidator.normalize({
+    name: "Integrações",
+    targeting: { source: "none", mode: "none" },
+    steps: [
+      { type: "assetPreset", presetUuid: "Preset.asset", destination: "location", snapToGrid: true },
+      { type: "summon", actorId: "actor-id", count: "2", destination: "source", disposition: "1", visageId: "mask-id" }
+    ]
+  }, { stepRegistry: createCoreStepRegistry() });
+
+  assert.equal(project.steps[1].count, 2);
+  assert.equal(project.steps[1].disposition, 1);
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Inválido",
+    targeting: { source: "none", mode: "none" },
+    steps: [
+      { type: "assetPreset" },
+      { type: "summon", count: 0 }
+    ]
+  }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
+});

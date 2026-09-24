@@ -312,6 +312,55 @@
                   <label>Fade out (ms) <input type="number" min="0" value="{{fadeOut}}" data-step-index="{{index}}" data-step-path="fadeOut" data-value-type="optional-number"></label>
                 {{/if}}
 
+                {{#if isAssetPreset}}
+                  <fieldset class="macro-maker-integration-settings full">
+                    <legend><i class="fas fa-cubes"></i> Asset configurado no Baileywiki Mass Edit</legend>
+                    {{#unless ../massEditActive}}<p class="macro-maker-integration-warning">Ative Baileywiki Mass Edit para abrir o seletor e executar este asset. A configuração continua salva no projeto.</p>{{/unless}}
+                    <label class="full">Preset selecionado
+                      <span class="macro-maker-inline-picker"><input type="text" value="{{presetName}}" placeholder="Nenhum preset selecionado" data-step-index="{{index}}" data-step-path="presetName"><button type="button" data-action="choose-asset-preset" data-index="{{index}}" title="Abrir presets do Mass Edit"><i class="fas fa-folder-open"></i> Escolher asset</button></span>
+                    </label>
+                    <label class="full">UUID do preset <input type="text" value="{{presetUuid}}" placeholder="Preset.UUID" data-step-index="{{index}}" data-step-path="presetUuid"></label>
+                    <label>Tipo do preset <input type="text" value="{{presetType}}" placeholder="ALL" data-step-index="{{index}}" data-step-path="presetType"></label>
+                    <label>Posição
+                      <select data-step-index="{{index}}" data-step-path="destination" data-value="{{destination}}"><option value="location">Ponto escolhido</option><option value="source">Executante</option><option value="target">Alvo</option></select>
+                    </label>
+                    <div class="checkbox-grid full">
+                      <label><input type="checkbox" {{#if pickPosition}}checked{{/if}} data-step-index="{{index}}" data-step-path="pickPosition" data-value-type="boolean"> Posicionar com prévia do Mass Edit</label>
+                      <label><input type="checkbox" {{#if snapToGrid}}checked{{/if}} data-step-index="{{index}}" data-step-path="snapToGrid" data-value-type="boolean"> Ajustar à grade</label>
+                      <label><input type="checkbox" {{#if hidden}}checked{{/if}} data-step-index="{{index}}" data-step-path="hidden" data-value-type="boolean"> Criar oculto</label>
+                    </div>
+                  </fieldset>
+                {{/if}}
+
+                {{#if isSummon}}
+                  <fieldset class="macro-maker-integration-settings full">
+                    <legend><i class="fas fa-dragon"></i> Invocar token</legend>
+                    <p class="macro-maker-integration-note">Um jogador pode executar esta etapa. O GM ativo cria o token usando somente o ator e as opções salvos neste macro.</p>
+                    <label>Ator
+                      <select data-step-index="{{index}}" data-step-path="actorId" data-value="{{actorId}}" data-render-on-change="true"><option value="">Selecione um ator</option>{{#each ../summonActors}}<option value="{{id}}">{{name}}</option>{{/each}}</select>
+                    </label>
+                    <label>Nome do token <input type="text" value="{{tokenName}}" placeholder="Usar nome do ator" data-step-index="{{index}}" data-step-path="tokenName"></label>
+                    <label>Quantidade <input type="number" min="1" max="20" value="{{count}}" data-step-index="{{index}}" data-step-path="count" data-value-type="number"></label>
+                    <label>Posição
+                      <select data-step-index="{{index}}" data-step-path="destination" data-value="{{destination}}"><option value="location">Ponto escolhido</option><option value="source">Executante</option><option value="target">Alvo</option></select>
+                    </label>
+                    <label>Disposição
+                      <select data-step-index="{{index}}" data-step-path="disposition" data-value="{{disposition}}" data-value-type="number"><option value="-1">Hostil</option><option value="0">Neutro</option><option value="1">Amigável</option></select>
+                    </label>
+                    <div class="checkbox-grid full">
+                      <label><input type="checkbox" {{#if hidden}}checked{{/if}} data-step-index="{{index}}" data-step-path="hidden" data-value-type="boolean"> Criar oculto</label>
+                      <label><input type="checkbox" {{#if snapToGrid}}checked{{/if}} data-step-index="{{index}}" data-step-path="snapToGrid" data-value-type="boolean"> Ajustar à grade</label>
+                    </div>
+                    {{#if ../visageActive}}
+                      <label class="full">Variação do Visage
+                        <select data-step-index="{{index}}" data-step-path="visageId"><option value="">Sem variação</option>{{#each visageChoices}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select>
+                      </label>
+                    {{else}}
+                      <p class="macro-maker-integration-warning full">Ative o módulo Visage para escolher e aplicar uma variação ao token invocado.</p>
+                    {{/if}}
+                  </fieldset>
+                {{/if}}
+
                 {{#if isWait}}
                   <label>Espera (ms) <input type="number" min="0" value="{{ms}}" data-step-index="{{index}}" data-step-path="ms" data-value-type="number"></label>
                 {{/if}}

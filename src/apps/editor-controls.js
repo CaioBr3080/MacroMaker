@@ -145,5 +145,16 @@ export const FIELD_HELP = {
   align: "Alinhamento do texto da mensagem.",
   bold: "Exibe o texto da mensagem em negrito.",
   italic: "Exibe o texto da mensagem em itálico.",
-  underline: "Sublinha o texto da mensagem."
-};
+  underline: "Sublinha o texto da mensagem.",
+  presetName: "Nome do preset do Baileywiki Mass Edit. Use Escolher asset para preencher pelo navegador de presets.",
+  presetUuid: "UUID do preset Mass Edit. O seletor preenche automaticamente; use este campo apenas para informar um UUID conhecido.",
+  presetType: "Tipo de documento do preset. ALL deixa o Mass Edit decidir pelo próprio preset.",
+  destination: "Ponto onde o asset ou token será colocado: ponto selecionado durante a macro, executante ou alvo.",
+  pickPosition: "Abre a prévia de posicionamento do Mass Edit antes de criar o asset.",
+  snapToGrid: "Ajusta a criação à grade da cena.",
+  hidden: "Cria o documento oculto para jogadores.",
+  actorId: "Ator cujo Protótipo de Token será criado. Esta etapa só pode ser configurada pelo GM.",
+  tokenName: "Nome exibido pelo token invocado. Vazio usa o nome definido no ator.",
+  count: "Quantidade de tokens criados, de 1 a 20.",
+  disposition: "Relação do token invocado com os jogadores: hostil, neutra ou amigável.",
+  visageId: "Variação de aparência aplicada pelo Visage após a criação do token."};

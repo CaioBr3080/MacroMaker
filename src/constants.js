@@ -20,7 +20,9 @@ export const STEP_TYPES = Object.freeze({
   BRANCH: "branch",
   SET_VARIABLE: "setVariable",
   MUTATE_STEPS: "mutateSteps",
-  REMOVE_PERSISTENT: "removePersistent"
+  REMOVE_PERSISTENT: "removePersistent",
+  ASSET_PRESET: "assetPreset",
+  SUMMON: "summon"
 });
 
 export const TARGET_MODES = Object.freeze({

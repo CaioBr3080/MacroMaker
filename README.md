@@ -4,10 +4,10 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.10` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.11` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - uma aba própria **Macro Maker** na sidebar e um botão de fallback no diretório de Macros;
-- árvore de pastas e subpastas recolhível na própria aba Macro Maker; o GM cria, aninha e configura permissões de cada pasta sem sair dela;
+- árvore de pastas e subpastas recolhível na própria aba Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
 - editor migrado para `ApplicationV2` e Handlebars;
 - criação e edição de projetos por cartões visuais, com modo JSON avançado separado;
 - cada projeto salvo como um Macro normal do Foundry;
@@ -15,7 +15,7 @@ Esta versão `0.9.10` entrega a base do MVP até importação, compartilhamento 
 - comando compilado pequeno, chamando `game.macroMaker.executeMacro(uuid)`;
 - alvos marcados com `T`, seleção interativa de tokens, ponto, círculo, cone, linha e template medido;
 - filtros de aliado/inimigo, mínimo, máximo, alcance e visualização do alcance no canvas;
-- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu e remoção de persistente;
+- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit e invocação de token;
 - validação e normalização centralizadas antes de salvar ou executar;
 - registro público e extensível de tipos de etapa em `game.macroMaker.steps`;
 - adição, duplicação, exclusão, ativação e reordenação de etapas;
@@ -44,7 +44,7 @@ Etapas aninhadas aparecem nas faixas visuais da ramificação e continuam dispon
 ## Instalação para teste
 
 1. Extraia a pasta `macro-maker` dentro de `FoundryVTT/Data/modules/`.
-2. Ative **Sequencer** e depois **Macro Maker** no mundo.
+2. Ative **Sequencer** e depois **Macro Maker** no mundo. Para assets, ative também **Baileywiki Mass Edit**; para variações de invocação, ative **Visage**.
 3. Abra a aba **Macro Maker** na sidebar. Se ela não estiver disponível, use o botão **Macro Maker** no diretório de Macros.
 4. Crie um projeto, edite o JSON e salve.
 5. Selecione o token executante, marque um alvo com `T` e execute.
@@ -84,6 +84,8 @@ macro-maker/
 - **Etapas:** use a seta de recolher para deixar só o cabeçalho. Edite o número para mudar a posição; Enter ou sair do campo confirma. A lista lateral permite navegar pela sequência sem expandir todos os cartões.
 - **Distâncias:** os campos cinza não se aplicam ao método selecionado. Seus valores são mantidos para quando você voltar àquele método. Passe o mouse sobre `?` para consultar exemplos e unidades.
 - **Imagens e cores:** o botão de pasta ao lado da imagem do Macro abre o seletor do Foundry. Cores aceitam o seletor RGB e valores `#RRGGBB`.
+- **Pastas da aba:** o GM cria e edita nome, cor, destino e permissões diretamente na aba. Arraste um projeto ou uma pasta para outra pasta; use “Solte aqui para mover à raiz” para remover o vínculo.
+- **Assets e invocações:** a etapa Asset abre o navegador do Baileywiki Mass Edit e executa o preset salvo. A etapa Invocar token usa o protótipo do Ator selecionado; jogadores podem executar o macro, mas o GM ativo cria o token e somente o GM pode configurar essa etapa. Com Visage ativo, selecione uma variação do ator.
 - **Compartilhamento:** Todos aplica o acesso selecionado a todos, incluindo usuários offline e futuros. Não alterar atribuição preserva permissões existentes. Pastas mostram o caminho completo; Raiz remove a pasta do Macro.
 
 O Macro Document contém duas partes:
