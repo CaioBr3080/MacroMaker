@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.13 - 2026-09-24
+
+- Animações agora mantêm a escala base mesmo ao esticar até o destino; escala ao objeto também não é descartada pelo esticamento.
+- Nova opção Apontar para o destino: orienta o asset da origem para o alvo/ponto, inclusive durante o esticamento; o campo de rotação passa a ser o ajuste fino dessa direção.
+- Esticar sempre e Esticar somente após distância foram separados. Assim, um projétil pode usar tamanho fixo até a distância escolhida e só então alongar até o alvo.
+
 ## 0.9.12 - 2026-09-24
 
 - Textareas de descrição, menu, mensagem e complemento do chat preservam quebras de linha inclusive antes do primeiro e depois do último caractere, sem inserir marcador no texto salvo.

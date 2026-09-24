@@ -451,6 +451,21 @@ export class ProjectValidator {
     if (step.attachTo != null && ![true, false, "source", "target", "location"].includes(step.attachTo)) {
       issues.push({ path: `${path}.attachTo`, message: "Vínculo persistente inválido." });
     }
+    for (const key of ["stretchTo", "rotateTowardsTarget"]) {
+      if (step[key] != null && typeof step[key] !== "boolean") {
+        issues.push({ path: path + "." + key, message: key + " precisa ser booleano." });
+      }
+    }
+    if (step.distanceBehavior != null) {
+      if (!isRecord(step.distanceBehavior)) {
+        issues.push({ path: path + ".distanceBehavior", message: "distanceBehavior precisa ser um objeto." });
+      } else {
+        this.#normalizeOptionalNumber(step.distanceBehavior, "stretchAfter", path + ".distanceBehavior.stretchAfter", issues, { minimum: 0 });
+      }
+    }
+    this.#normalizeOptionalNumber(step, "scale", path + ".scale", issues, { minimum: 0 });
+    this.#normalizeOptionalNumber(step, "scaleToObject", path + ".scaleToObject", issues, { minimum: 0 });
+    this.#normalizeOptionalNumber(step, "rotation", path + ".rotation", issues);
   }
 
   static #normalizePersistentRemoval(step, path, issues) {

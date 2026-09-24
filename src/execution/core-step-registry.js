@@ -20,7 +20,8 @@ export function createCoreStepRegistry() {
       file: "jb2a.",
       source: "source",
       target: "target",
-      stretchTo: true,
+      stretchTo: false,
+      rotateTowardsTarget: false,
       persist: false,
       duplicatePolicy: "replace"
     },

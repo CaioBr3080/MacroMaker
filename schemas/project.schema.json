@@ -119,6 +119,18 @@
           "variable": { "type": "string" },
           "cancelBehavior": { "enum": ["abort", "default", "continue"] },
           "duplicatePolicy": { "enum": ["replace", "skip", "stack"] },
+          "stretchTo": { "type": "boolean" },
+          "rotateTowardsTarget": { "type": "boolean" },
+          "distanceBehavior": {
+            "type": "object",
+            "properties": {
+              "stretchAfter": { "type": "number", "minimum": 0 }
+            },
+            "additionalProperties": true
+          },
+          "scale": { "type": "number", "minimum": 0 },
+          "scaleToObject": { "type": "number", "minimum": 0 },
+          "rotation": { "type": "number" },
           "durationSeconds": { "type": "number", "minimum": 0 },
           "durationRounds": { "type": "number", "minimum": 0 }
         },

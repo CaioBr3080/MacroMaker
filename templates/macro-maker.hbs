@@ -275,19 +275,20 @@
                   <label>Destino
                     <select data-step-index="{{index}}" data-step-path="target" data-value="{{target}}"><option value="target">Alvo</option><option value="source">Executante</option><option value="location">Ponto escolhido</option><option value="template">Template</option></select>
                   </label>
-                  <label>Escala <input type="number" step="0.1" value="{{scale}}" data-step-index="{{index}}" data-step-path="scale" data-value-type="optional-number"></label>
-                  <label>Escala ao objeto <input type="number" step="0.1" value="{{scaleToObject}}" data-step-index="{{index}}" data-step-path="scaleToObject" data-value-type="optional-number"></label>
+                  <label>Escala base <input type="number" min="0" step="0.1" value="{{scale}}" data-step-index="{{index}}" data-step-path="scale" data-value-type="optional-number"></label>
+                  <label>Escala ao objeto <input type="number" min="0" step="0.1" value="{{scaleToObject}}" data-step-index="{{index}}" data-step-path="scaleToObject" data-value-type="optional-number"></label>
                   <label>Opacidade <input type="number" min="0" max="1" step="0.05" value="{{opacity}}" data-step-index="{{index}}" data-step-path="opacity" data-value-type="optional-number"></label>
                   <label>Cor <input type="text" value="{{tint}}" placeholder="#ffffff" data-step-index="{{index}}" data-step-path="tint"></label>
-                  <label>Rotação <input type="number" step="1" value="{{rotation}}" data-step-index="{{index}}" data-step-path="rotation" data-value-type="optional-number"></label>
+                  <label>Ajuste de rotação (graus) <input type="number" step="1" value="{{rotation}}" data-step-index="{{index}}" data-step-path="rotation" data-value-type="optional-number"></label>
                   <label>Velocidade <input type="number" min="0.01" step="0.1" value="{{playbackRate}}" data-step-index="{{index}}" data-step-path="playbackRate" data-value-type="optional-number"></label>
                   <label>Fade in (ms) <input type="number" min="0" value="{{fadeIn}}" data-step-index="{{index}}" data-step-path="fadeIn" data-value-type="optional-number"></label>
                   <label>Fade out (ms) <input type="number" min="0" value="{{fadeOut}}" data-step-index="{{index}}" data-step-path="fadeOut" data-value-type="optional-number"></label>
-                  <label>Esticar após distância <input type="number" min="0" step="any" value="{{distanceBehavior.stretchAfter}}" data-step-index="{{index}}" data-step-path="distanceBehavior.stretchAfter" data-value-type="optional-number"></label>
+                  <label>Esticar somente após distância <input type="number" min="0" step="any" value="{{distanceBehavior.stretchAfter}}" data-step-index="{{index}}" data-step-path="distanceBehavior.stretchAfter" data-value-type="optional-number"></label>
                   <label>Nome persistente <input type="text" value="{{name}}" data-step-index="{{index}}" data-step-path="name"></label>
                   <div class="checkbox-grid full">
                     <label><input type="checkbox" {{#if attachTo}}checked{{/if}} data-step-index="{{index}}" data-step-path="attachTo" data-value-type="boolean"> Anexar à origem</label>
-                    <label><input type="checkbox" {{#if stretchTo}}checked{{/if}} data-step-index="{{index}}" data-step-path="stretchTo" data-value-type="boolean"> Esticar ao destino</label>
+                    <label><input type="checkbox" {{#if stretchTo}}checked{{/if}} data-step-index="{{index}}" data-step-path="stretchTo" data-value-type="boolean"> Esticar sempre até o destino</label>
+                    <label><input type="checkbox" {{#if rotateTowardsTarget}}checked{{/if}} data-step-index="{{index}}" data-step-path="rotateTowardsTarget" data-value-type="boolean"> Apontar para o destino</label>
                     <label><input type="checkbox" {{#if belowTokens}}checked{{/if}} data-step-index="{{index}}" data-step-path="belowTokens" data-value-type="boolean"> Abaixo dos tokens</label>
                     <label><input type="checkbox" {{#if randomRotation}}checked{{/if}} data-step-index="{{index}}" data-step-path="randomRotation" data-value-type="boolean"> Rotação aleatória</label>
                     <label><input type="checkbox" {{#if mirrorX}}checked{{/if}} data-step-index="{{index}}" data-step-path="mirrorX" data-value-type="boolean"> Espelhar X</label>

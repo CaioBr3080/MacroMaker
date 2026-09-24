@@ -24,6 +24,7 @@ function installSequencerMock(existing = []) {
     opacity(...args) { return this.call("opacity", ...args); }
     tint(...args) { return this.call("tint", ...args); }
     rotate(...args) { return this.call("rotate", ...args); }
+    rotateTowards(...args) { return this.call("rotateTowards", ...args); }
     playbackRate(...args) { return this.call("playbackRate", ...args); }
     belowTokens(...args) { return this.call("belowTokens", ...args); }
     randomRotation(...args) { return this.call("randomRotation", ...args); }
@@ -181,4 +182,52 @@ test("remoção por alvo não usa o executante", async (t) => {
   });
 
   assert.deepEqual(calls.at(-1), ["manager", "endEffects", { name: "macro-maker.*", target }]);
+});
+
+test("mantém a escala, orientação e esticamento condicional", async (t) => {
+  t.after(clearSequencerMock);
+  const calls = installSequencerMock();
+  const source = { id: "source", center: { x: 10, y: 10 } };
+  const target = { id: "target", center: { x: 110, y: 10 } };
+  let distance = 4;
+  const context = {
+    resolveLocation: (reference) => reference === "target" ? target : source,
+    distanceTo: () => distance
+  };
+  const step = {
+    file: "jb2a.test",
+    source: "source",
+    target: "target",
+    scale: 1.5,
+    rotation: 20,
+    rotateTowardsTarget: true,
+    stretchTo: false,
+    distanceBehavior: { stretchAfter: 5 }
+  };
+
+  await SequencerAdapter.playAnimation(step, context);
+
+  assert.ok(!calls.some((call) => call[1] === "stretchTo"));
+  assert.deepEqual(calls.find((call) => call[1] === "scale"), ["effect", "scale", 1.5]);
+  assert.deepEqual(calls.find((call) => call[1] === "rotateTowards"), [
+    "effect",
+    "rotateTowards",
+    target,
+    { rotationOffset: 20 }
+  ]);
+  assert.ok(!calls.some((call) => call[1] === "rotate"));
+
+  calls.length = 0;
+  distance = 6;
+  await SequencerAdapter.playAnimation(step, context);
+
+  assert.deepEqual(calls.find((call) => call[1] === "stretchTo"), ["effect", "stretchTo", target, {}]);
+  assert.deepEqual(calls.find((call) => call[1] === "scale"), ["effect", "scale", 1.5]);
+  assert.deepEqual(calls.find((call) => call[1] === "rotateTowards"), [
+    "effect",
+    "rotateTowards",
+    target,
+    { rotationOffset: 20 }
+  ]);
+  assert.ok(!calls.some((call) => call[1] === "rotate"));
 });
