@@ -258,6 +258,7 @@ export class ProjectValidator {
     if (step.type === STEP_TYPES.ASSET_PRESET) this.#normalizeAssetPreset(step, path, issues);
     if (step.type === STEP_TYPES.SUMMON) this.#normalizeSummon(step, path, issues);
     if (step.type === STEP_TYPES.TOKEN_MAGIC) this.#normalizeTokenMagic(step, path, issues);
+    if (step.type === STEP_TYPES.MODIFY_TOKEN) this.#normalizeTokenMutation(step, path, issues);
 
     const rollTypes = [STEP_TYPES.ATTACK, STEP_TYPES.TEST, STEP_TYPES.DAMAGE, STEP_TYPES.HEALING, STEP_TYPES.ROLL];
     if (!rollTypes.includes(step.type)) return;
@@ -496,6 +497,67 @@ export class ProjectValidator {
   }
 
 
+  static #normalizeTokenMutation(step, path, issues) {
+    step.scope ??= "target";
+    if (!["source", "target", "targets"].includes(step.scope)) {
+      issues.push({ path: `${path}.scope`, message: "O escopo da modificação deve ser executante, alvo ou todos os alvos." });
+    }
+    step.changes ??= {};
+    if (!isRecord(step.changes)) {
+      issues.push({ path: `${path}.changes`, message: "As alterações do token precisam ser um objeto." });
+      return;
+    }
+
+    const stringPaths = new Set(["name", "movementAction", "texture.src", "texture.tint", "sight.visionMode", "sight.color", "light.color", "light.animation.type"]);
+    const booleanPaths = new Set(["hidden", "lockRotation", "sight.enabled", "light.animation.reverse"]);
+    const numberPaths = new Set([
+      "alpha", "disposition", "displayName", "displayBars", "width", "height", "rotation",
+      "texture.scaleX", "texture.scaleY", "sight.range", "sight.angle", "sight.attenuation", "sight.brightness", "sight.saturation", "sight.contrast",
+      "light.dim", "light.bright", "light.angle", "light.alpha", "light.coloration", "light.luminosity", "light.attenuation", "light.saturation", "light.contrast", "light.shadows",
+      "light.animation.speed", "light.animation.intensity"
+    ]);
+    const allowedPaths = new Set([...stringPaths, ...booleanPaths, ...numberPaths]);
+    const prefixes = new Set([...allowedPaths].flatMap((entry) => {
+      const parts = entry.split(".");
+      return parts.slice(0, -1).map((_part, index) => parts.slice(0, index + 1).join("."));
+    }));
+    const visit = (value, prefix = "") => {
+      for (const [key, next] of Object.entries(value)) {
+        const current = prefix ? `${prefix}.${key}` : key;
+        if (["bar1", "bar2", "actorData", "delta"].includes(key)) {
+          issues.push({ path: `${path}.changes.${current}`, message: "A etapa Modificar token não altera Recursos nem dados do ator." });
+          continue;
+        }
+        if (isRecord(next) && prefixes.has(current)) {
+          visit(next, current);
+          continue;
+        }
+        if (!allowedPaths.has(current)) {
+          issues.push({ path: `${path}.changes.${current}`, message: "Este campo do token não é permitido nesta etapa." });
+          continue;
+        }
+        if (stringPaths.has(current) && typeof next !== "string") {
+          issues.push({ path: `${path}.changes.${current}`, message: "Este campo do token precisa ser texto." });
+        }
+        if (booleanPaths.has(current) && typeof next !== "boolean") {
+          issues.push({ path: `${path}.changes.${current}`, message: "Este campo do token precisa ser verdadeiro ou falso." });
+        }
+        if (numberPaths.has(current) && !Number.isFinite(Number(next))) {
+          issues.push({ path: `${path}.changes.${current}`, message: "Este campo do token precisa ser numérico." });
+        } else if (numberPaths.has(current)) value[key] = Number(next);
+        if (["alpha", "light.alpha"].includes(current) && (Number(next) < 0 || Number(next) > 1)) {
+          issues.push({ path: `${path}.changes.${current}`, message: "Opacidade precisa ficar entre 0 e 1." });
+        }
+        if (["width", "height"].includes(current) && Number(next) <= 0) {
+          issues.push({ path: `${path}.changes.${current}`, message: "Largura e altura precisam ser maiores que zero." });
+        }
+        if (["displayName", "displayBars"].includes(current) && (!Number.isInteger(Number(next)) || Number(next) < 0)) {
+          issues.push({ path: `${path}.changes.${current}`, message: "O modo de exibição precisa ser um número inteiro não negativo." });
+        }
+      }
+    };
+    visit(step.changes);
+  }
   static #normalizeTokenMagic(step, path, issues) {
     if (step.destination != null && !["source", "target", "template"].includes(step.destination)) {
       issues.push({ path: path + ".destination", message: "Destino do Token Magic inválido." });

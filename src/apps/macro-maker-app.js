@@ -45,6 +45,11 @@ function visageChoices(actorId, selectedId) {
   return [...unique.values()].sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { numeric: true }));
 }
 
+function movementActions() {
+  return Object.entries(globalThis.CONFIG?.Token?.movement?.actions ?? {})
+    .map(([id, action]) => ({ id, label: action?.label ?? action?.name ?? id }))
+    .sort((left, right) => String(left.label).localeCompare(String(right.label), "pt-BR", { numeric: true }));
+}
 function tokenMagicPresets() {
   const module = game.modules?.get?.("tokenmagic");
   const api = module?.active ? (globalThis.TokenMagic ?? module.api) : null;
@@ -250,6 +255,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         isAssetPreset: step.type === "assetPreset",
         isSummon: step.type === "summon",
         isTokenMagic: step.type === "tokenMagic",
+        isModifyToken: step.type === "modifyToken",
         visageChoices: visageChoices(step.actorId, step.visageId)
       })),
       hasMacro: Boolean(this.macroUuid),
@@ -261,6 +267,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       visageActive: Boolean(game.modules?.get?.("visage")?.active),
       tokenMagicActive: Boolean(game.modules?.get?.("tokenmagic")?.active),
       tokenMagicPresets: tokenMagicPresets(),
+      movementActions: movementActions(),
       migrationPending: this.migrationPending,
       folders: folderChoices(game.folders ?? []),
       users: (game.users ?? []).map((user) => ({ id: user.id, name: user.name, active: user.active })),
@@ -905,7 +912,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       if (label) label.textContent = element.value || this.project.steps[index].type;
     }
     if (element.dataset.stepPath === "flavor" || element.dataset.stepPath?.startsWith("messageStyle.")) this.#updateMessagePreviews();
-    if (["tint", "messageStyle.color", "speakerStyle.color"].includes(element.dataset.stepPath)) {
+    if (["tint", "messageStyle.color", "speakerStyle.color", "changes.texture.tint", "changes.sight.color", "changes.light.color"].includes(element.dataset.stepPath)) {
       const picker = element.closest("label")?.querySelector("[data-color-for]");
       if (picker && /^#[0-9a-f]{6}$/i.test(element.value)) picker.value = element.value;
     }
@@ -939,7 +946,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         help.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); });
         label.append(help);
       }
-      if (["tint", "messageStyle.color", "speakerStyle.color"].includes(path) && !label.querySelector("[data-color-for]")) {
+      if (["tint", "messageStyle.color", "speakerStyle.color", "changes.texture.tint", "changes.sight.color", "changes.light.color"].includes(path) && !label.querySelector("[data-color-for]")) {
         const picker = document.createElement("input");
         picker.type = "color";
         picker.dataset.colorFor = path;
@@ -966,6 +973,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const type = element.dataset.valueType ?? "string";
     if (type === "boolean") return element.checked;
     if (type === "boolean-select") return element.value === "true";
+    if (type === "optional-boolean") return element.value === "" ? DELETE_VALUE : element.value === "true";
     if (type === "optional-string") return element.value === "" ? DELETE_VALUE : element.value;
     if (["number", "optional-number", "number-null"].includes(type)) {
       if (element.value === "") return type === "number-null" ? null : DELETE_VALUE;

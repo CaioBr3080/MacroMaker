@@ -245,3 +245,22 @@ test("valida a etapa opcional Token Magic FX", () => {
     steps: [{ type: "tokenMagic", destination: "location", operation: "remove" }]
   }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
 });
+test("valida a etapa Modificar token e bloqueia Recursos", () => {
+  const project = ProjectValidator.normalize({
+    name: "Token da cena",
+    targeting: { source: "none", mode: "none" },
+    steps: [{
+      type: "modifyToken",
+      scope: "targets",
+      changes: { name: "Sombra", alpha: "0.4", sight: { enabled: true, range: "12" }, light: { bright: 6 } }
+    }]
+  }, { stepRegistry: createCoreStepRegistry() });
+
+  assert.equal(project.steps[0].changes.alpha, 0.4);
+  assert.equal(project.steps[0].changes.sight.range, 12);
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Recursos",
+    targeting: { source: "none", mode: "none" },
+    steps: [{ type: "modifyToken", changes: { bar1: { attribute: "hp" } } }]
+  }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
+});

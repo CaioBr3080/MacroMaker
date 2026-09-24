@@ -23,7 +23,8 @@ export const STEP_TYPES = Object.freeze({
   REMOVE_PERSISTENT: "removePersistent",
   ASSET_PRESET: "assetPreset",
   SUMMON: "summon",
-  TOKEN_MAGIC: "tokenMagic"
+  TOKEN_MAGIC: "tokenMagic",
+  MODIFY_TOKEN: "modifyToken"
 });
 
 export const TARGET_MODES = Object.freeze({

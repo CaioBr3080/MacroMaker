@@ -51,6 +51,7 @@ test("o registro principal contém todos os tipos do schema atual", () => {
     "mutateSteps",
     "removePersistent",
     "assetPreset",
+    "modifyToken",
     "tokenMagic",
     "summon"
   ]);

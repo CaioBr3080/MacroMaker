@@ -191,7 +191,8 @@
           <h2>Etapas</h2>
           <span class="spacer"></span>
           <label for="macro-maker-step-type">Adicionar</label>
-          <select id="macro-maker-step-type" name="newStepType">
+<datalist id="macro-maker-movement-actions">{{#each movementActions}}<option value="{{id}}">{{label}}</option>{{/each}}</datalist>
+                    <select id="macro-maker-step-type" name="newStepType">
             {{#each stepTypes}}<option value="{{type}}">{{label}}</option>{{/each}}
           </select>
           <button type="button" data-action="add-step"><i class="fas fa-plus"></i> Adicionar</button>
@@ -333,6 +334,76 @@
                   </fieldset>
                 {{/if}}
 
+                {{#if isModifyToken}}
+                  <fieldset class="macro-maker-token-mutation-settings full">
+                    <legend><i class="fas fa-user-gear"></i> Modificar token da cena</legend>
+                    <p class="full macro-maker-help-note">Altera somente o Token desta cena; não muda o protótipo do Ator. Campos vazios permanecem como estão. Recursos não fazem parte desta etapa.</p>
+                    <label>Aplicar em
+                      <select data-step-index="{{index}}" data-step-path="scope" data-value="{{scope}}"><option value="target">Alvo principal</option><option value="targets">Todos os alvos</option><option value="source">Executante</option></select>
+                    </label>
+                    <label>Nome <input type="text" value="{{changes.name}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.name" data-value-type="optional-string"></label>
+                    <label>Opacidade <input type="number" min="0" max="1" step="0.05" value="{{changes.alpha}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.alpha" data-value-type="optional-number"></label>
+                    <label>Oculto
+                      <select data-step-index="{{index}}" data-step-path="changes.hidden" data-value="{{changes.hidden}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Ocultar</option><option value="false">Mostrar</option></select>
+                    </label>
+                    <label>Disposição
+                      <select data-step-index="{{index}}" data-step-path="changes.disposition" data-value="{{changes.disposition}}" data-value-type="optional-number"><option value="">Não alterar</option><option value="-1">Hostil</option><option value="0">Neutro</option><option value="1">Amigável</option></select>
+                    </label>
+                    <label>Exibir nome
+                      <select data-step-index="{{index}}" data-step-path="changes.displayName" data-value="{{changes.displayName}}" data-value-type="optional-number"><option value="">Não alterar</option><option value="0">Nunca</option><option value="10">Controlado</option><option value="20">Ao passar o mouse</option><option value="30">Para proprietário</option><option value="40">Ao passar ou controlar</option><option value="50">Sempre</option></select>
+                    </label>
+                    <label>Rotação (graus) <input type="number" step="any" value="{{changes.rotation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.rotation" data-value-type="optional-number"></label>
+                    <label>Travar rotação
+                      <select data-step-index="{{index}}" data-step-path="changes.lockRotation" data-value="{{changes.lockRotation}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Sim</option><option value="false">Não</option></select>
+                    </label>
+                    <label>Ação de movimento <input type="text" list="macro-maker-movement-actions" value="{{changes.movementAction}}" placeholder="Não alterar (ex.: walk)" data-step-index="{{index}}" data-step-path="changes.movementAction" data-value-type="optional-string"></label>
+
+                    <fieldset class="full"><legend>Imagem e tamanho</legend>
+                      <label class="file-field full">Imagem do token
+                        <span><input type="text" value="{{changes.texture.src}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.texture.src" data-value-type="optional-string"><button type="button" data-action="browse-file" data-index="{{index}}" data-step-field="changes.texture.src" data-file-type="image" title="Escolher imagem"><i class="fas fa-folder-open"></i></button></span>
+                      </label>
+                      <label>Largura (quadrados) <input type="number" min="0.1" step="0.1" value="{{changes.width}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.width" data-value-type="optional-number"></label>
+                      <label>Altura (quadrados) <input type="number" min="0.1" step="0.1" value="{{changes.height}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.height" data-value-type="optional-number"></label>
+                      <label>Escala X <input type="number" step="0.05" value="{{changes.texture.scaleX}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.texture.scaleX" data-value-type="optional-number"></label>
+                      <label>Escala Y <input type="number" step="0.05" value="{{changes.texture.scaleY}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.texture.scaleY" data-value-type="optional-number"></label>
+                      <label>Cor da imagem <input type="text" value="{{changes.texture.tint}}" placeholder="#RRGGBB" data-step-index="{{index}}" data-step-path="changes.texture.tint" data-value-type="optional-string"></label>
+                    </fieldset>
+
+                    <fieldset class="full"><legend>Visão</legend>
+                      <label>Visão ativa
+                        <select data-step-index="{{index}}" data-step-path="changes.sight.enabled" data-value="{{changes.sight.enabled}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Ativar</option><option value="false">Desativar</option></select>
+                      </label>
+                      <label>Alcance <input type="number" min="0" step="any" value="{{changes.sight.range}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.range" data-value-type="optional-number"></label>
+                      <label>Ângulo <input type="number" min="0" max="360" step="any" value="{{changes.sight.angle}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.angle" data-value-type="optional-number"></label>
+                      <label>Modo de visão <input type="text" value="{{changes.sight.visionMode}}" placeholder="Não alterar (ex.: basic)" data-step-index="{{index}}" data-step-path="changes.sight.visionMode" data-value-type="optional-string"></label>
+                      <label>Cor da visão <input type="text" value="{{changes.sight.color}}" placeholder="#RRGGBB" data-step-index="{{index}}" data-step-path="changes.sight.color" data-value-type="optional-string"></label>
+                      <label>Atenuação <input type="number" step="0.05" value="{{changes.sight.attenuation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.attenuation" data-value-type="optional-number"></label>
+                      <label>Brilho <input type="number" step="0.05" value="{{changes.sight.brightness}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.brightness" data-value-type="optional-number"></label>
+                      <label>Saturação <input type="number" step="0.05" value="{{changes.sight.saturation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.saturation" data-value-type="optional-number"></label>
+                      <label>Contraste <input type="number" step="0.05" value="{{changes.sight.contrast}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.contrast" data-value-type="optional-number"></label>
+                    </fieldset>
+
+                    <fieldset class="full"><legend>Luz emitida</legend>
+                      <label>Luz fraca <input type="number" min="0" step="any" value="{{changes.light.dim}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.dim" data-value-type="optional-number"></label>
+                      <label>Luz forte <input type="number" min="0" step="any" value="{{changes.light.bright}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.bright" data-value-type="optional-number"></label>
+                      <label>Ângulo <input type="number" min="0" max="360" step="any" value="{{changes.light.angle}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.angle" data-value-type="optional-number"></label>
+                      <label>Cor da luz <input type="text" value="{{changes.light.color}}" placeholder="#RRGGBB" data-step-index="{{index}}" data-step-path="changes.light.color" data-value-type="optional-string"></label>
+                      <label>Opacidade <input type="number" min="0" max="1" step="0.05" value="{{changes.light.alpha}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.alpha" data-value-type="optional-number"></label>
+                      <label>Coloração <input type="number" step="1" value="{{changes.light.coloration}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.coloration" data-value-type="optional-number"></label>
+                      <label>Luminosidade <input type="number" step="0.05" value="{{changes.light.luminosity}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.luminosity" data-value-type="optional-number"></label>
+                      <label>Atenuação <input type="number" step="0.05" value="{{changes.light.attenuation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.attenuation" data-value-type="optional-number"></label>
+                      <label>Saturação <input type="number" step="0.05" value="{{changes.light.saturation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.saturation" data-value-type="optional-number"></label>
+                      <label>Contraste <input type="number" step="0.05" value="{{changes.light.contrast}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.contrast" data-value-type="optional-number"></label>
+                      <label>Sombras <input type="number" step="0.05" value="{{changes.light.shadows}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.shadows" data-value-type="optional-number"></label>
+                      <label>Tipo de animação <input type="text" value="{{changes.light.animation.type}}" placeholder="Não alterar (ex.: torch)" data-step-index="{{index}}" data-step-path="changes.light.animation.type" data-value-type="optional-string"></label>
+                      <label>Velocidade da animação <input type="number" min="0" step="1" value="{{changes.light.animation.speed}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.animation.speed" data-value-type="optional-number"></label>
+                      <label>Intensidade da animação <input type="number" min="0" step="1" value="{{changes.light.animation.intensity}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.animation.intensity" data-value-type="optional-number"></label>
+                      <label>Inverter animação
+                        <select data-step-index="{{index}}" data-step-path="changes.light.animation.reverse" data-value="{{changes.light.animation.reverse}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Sim</option><option value="false">Não</option></select>
+                      </label>
+                    </fieldset>
+                  </fieldset>
+                {{/if}}
                 {{#if isTokenMagic}}
                   <fieldset class="macro-maker-integration-settings full">
                     <legend><i class="fas fa-wand-sparkles"></i> Efeito Token Magic FX</legend>

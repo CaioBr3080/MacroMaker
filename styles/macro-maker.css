@@ -722,6 +722,71 @@
   box-shadow: 0 3px 12px #000;
 }
 
+.macro-maker-target-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: min(420px, calc(100vw - 2rem));
+  max-height: min(70vh, 560px);
+}
+
+.macro-maker-target-picker-summary,
+.macro-maker-target-picker-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.macro-maker-target-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.macro-maker-target-search input {
+  flex: 1;
+  min-width: 0;
+}
+
+.macro-maker-token-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.3rem;
+  max-height: 240px;
+  margin-top: 0.45rem;
+  overflow: auto;
+}
+
+.macro-maker-token-result {
+  overflow: hidden;
+  padding: 0.3rem 0.45rem;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.macro-maker-token-result.selected {
+  border-color: #69a9ff;
+  background: rgba(105, 169, 255, 0.28);
+}
+
+.macro-maker-target-picker-actions {
+  justify-content: flex-end;
+  margin-top: 0.55rem;
+}
+
+.macro-maker-token-mutation-settings > fieldset {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.55rem;
+  margin: 0.6rem 0 0;
+}
+
+.macro-maker-token-mutation-settings > fieldset > legend {
+  padding: 0 0.25rem;
+}
 .macro-maker-target-overlay small {
   opacity: 0.7;
 }

@@ -4,7 +4,7 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.19` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.20` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - uma aba própria **Macro Maker** na sidebar e um botão de fallback no diretório de Macros;
 - árvore de pastas e subpastas recolhível na própria aba Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
@@ -13,9 +13,9 @@ Esta versão `0.9.19` entrega a base do MVP até importação, compartilhamento 
 - cada projeto salvo como um Macro normal do Foundry;
 - fonte do projeto preservada em `flags.macro-maker.project`;
 - comando compilado pequeno, chamando `game.macroMaker.executeMacro(uuid)`;
-- alvos marcados com `T`, seleção interativa de tokens, ponto, círculo, cone, linha e template medido;
+- alvos marcados com `T`, seleção interativa de tokens com busca digitável por nome, ponto, círculo, cone, linha e template medido;
 - filtros de aliado/inimigo, mínimo, máximo, alcance e visualização do alcance no canvas;
-- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit, invocação de token e efeitos do Token Magic FX;
+- etapas separadas de ataque, teste, dano, cura, rolagem genérica, animação, som, espera, menu, remoção de persistente, asset configurado do Baileywiki Mass Edit, invocação de token, efeitos do Token Magic FX e modificação segura do token da cena;
 - validação e normalização centralizadas antes de salvar ou executar;
 - registro público e extensível de tipos de etapa em `game.macroMaker.steps`;
 - adição, duplicação, exclusão, ativação e reordenação de etapas;

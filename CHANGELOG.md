@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.20 - 2026-09-24
+
+- O seletor de tokens do canvas agora permite pesquisar por nome, ignorando maiúsculas e acentos, sem trocar o token controlado pelo GM.
+- Nova etapa Modificar token da cena: atua no executante, alvo principal ou todos os alvos e permite alterar nome, aparência, tamanho, opacidade, visão, luz e ação de movimento.
+- A etapa atualiza somente o TokenDocument colocado na cena e bloqueia Recursos e dados do Ator, preservando o protótipo.
 ## 0.9.19 - 2026-09-24
 
 - Etapas desabilitadas continuam totalmente editáveis e podem ser reativadas pelo checkbox. A interface deixou de usar a classe genérica disabled do Foundry, que bloqueava os cliques.

@@ -1,5 +1,16 @@
 import { canvasEventTarget, lockTokenInteraction, stopCanvasEvent } from "./canvas-interaction-lock.js";
 
+function comparableName(token) {
+  return String(token?.name ?? token?.document?.name ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+}
+
+export function searchTokens(tokens, query = "", { limit = 40 } = {}) {
+  const term = String(query).normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
+  return [...tokens]
+    .filter((token) => !term || comparableName(token).includes(term))
+    .sort((left, right) => comparableName(left).localeCompare(comparableName(right), "pt-BR", { numeric: true }))
+    .slice(0, limit);
+}
 export class CanvasTargetPicker {
   static async pick({ minTargets = 0, maxTargets = Infinity } = {}) {
     if (!canvas?.ready) throw new Error("O canvas precisa estar ativo para selecionar tokens.");
@@ -16,7 +27,7 @@ export class CanvasTargetPicker {
     return new Promise((resolve) => {
       const overlay = document.createElement("div");
       overlay.className = "macro-maker-target-overlay interactive";
-      overlay.innerHTML = '<div><i class="fas fa-bullseye"></i> Clique nos tokens para marcar como alvo <strong data-target-count>' + game.user.targets.size + '</strong><small>Enter confirma · Esc cancela</small><button type="button" data-confirm><i class="fas fa-check"></i> Confirmar</button><button type="button" data-cancel><i class="fas fa-xmark"></i> Cancelar</button></div>';
+      overlay.innerHTML = '<div class="macro-maker-target-picker"><div class="macro-maker-target-picker-summary"><i class="fas fa-bullseye"></i> Clique ou pesquise para marcar alvos <strong data-target-count>' + game.user.targets.size + '</strong><small>Enter confirma · Esc cancela</small></div><label class="macro-maker-target-search"><i class="fas fa-magnifying-glass"></i><input type="search" data-token-search placeholder="Digite o nome do token" autocomplete="off"></label><div class="macro-maker-token-results" data-token-results></div><div class="macro-maker-target-picker-actions"><button type="button" data-confirm><i class="fas fa-check"></i> Confirmar</button><button type="button" data-cancel><i class="fas fa-xmark"></i> Cancelar</button></div></div>';
       document.body.append(overlay);
 
       const restoreControlled = () => {
@@ -45,6 +56,34 @@ export class CanvasTargetPicker {
           const height = token.h ?? token.height ?? canvas.grid.size;
           return point.x >= token.x && point.x <= token.x + width && point.y >= token.y && point.y <= token.y + height;
         }) ?? null;
+      };
+      const renderSearchResults = () => {
+        if (!tokenResults) return;
+        tokenResults.replaceChildren();
+        const candidates = searchTokens(canvas.tokens.placeables ?? [], searchInput?.value ?? "")
+          .filter((token) => !originalControlledIds.has(token.id));
+        if (!candidates.length) {
+          const empty = document.createElement("small");
+          empty.textContent = "Nenhum token encontrado.";
+          tokenResults.append(empty);
+          return;
+        }
+        for (const token of candidates) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "macro-maker-token-result";
+          button.textContent = token.name ?? token.document?.name ?? token.id;
+          button.classList.toggle("selected", game.user.targets.has(token));
+          button.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            token.setTarget?.(!game.user.targets.has(token), { user: game.user, releaseOthers: false });
+            updateCount();
+            renderSearchResults();
+            queueMicrotask(restoreControlled);
+          });
+          tokenResults.append(button);
+        }
       };
       const blockCanvasEvent = (event) => {
         if (canvasEventTarget(canvasElement, event)) stopCanvasEvent(event);
@@ -79,6 +118,7 @@ export class CanvasTargetPicker {
           window.removeEventListener(type, blockCanvasEvent, true);
         }
         window.removeEventListener("keydown", onKey, true);
+        searchInput?.removeEventListener("input", renderSearchResults);
         overlay.remove();
         unlockTokenInteraction();
         restoreControlled();
@@ -104,8 +144,13 @@ export class CanvasTargetPicker {
         if (event.key === "Escape") finish(true);
         if (event.key === "Enter") finish(false);
       };
-      const targetHookId = Hooks.on("targetToken", updateCount);
+      const targetHookId = Hooks.on("targetToken", () => {
+        updateCount();
+        renderSearchResults();
+      });
       const controlHookId = Hooks.on("controlToken", onControl);
+      searchInput?.addEventListener("input", renderSearchResults);
+      renderSearchResults();
       overlay.querySelector("[data-confirm]").addEventListener("click", () => finish(false));
       overlay.querySelector("[data-cancel]").addEventListener("click", () => finish(true));
       window.addEventListener("pointerdown", onPointerDown, true);

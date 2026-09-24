@@ -8,6 +8,7 @@ import { RollExecutor } from "./executors/roll-executor.js";
 import { BranchExecutor } from "./executors/branch-executor.js";
 import { RuntimeStepExecutor } from "./executors/runtime-step-executor.js";
 import { VariableExecutor } from "./executors/variable-executor.js";
+import { TokenUpdateExecutor } from "./executors/token-update-executor.js";
 import { StepRegistry } from "./step-registry.js";
 
 export function createCoreStepRegistry() {
@@ -169,6 +170,17 @@ export function createCoreStepRegistry() {
     execute: (step, context) => MassEditAdapter.spawnPreset(step, context)
   });
 
+  registry.register(STEP_TYPES.MODIFY_TOKEN, {
+    label: "Modificar token da cena",
+    icon: "fas fa-user-gear",
+    defaults: {
+      label: "Modificar token",
+      scope: "target",
+      changes: {}
+    },
+    schema: {},
+    execute: (step, context) => TokenUpdateExecutor.execute(step, context)
+  });
   registry.register(STEP_TYPES.TOKEN_MAGIC, {
     label: "Efeito Token Magic FX",
     icon: "fas fa-wand-sparkles",

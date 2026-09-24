@@ -165,4 +165,17 @@ export const FIELD_HELP = {
   tokenName: "Nome exibido pelo token invocado. Vazio usa o nome definido no ator.",
   count: "Quantidade de tokens criados, de 1 a 20.",
   disposition: "Relação do token invocado com os jogadores: hostil, neutra ou amigável.",
-  visageId: "Variação de aparência aplicada pelo Visage após a criação do token."};
+  visageId: "Variação de aparência aplicada pelo Visage após a criação do token.",
+  alpha: "Opacidade do token entre 0 (invisível) e 1 (opaco). Vazio não muda o token.",
+  displayName: "Define quando o nome do token aparece na cena. Vazio preserva a configuração atual.",
+  lockRotation: "Impede ou permite girar manualmente o token no canvas.",
+  movementAction: "Ação de movimento usada pelo Foundry, como walk. Vazio preserva a ação configurada na cena.",
+  visionMode: "Modo de visão registrado no Foundry ou em um sistema/módulo, como basic. Vazio preserva a visão atual.",
+  attenuation: "Controla a transição da visão ou luz. Vazio não altera o valor atual.",
+  brightness: "Ajuste de brilho do modo de visão. Vazio não altera o valor atual.",
+  saturation: "Ajuste de saturação da visão ou luz. Vazio não altera o valor atual.",
+  contrast: "Ajuste de contraste da visão ou luz. Vazio não altera o valor atual.",
+  luminosity: "Ajuste de luminosidade da luz emitida. Vazio não altera o valor atual.",
+  coloration: "Identificador numérico da coloração da luz do Foundry. Vazio mantém a coloração atual.",
+  shadows: "Intensidade das sombras na luz emitida. Vazio não altera o valor atual."
+};

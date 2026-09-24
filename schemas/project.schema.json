@@ -47,7 +47,7 @@
         "required": ["type"],
         "properties": {
           "type": {
-            "enum": ["animation", "sound", "wait", "attack", "test", "damage", "healing", "roll", "menu", "branch", "setVariable", "mutateSteps", "removePersistent", "assetPreset", "summon", "tokenMagic"]
+            "enum": ["animation", "sound", "wait", "attack", "test", "damage", "healing", "roll", "menu", "branch", "setVariable", "mutateSteps", "removePersistent", "assetPreset", "summon", "tokenMagic", "modifyToken"]
           },
           "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{4,128}$" },
           "label": { "type": "string" },
