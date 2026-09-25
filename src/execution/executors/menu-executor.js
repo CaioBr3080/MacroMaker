@@ -43,9 +43,11 @@ function dialogWidth(columns) {
 export class MenuExecutor {
   static async execute(step, context) {
     const columns = Math.min(6, Math.max(1, Number(step.columns ?? 1)));
+    const columnRows = Array(columns + 1).fill(0);
     const options = await Promise.all((step.options ?? []).map(async (option, index) => {
       const configuredColumn = optionColumn(option.column, columns);
       const effectiveColumn = configuredColumn ?? (index % columns) + 1;
+      const row = ++columnRows[effectiveColumn];
       const textTransform = step.columnSettings?.[effectiveColumn]?.textTransform ?? "none";
       return {
         index,
@@ -54,7 +56,7 @@ export class MenuExecutor {
         description: await interpolateOptionDescription(option.description, context.variables),
         image: escapeHtml(option.image ?? ""),
         icon: escapeHtml(option.icon ?? ""),
-        column: configuredColumn
+        column: effectiveColumn, row
       };
     }));
     if (!options.length) throw new Error("A etapa de menu não possui opções.");
@@ -92,7 +94,7 @@ export class MenuExecutor {
         <div class="macro-maker-menu-grid-scroll" style="${gridStyle}">
           ${columnHeaderMarkup}
           <div class="macro-maker-menu-options">
-            ${options.map((option) => `<label class="macro-maker-menu-card"${option.column ? ` style="grid-column:${option.column}"` : ""}>
+            ${options.map((option) => `<label class="macro-maker-menu-card" style="grid-column:${option.column};grid-row:${option.row}">
               <input type="${inputType}" name="choice" value="${option.index}" ${defaults.has(option.value) ? "checked" : ""}>
               ${option.image ? `<img src="${option.image}" alt="">` : ""}
               <strong>${option.icon ? `<i class="${option.icon}"></i> ` : ""}${option.label}</strong>

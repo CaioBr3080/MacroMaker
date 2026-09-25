@@ -128,3 +128,24 @@ test("descrição da opção resolve variáveis e fórmulas entre chaves", async
   assert.match(rendered, /DT atual: 17; base 12/);
   assert.doesNotMatch(rendered, /\{DT \+ 5\}/);
 });
+test("cada coluna do menu começa no topo e cresce verticalmente", async (t) => {
+  let rendered = "";
+  globalThis.Dialog = { wait: async (config) => { rendered = config.content; return null; } };
+  t.after(() => delete globalThis.Dialog);
+
+  await MenuExecutor.execute({
+    variable: "choice",
+    columns: 2,
+    options: [
+      { label: "A", value: "a", column: 1 },
+      { label: "B", value: "b", column: 1 },
+      { label: "C", value: "c", column: 2 },
+      { label: "D", value: "d", column: 2 }
+    ]
+  }, { project: { name: "Teste" }, variables: {} });
+
+  assert.match(rendered, /grid-column:1;grid-row:1[\s\S]*>A</);
+  assert.match(rendered, /grid-column:1;grid-row:2[\s\S]*>B</);
+  assert.match(rendered, /grid-column:2;grid-row:1[\s\S]*>C</);
+  assert.match(rendered, /grid-column:2;grid-row:2[\s\S]*>D</);
+});
