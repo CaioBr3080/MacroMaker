@@ -1632,3 +1632,49 @@
 .macro-maker-variable-prompt label small { font-weight: normal; opacity: 0.68; }
 .macro-maker-variable-prompt input,
 .macro-maker-variable-prompt select { width: 100%; }
+/* Menus com muitas opções: cada coluna tem seu próprio limite e rolagem vertical. */
+.macro-maker-menu-grid-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-height: min(68vh, 620px);
+  min-height: 0;
+}
+.macro-maker-menu-grid-scroll .macro-maker-menu-options {
+  align-items: stretch;
+  min-height: 0;
+  max-height: min(68vh, 620px);
+  overflow: hidden;
+}
+.macro-maker-menu-column {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  max-height: min(68vh, 620px);
+  overflow: hidden;
+  border: 1px solid rgba(177, 205, 246, 0.22);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.08);
+}
+.macro-maker-menu-column .macro-maker-menu-column-title {
+  min-height: 2.2rem;
+  box-sizing: border-box;
+}
+.macro-maker-menu-column-options {
+  min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.1rem 0.35rem 0.5rem 0.1rem;
+}
+.macro-maker-menu-column-options .macro-maker-menu-card {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}

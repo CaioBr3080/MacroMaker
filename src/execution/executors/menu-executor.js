@@ -70,18 +70,23 @@ export class MenuExecutor {
         titleStyle: settings.titleStyle ?? {}
       };
     });
-    const columnHeaderMarkup = columnHeaders.some((column) => column.title)
-      ? '<div class="macro-maker-menu-column-titles">'
-        + (await Promise.all(columnHeaders.map((column) => styledText("strong", "macro-maker-menu-column-title", column.title, column.titleStyle, context.variables, "grid-column:" + column.number + ";"))))
-          .join("")
-        + "</div>"
-      : "";
-
     const multiple = step.selection === "multiple" || step.multiple === true;
     const defaults = new Set((multiple ? step.defaultValues : [step.defaultValue])
       ?.filter?.((value) => value !== undefined) ?? []);
     if (!multiple && defaults.size === 0) defaults.add(options[0].value);
     const inputType = multiple ? "checkbox" : "radio";
+    const columnMarkup = (await Promise.all(columnHeaders.map(async (column) => {
+      const cards = options.filter((option) => option.column === column.number).map((option) => `<label class="macro-maker-menu-card" style="grid-column:${option.column};grid-row:${option.row}">
+        <input type="${inputType}" name="choice" value="${option.index}" ${defaults.has(option.value) ? "checked" : ""}>
+        ${option.image ? `<img src="${option.image}" alt="">` : ""}
+        <strong>${option.icon ? `<i class="${option.icon}"></i> ` : ""}${option.label}</strong>
+        ${option.description ? `<small>${option.description}</small>` : ""}
+      </label>`).join("");
+      return `<section class="macro-maker-menu-column" data-menu-column="${column.number}">
+        ${await styledText("strong", "macro-maker-menu-column-title", column.title, column.titleStyle, context.variables, "grid-column:" + column.number + ";")}
+        <div class="macro-maker-menu-column-options">${cards}</div>
+      </section>`;
+    }))).join("");
     const gridStyle = "--macro-maker-menu-columns:" + columns + ";--macro-maker-menu-min-width:" + (columns * 250) + "px";
     const title = step.title ?? step.label ?? context.project.name;
     const content = `
@@ -92,15 +97,7 @@ export class MenuExecutor {
         </header>
         ${step.image ? `<img class="macro-maker-menu-image" src="${escapeHtml(step.image)}" alt="">` : ""}
         <div class="macro-maker-menu-grid-scroll" style="${gridStyle}">
-          ${columnHeaderMarkup}
-          <div class="macro-maker-menu-options">
-            ${options.map((option) => `<label class="macro-maker-menu-card" style="grid-column:${option.column};grid-row:${option.row}">
-              <input type="${inputType}" name="choice" value="${option.index}" ${defaults.has(option.value) ? "checked" : ""}>
-              ${option.image ? `<img src="${option.image}" alt="">` : ""}
-              <strong>${option.icon ? `<i class="${option.icon}"></i> ` : ""}${option.label}</strong>
-              ${option.description ? `<small>${option.description}</small>` : ""}
-            </label>`).join("")}
-          </div>
+          <div class="macro-maker-menu-options">${columnMarkup}</div>
         </div>
       </form>`;
 
