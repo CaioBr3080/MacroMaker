@@ -181,5 +181,9 @@ export const FIELD_HELP = {
   contrast: "Ajuste de contraste da visão ou luz. Vazio não altera o valor atual.",
   luminosity: "Ajuste de luminosidade da luz emitida. Vazio não altera o valor atual.",
   coloration: "Identificador numérico da coloração da luz do Foundry. Vazio mantém a coloração atual.",
-  shadows: "Intensidade das sombras na luz emitida. Vazio não altera o valor atual."
+  shadows: "Intensidade das sombras na luz emitida. Vazio não altera o valor atual.",
+  edgeAttenuation: "Atenuação da borda do Vision Edge entre 0 e 1. Use uma variável numérica como RAIO se desejar.",
+  edgeAttenuationOverride: "Define se a visão do token usa o valor personalizado do Vision Edge ou o padrão do mundo.",
+  lightEdgeAttenuation: "Atenuação da borda da luz do Vision Edge entre 0 e 1. Use uma variável numérica como RAIO se desejar.",
+  lightEdgeAttenuationOverride: "Define se a luz do token usa o valor personalizado do Vision Edge ou o padrão do mundo."
 };

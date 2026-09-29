@@ -57,3 +57,21 @@ test("recusa referência numérica inexistente", async () => {
     /variável numérica/
   );
 });
+test("atualiza as flags de atenuação do Vision Edge", async () => {
+  let update;
+  const document = { id: "vision-edge", update: async (data) => { update = data; } };
+  await TokenUpdateExecutor.execute({ scope: "target", changes: {
+    flags: { "vision-edge-attenuation": {
+      edgeAttenuation: "BORDA",
+      edgeAttenuationOverride: true,
+      lightEdgeAttenuation: "@BORDA",
+      lightEdgeAttenuationOverride: false
+    } }
+  } }, { target: { document }, targets: [], source: null, variables: { BORDA: 0.6 } });
+  assert.deepEqual(update, { flags: { "vision-edge-attenuation": {
+    edgeAttenuation: 0.6,
+    edgeAttenuationOverride: true,
+    lightEdgeAttenuation: 0.6,
+    lightEdgeAttenuationOverride: false
+  } } });
+});

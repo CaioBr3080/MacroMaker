@@ -314,7 +314,13 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         visageChoices: visageChoices(step.actorId, step.visageId),
         summonActorName: summonActorName(step.actorId),
         visageGlobalChoices: globalVisageChoices(step.visageId),
-        visageLocalChoices: localVisageChoices(step.localTokenUuid, step.visageId)
+        visageLocalChoices: localVisageChoices(step.localTokenUuid, step.visageId),
+        visionEdge: {
+          attenuation: step.changes?.flags?.["vision-edge-attenuation"]?.edgeAttenuation,
+          override: step.changes?.flags?.["vision-edge-attenuation"]?.edgeAttenuationOverride,
+          lightAttenuation: step.changes?.flags?.["vision-edge-attenuation"]?.lightEdgeAttenuation,
+          lightOverride: step.changes?.flags?.["vision-edge-attenuation"]?.lightEdgeAttenuationOverride
+        }
       })),
       hasMacro: Boolean(this.macroUuid),
       canManageMacro: Boolean(this.macroUuid) && this.canEdit,
@@ -325,6 +331,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       massEditActive: Boolean(game.modules?.get?.("multi-token-edit")?.active),
       visageActive: Boolean(game.modules?.get?.("visage")?.active),
       tokenMagicActive: Boolean(game.modules?.get?.("tokenmagic")?.active),
+      visionEdgeActive: Boolean(game.modules?.get?.("vision-edge-attenuation")?.active),
       tokenMagicPresets: tokenMagicPresets(),
       movementActions: movementActions(),
       visionModes: visionModes(),

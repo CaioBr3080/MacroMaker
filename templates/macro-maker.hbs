@@ -426,6 +426,17 @@
                         <select data-step-index="{{index}}" data-step-path="changes.light.animation.reverse" data-value="{{changes.light.animation.reverse}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Sim</option><option value="false">Não</option></select>
                       </label>
                     </fieldset>
+                    <fieldset class="full macro-maker-vision-edge-settings"><legend><i class="fas fa-eye"></i> Vision Edge Attenuation</legend>
+                      {{#unless ../visionEdgeActive}}<p class="full macro-maker-integration-warning">Ative o módulo Vision Edge Attenuation para que estas flags tenham efeito. A configuração continuará salva no token.</p>{{/unless}}
+                      <label>Atenuação da borda da visão <input type="text" inputmode="decimal" data-allow-variable="true" min="0" max="1" step="0.05" value="{{visionEdge.attenuation}}" placeholder="Não alterar (0–1 ou variável)" data-step-index="{{index}}" data-step-path="changes.flags.vision-edge-attenuation.edgeAttenuation" data-value-type="optional-number"></label>
+                      <label>Valor personalizado da visão
+                        <select data-step-index="{{index}}" data-step-path="changes.flags.vision-edge-attenuation.edgeAttenuationOverride" data-value="{{visionEdge.override}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Usar valor personalizado</option><option value="false">Usar padrão do mundo</option></select>
+                      </label>
+                      <label>Atenuação da borda da luz <input type="text" inputmode="decimal" data-allow-variable="true" min="0" max="1" step="0.05" value="{{visionEdge.lightAttenuation}}" placeholder="Não alterar (0–1 ou variável)" data-step-index="{{index}}" data-step-path="changes.flags.vision-edge-attenuation.lightEdgeAttenuation" data-value-type="optional-number"></label>
+                      <label>Valor personalizado da luz
+                        <select data-step-index="{{index}}" data-step-path="changes.flags.vision-edge-attenuation.lightEdgeAttenuationOverride" data-value="{{visionEdge.lightOverride}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Usar valor personalizado</option><option value="false">Usar padrão do mundo</option></select>
+                      </label>
+                    </fieldset>
                   </fieldset>
                 {{/if}}
                 {{#if isTokenMagic}}

@@ -554,10 +554,10 @@ export class ProjectValidator {
     }
 
     const stringPaths = new Set(["name", "movementAction", "texture.src", "texture.tint", "sight.visionMode", "sight.color", "light.color", "light.animation.type"]);
-    const booleanPaths = new Set(["hidden", "lockRotation", "sight.enabled", "light.animation.reverse"]);
+    const booleanPaths = new Set(["hidden", "lockRotation", "sight.enabled", "light.animation.reverse", "flags.vision-edge-attenuation.edgeAttenuationOverride", "flags.vision-edge-attenuation.lightEdgeAttenuationOverride"]);
     const numberPaths = new Set([
       "alpha", "disposition", "displayName", "displayBars", "width", "height", "rotation",
-      "texture.scaleX", "texture.scaleY", "sight.range", "sight.angle", "sight.attenuation", "sight.brightness", "sight.saturation", "sight.contrast",
+      "texture.scaleX", "texture.scaleY", "sight.range", "sight.angle", "sight.attenuation", "sight.brightness", "sight.saturation", "sight.contrast", "flags.vision-edge-attenuation.edgeAttenuation", "flags.vision-edge-attenuation.lightEdgeAttenuation",
       "light.dim", "light.bright", "light.angle", "light.alpha", "light.coloration", "light.luminosity", "light.attenuation", "light.saturation", "light.contrast", "light.shadows",
       "light.animation.speed", "light.animation.intensity"
     ]);
@@ -590,7 +590,7 @@ export class ProjectValidator {
         if (numberPaths.has(current) && !Number.isFinite(Number(next)) && !isNumericReference(next)) {
           issues.push({ path: `${path}.changes.${current}`, message: "Este campo do token precisa ser numérico." });
         } else if (numberPaths.has(current) && Number.isFinite(Number(next))) value[key] = Number(next);
-        if (["alpha", "light.alpha"].includes(current) && !isNumericReference(next) && (Number(next) < 0 || Number(next) > 1)) {
+        if (["alpha", "light.alpha", "flags.vision-edge-attenuation.edgeAttenuation", "flags.vision-edge-attenuation.lightEdgeAttenuation"].includes(current) && !isNumericReference(next) && (Number(next) < 0 || Number(next) > 1)) {
           issues.push({ path: `${path}.changes.${current}`, message: "Opacidade precisa ficar entre 0 e 1." });
         }
         if (["width", "height"].includes(current) && !isNumericReference(next) && Number(next) <= 0) {

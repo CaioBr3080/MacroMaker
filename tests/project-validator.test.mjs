@@ -372,3 +372,20 @@ test("aceita variáveis numéricas nos campos de Modificar token", () => {
     steps: [{ type: "modifyToken", changes: { light: { dim: "RAIO + 1" } } }]
   }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
 });
+test("valida as flags do Vision Edge no TokenDocument", () => {
+  const project = ProjectValidator.normalize({
+    name: "Vision Edge",
+    targeting: { source: "none", mode: "none" },
+    variables: { BORDA: 0.75 },
+    steps: [{ type: "modifyToken", changes: {
+      flags: { "vision-edge-attenuation": {
+        edgeAttenuation: "BORDA",
+        edgeAttenuationOverride: true,
+        lightEdgeAttenuation: "@BORDA",
+        lightEdgeAttenuationOverride: false
+      } }
+    } }]
+  }, { stepRegistry: createCoreStepRegistry() });
+  assert.equal(project.steps[0].changes.flags["vision-edge-attenuation"].edgeAttenuation, "BORDA");
+  assert.equal(project.steps[0].changes.flags["vision-edge-attenuation"].lightEdgeAttenuation, "@BORDA");
+});

@@ -3,13 +3,16 @@ const UPDATE_PATHS = [
   "texture.src", "texture.scaleX", "texture.scaleY", "texture.tint",
   "sight.enabled", "sight.range", "sight.angle", "sight.visionMode", "sight.color", "sight.attenuation", "sight.brightness", "sight.saturation", "sight.contrast",
   "light.dim", "light.bright", "light.angle", "light.color", "light.alpha", "light.coloration", "light.luminosity", "light.attenuation", "light.saturation", "light.contrast", "light.shadows",
-  "light.animation.type", "light.animation.speed", "light.animation.intensity", "light.animation.reverse"
+  "light.animation.type", "light.animation.speed", "light.animation.intensity", "light.animation.reverse",
+  "flags.vision-edge-attenuation.edgeAttenuation", "flags.vision-edge-attenuation.edgeAttenuationOverride",
+  "flags.vision-edge-attenuation.lightEdgeAttenuation", "flags.vision-edge-attenuation.lightEdgeAttenuationOverride"
 ];
 const NUMERIC_PATHS = new Set([
   "alpha", "disposition", "displayName", "displayBars", "width", "height", "rotation",
   "texture.scaleX", "texture.scaleY", "sight.range", "sight.angle", "sight.attenuation", "sight.brightness", "sight.saturation", "sight.contrast",
   "light.dim", "light.bright", "light.angle", "light.alpha", "light.coloration", "light.luminosity", "light.attenuation", "light.saturation", "light.contrast", "light.shadows",
-  "light.animation.speed", "light.animation.intensity"
+  "light.animation.speed", "light.animation.intensity",
+  "flags.vision-edge-attenuation.edgeAttenuation", "flags.vision-edge-attenuation.lightEdgeAttenuation"
 ]);
 
 function readPath(object, path) {
