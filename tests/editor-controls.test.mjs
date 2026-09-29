@@ -16,6 +16,8 @@ test("campos de geometria acompanham o método sem modificar os valores", () => 
   }
   assert.equal(targetingFieldActive("range", { mode: "circle", source: "none" }), false);
   assert.equal(targetingFieldActive("filter", { mode: "point" }), false);
+  assert.equal(targetingFieldActive("includeSource", { mode: "currentTargets", source: "controlled" }), true);
+  assert.equal(targetingFieldActive("includeSource", { mode: "none", source: "controlled" }), false);
 });
 
 test("pastas exibem o caminho completo, ordenam naturalmente e toleram ciclos", () => {

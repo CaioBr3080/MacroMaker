@@ -31,3 +31,17 @@ test("filtro de relação exige um executante", async (t) => {
     /token executante/
   );
 });
+
+test("autoalvo adiciona o executante aos alvos marcados", async (t) => {
+  const source = { id: "source", document: { disposition: 1 } };
+  const enemy = { id: "enemy", document: { disposition: -1 } };
+  globalThis.game = { user: { targets: new Set([enemy]) } };
+  globalThis.canvas = { tokens: { controlled: [source], placeables: [source, enemy] } };
+  t.after(() => {
+    delete globalThis.game;
+    delete globalThis.canvas;
+  });
+
+  const result = await TargetingService.resolve({ mode: "currentTargets", filter: "all", includeSource: true }, { source });
+  assert.deepEqual(result.targets, [source, enemy]);
+});

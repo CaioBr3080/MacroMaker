@@ -355,3 +355,20 @@ test("valida a etapa Mover token", () => {
     steps: [{ type: "moveToken", scope: "other", destination: "elsewhere", mode: "slide" }]
   }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
 });
+test("aceita variáveis numéricas nos campos de Modificar token", () => {
+  const project = ProjectValidator.normalize({
+    name: "Luz variável",
+    targeting: { source: "none", mode: "none" },
+    variables: { RAIO: 12 },
+    steps: [{ type: "modifyToken", changes: { sight: { range: "@RAIO" }, light: { dim: "RAIO", bright: "6" } } }]
+  }, { stepRegistry: createCoreStepRegistry() });
+  assert.equal(project.steps[0].changes.sight.range, "@RAIO");
+  assert.equal(project.steps[0].changes.light.dim, "RAIO");
+  assert.equal(project.steps[0].changes.light.bright, 6);
+
+  assert.throws(() => ProjectValidator.normalize({
+    name: "Referência inválida",
+    targeting: { source: "none", mode: "none" },
+    steps: [{ type: "modifyToken", changes: { light: { dim: "RAIO + 1" } } }]
+  }, { stepRegistry: createCoreStepRegistry() }), ProjectValidationError);
+});

@@ -1058,7 +1058,9 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     if (["number", "optional-number", "number-null"].includes(type)) {
       if (element.value === "") return type === "number-null" ? null : DELETE_VALUE;
       const value = Number(element.value);
-      return Number.isFinite(value) ? value : DELETE_VALUE;
+      if (Number.isFinite(value)) return value;
+      if (element.dataset.allowVariable === "true" && /^@?[A-Za-z_][A-Za-z0-9_]*$/.test(element.value.trim())) return element.value.trim();
+      return DELETE_VALUE;
     }
     const text = element.value;
     if (element.dataset.preserveLeadingNewline !== undefined && text.charCodeAt(0) === 0xfeff) {

@@ -38,8 +38,8 @@ export class TargetGeometry {
     return false;
   }
 
-  static filterTokens(tokens, { source = null, filter = "all", predicate = () => true } = {}) {
-    return tokens.filter((token) => token !== source)
+  static filterTokens(tokens, { source = null, filter = "all", includeSource = false, predicate = () => true } = {}) {
+    return tokens.filter((token) => includeSource || token !== source)
       .filter((token) => this.relationMatches(source, token, filter))
       .filter(predicate);
   }

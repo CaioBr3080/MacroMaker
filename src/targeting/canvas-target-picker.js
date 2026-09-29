@@ -12,7 +12,7 @@ export function searchTokens(tokens, query = "", { limit = 40 } = {}) {
     .slice(0, limit);
 }
 export class CanvasTargetPicker {
-  static async pick({ minTargets = 0, maxTargets = Infinity } = {}) {
+  static async pick({ minTargets = 0, maxTargets = Infinity, source = null, includeSource = false } = {}) {
     if (!canvas?.ready) throw new Error("O canvas precisa estar ativo para selecionar tokens.");
     const canvasElement = canvas.app?.canvas ?? canvas.app?.view;
     if (!canvasElement) throw new Error("O elemento do canvas não está disponível.");
@@ -61,7 +61,7 @@ export class CanvasTargetPicker {
         if (!tokenResults) return;
         tokenResults.replaceChildren();
         const candidates = searchTokens(canvas.tokens.placeables ?? [], searchInput?.value ?? "")
-          .filter((token) => !originalControlledIds.has(token.id));
+          .filter((token) => !originalControlledIds.has(token.id) || (includeSource && token === source));
         if (!candidates.length) {
           const empty = document.createElement("small");
           empty.textContent = "Nenhum token encontrado.";
@@ -93,7 +93,7 @@ export class CanvasTargetPicker {
         stopCanvasEvent(event);
         if (event.button !== 0) return;
         const token = tokenAt(event);
-        if (!token || originalControlledIds.has(token.id)) return;
+        if (!token || (originalControlledIds.has(token.id) && !(includeSource && token === source))) return;
         token.setTarget?.(!game.user.targets.has(token), { user: game.user, releaseOthers: false });
         updateCount();
         queueMicrotask(restoreControlled);

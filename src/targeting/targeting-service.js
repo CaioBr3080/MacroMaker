@@ -11,9 +11,9 @@ export class TargetingService {
     let template = null;
 
     if (mode === TARGET_MODES.CURRENT_TARGETS) targets = [...game.user.targets];
-    else if (mode === TARGET_MODES.CONTROLLED) targets = [...canvas.tokens.controlled].filter((token) => token !== source);
+    else if (mode === TARGET_MODES.CONTROLLED) targets = [...canvas.tokens.controlled];
     else if (mode === TARGET_MODES.TOKEN) {
-      const result = await CanvasTargetPicker.pick(targeting);
+      const result = await CanvasTargetPicker.pick({ ...targeting, source });
       if (result.cancelled) return { cancelled: true, targets: [], location: null, template: null };
       targets = result.targets;
     } else if ([TARGET_MODES.POINT, TARGET_MODES.CIRCLE, TARGET_MODES.CONE, TARGET_MODES.LINE].includes(mode)) {
@@ -48,7 +48,8 @@ export class TargetingService {
     if (relationshipModes.includes(mode) && targeting.filter && targeting.filter !== "all" && !source) {
       throw new Error("Selecione o token executante para filtrar aliados ou inimigos.");
     }
-    targets = TargetGeometry.filterTokens(targets, { source, filter: targeting.filter });
+    if (targeting.includeSource && source && !targets.includes(source) && mode !== TARGET_MODES.POINT) targets.unshift(source);
+    targets = TargetGeometry.filterTokens(targets, { source, filter: targeting.filter, includeSource: targeting.includeSource === true });
     return { cancelled: false, targets, location, template };
   }
 

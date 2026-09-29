@@ -17,6 +17,7 @@ export function createDefaultProject(overrides = {}) {
       range: null,
       blockOutOfRange: false,
       clearTargetsAfterExecution: false,
+      includeSource: false,
       radius: 3,
       angle: 90,
       width: 1

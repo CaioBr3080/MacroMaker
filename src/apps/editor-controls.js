@@ -7,6 +7,7 @@ export function targetingFieldActive(field, targeting = {}) {
   if (field === "width") return mode === "line";
   if (["range", "blockOutOfRange"].includes(field)) return mode !== "none" && source !== "none";
   if (field === "filter") return !["none", "point"].includes(mode);
+  if (field === "includeSource") return mode !== "none" && mode !== "point" && source !== "none";
   if (["minTargets", "maxTargets"].includes(field)) return mode !== "none";
   return true;
 }
@@ -114,6 +115,7 @@ export const FIELD_HELP = {
   width: "Largura da linha nas unidades da cena. O comprimento vai da origem até o ponto clicado.",
   blockOutOfRange: "Impede executar quando um alvo está além do alcance. Precisa de uma origem e de alcance preenchido.",
   clearTargetsAfterExecution: "Desmarca somente os alvos usados ao concluir a macro. Não altera o token executante controlado.",
+  includeSource: "Permite incluir o próprio token executante na lista de alvos. Útil para curas, buffs e efeitos aplicados em si mesmo.",
   minTargets: "Quantidade mínima de alvos. Em Escolher ponto, o ponto conta como uma seleção.",
   maxTargets: "Quantidade máxima permitida de alvos (não é o raio da área).",
   filter: "Todos, aliados ou inimigos. A relação é comparada com o token de origem.",

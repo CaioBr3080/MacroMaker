@@ -21,6 +21,7 @@
         "maxTargets": { "type": "integer", "minimum": 0 },
         "range": { "type": ["number", "null"] },
         "blockOutOfRange": { "type": "boolean" },
+        "includeSource": { "type": "boolean" },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "angle": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 },
         "width": { "type": "number", "exclusiveMinimum": 0 }

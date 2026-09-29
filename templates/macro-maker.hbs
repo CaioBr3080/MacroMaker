@@ -162,6 +162,10 @@
           <input type="checkbox" {{#if project.targeting.clearTargetsAfterExecution}}checked{{/if}} data-project-path="targeting.clearTargetsAfterExecution" data-value-type="boolean">
           Desmarcar alvos ao terminar
         </label>
+        <label class="checkbox-field">
+          <input type="checkbox" {{#if project.targeting.includeSource}}checked{{/if}} data-project-path="targeting.includeSource" data-value-type="boolean">
+          Incluir executante como alvo
+        </label>
       </fieldset>
 
       <fieldset class="macro-maker-project-fields">
@@ -357,12 +361,12 @@
                 {{#if isModifyToken}}
                   <fieldset class="macro-maker-token-mutation-settings full">
                     <legend><i class="fas fa-user-gear"></i> Modificar token da cena</legend>
-                    <p class="full macro-maker-help-note">Altera somente o Token desta cena; não muda o protótipo do Ator. Campos vazios permanecem como estão. Recursos não fazem parte desta etapa.</p>
+                    <p class="full macro-maker-help-note">Altera somente o Token desta cena; não muda o protótipo do Ator. Campos vazios permanecem como estão. Recursos não fazem parte desta etapa. Campos numéricos aceitam variáveis como FOR ou @FOR.</p>
                     <label>Aplicar em
                       <select data-step-index="{{index}}" data-step-path="scope" data-value="{{scope}}"><option value="target">Alvo principal</option><option value="targets">Todos os alvos</option><option value="source">Executante</option></select>
                     </label>
                     <label>Nome <input type="text" value="{{changes.name}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.name" data-value-type="optional-string"></label>
-                    <label>Opacidade <input type="number" min="0" max="1" step="0.05" value="{{changes.alpha}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.alpha" data-value-type="optional-number"></label>
+                    <label>Opacidade <input type="text" inputmode="decimal" data-allow-variable="true" min="0" max="1" step="0.05" value="{{changes.alpha}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.alpha" data-value-type="optional-number"></label>
                     <label>Oculto
                       <select data-step-index="{{index}}" data-step-path="changes.hidden" data-value="{{changes.hidden}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Ocultar</option><option value="false">Mostrar</option></select>
                     </label>
@@ -372,7 +376,7 @@
                     <label>Exibir nome
                       <select data-step-index="{{index}}" data-step-path="changes.displayName" data-value="{{changes.displayName}}" data-value-type="optional-number"><option value="">Não alterar</option><option value="0">Nunca</option><option value="10">Controlado</option><option value="20">Ao passar o mouse</option><option value="30">Para proprietário</option><option value="40">Ao passar ou controlar</option><option value="50">Sempre</option></select>
                     </label>
-                    <label>Rotação (graus) <input type="number" step="any" value="{{changes.rotation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.rotation" data-value-type="optional-number"></label>
+                    <label>Rotação (graus) <input type="text" inputmode="decimal" data-allow-variable="true" step="any" value="{{changes.rotation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.rotation" data-value-type="optional-number"></label>
                     <label>Travar rotação
                       <select data-step-index="{{index}}" data-step-path="changes.lockRotation" data-value="{{changes.lockRotation}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Sim</option><option value="false">Não</option></select>
                     </label>
@@ -382,10 +386,10 @@
                       <label class="file-field full">Imagem do token
                         <span><input type="text" value="{{changes.texture.src}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.texture.src" data-value-type="optional-string"><button type="button" data-action="browse-file" data-index="{{index}}" data-step-field="changes.texture.src" data-file-type="image" title="Escolher imagem"><i class="fas fa-folder-open"></i></button></span>
                       </label>
-                      <label>Largura (quadrados) <input type="number" min="0.1" step="0.1" value="{{changes.width}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.width" data-value-type="optional-number"></label>
-                      <label>Altura (quadrados) <input type="number" min="0.1" step="0.1" value="{{changes.height}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.height" data-value-type="optional-number"></label>
-                      <label>Escala X <input type="number" step="0.05" value="{{changes.texture.scaleX}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.texture.scaleX" data-value-type="optional-number"></label>
-                      <label>Escala Y <input type="number" step="0.05" value="{{changes.texture.scaleY}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.texture.scaleY" data-value-type="optional-number"></label>
+                      <label>Largura (quadrados) <input type="text" inputmode="decimal" data-allow-variable="true" min="0.1" step="0.1" value="{{changes.width}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.width" data-value-type="optional-number"></label>
+                      <label>Altura (quadrados) <input type="text" inputmode="decimal" data-allow-variable="true" min="0.1" step="0.1" value="{{changes.height}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.height" data-value-type="optional-number"></label>
+                      <label>Escala X <input type="text" inputmode="decimal" data-allow-variable="true" step="0.05" value="{{changes.texture.scaleX}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.texture.scaleX" data-value-type="optional-number"></label>
+                      <label>Escala Y <input type="text" inputmode="decimal" data-allow-variable="true" step="0.05" value="{{changes.texture.scaleY}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.texture.scaleY" data-value-type="optional-number"></label>
                       <label>Cor da imagem <input type="text" value="{{changes.texture.tint}}" placeholder="#RRGGBB" data-step-index="{{index}}" data-step-path="changes.texture.tint" data-value-type="optional-string"></label>
                     </fieldset>
 
@@ -393,8 +397,8 @@
                       <label>Visão ativa
                         <select data-step-index="{{index}}" data-step-path="changes.sight.enabled" data-value="{{changes.sight.enabled}}" data-value-type="optional-boolean"><option value="">Não alterar</option><option value="true">Ativar</option><option value="false">Desativar</option></select>
                       </label>
-                      <label>Alcance <input type="number" min="0" step="any" value="{{changes.sight.range}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.range" data-value-type="optional-number"></label>
-                      <label>Ângulo <input type="number" min="0" max="360" step="any" value="{{changes.sight.angle}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.angle" data-value-type="optional-number"></label>
+                      <label>Alcance <input type="text" inputmode="decimal" data-allow-variable="true" min="0" step="any" value="{{changes.sight.range}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.range" data-value-type="optional-number"></label>
+                      <label>Ângulo <input type="text" inputmode="decimal" data-allow-variable="true" min="0" max="360" step="any" value="{{changes.sight.angle}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.sight.angle" data-value-type="optional-number"></label>
                       <label>Modo de visão <input type="text" list="macro-maker-vision-modes" value="{{changes.sight.visionMode}}" placeholder="Não alterar (ex.: basic)" data-step-index="{{index}}" data-step-path="changes.sight.visionMode" data-value-type="optional-string"></label>
                       <label>Cor da visão <input type="text" value="{{changes.sight.color}}" placeholder="#RRGGBB" data-step-index="{{index}}" data-step-path="changes.sight.color" data-value-type="optional-string"></label>
                       <label>Atenuação <input type="range" min="-1" max="1" step="0.05" value="{{changes.sight.attenuation}}" data-range-output="sight-attenuation-{{index}}" data-step-index="{{index}}" data-step-path="changes.sight.attenuation" data-value-type="optional-number"><output data-range-output-value="sight-attenuation-{{index}}">{{changes.sight.attenuation}}</output></label>
@@ -404,17 +408,17 @@
                     </fieldset>
 
                     <fieldset class="full"><legend>Luz emitida</legend>
-                      <label>Luz fraca <input type="number" min="0" step="any" value="{{changes.light.dim}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.dim" data-value-type="optional-number"></label>
-                      <label>Luz forte <input type="number" min="0" step="any" value="{{changes.light.bright}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.bright" data-value-type="optional-number"></label>
-                      <label>Ângulo <input type="number" min="0" max="360" step="any" value="{{changes.light.angle}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.angle" data-value-type="optional-number"></label>
+                      <label>Luz fraca <input type="text" inputmode="decimal" data-allow-variable="true" min="0" step="any" value="{{changes.light.dim}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.dim" data-value-type="optional-number"></label>
+                      <label>Luz forte <input type="text" inputmode="decimal" data-allow-variable="true" min="0" step="any" value="{{changes.light.bright}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.bright" data-value-type="optional-number"></label>
+                      <label>Ângulo <input type="text" inputmode="decimal" data-allow-variable="true" min="0" max="360" step="any" value="{{changes.light.angle}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.angle" data-value-type="optional-number"></label>
                       <label>Cor da luz <input type="text" value="{{changes.light.color}}" placeholder="#RRGGBB" data-step-index="{{index}}" data-step-path="changes.light.color" data-value-type="optional-string"></label>
-                      <label>Opacidade <input type="number" min="0" max="1" step="0.05" value="{{changes.light.alpha}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.alpha" data-value-type="optional-number"></label>
-                      <label>Coloração <input type="number" step="1" value="{{changes.light.coloration}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.coloration" data-value-type="optional-number"></label>
-                      <label>Luminosidade <input type="number" step="0.05" value="{{changes.light.luminosity}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.luminosity" data-value-type="optional-number"></label>
+                      <label>Opacidade <input type="text" inputmode="decimal" data-allow-variable="true" min="0" max="1" step="0.05" value="{{changes.light.alpha}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.alpha" data-value-type="optional-number"></label>
+                      <label>Coloração <input type="text" inputmode="decimal" data-allow-variable="true" step="1" value="{{changes.light.coloration}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.coloration" data-value-type="optional-number"></label>
+                      <label>Luminosidade <input type="text" inputmode="decimal" data-allow-variable="true" step="0.05" value="{{changes.light.luminosity}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.luminosity" data-value-type="optional-number"></label>
                       <label>Atenuação <input type="range" min="-1" max="1" step="0.05" value="{{changes.light.attenuation}}" data-range-output="light-attenuation-{{index}}" data-step-index="{{index}}" data-step-path="changes.light.attenuation" data-value-type="optional-number"><output data-range-output-value="light-attenuation-{{index}}">{{changes.light.attenuation}}</output></label>
-                      <label>Saturação <input type="number" step="0.05" value="{{changes.light.saturation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.saturation" data-value-type="optional-number"></label>
-                      <label>Contraste <input type="number" step="0.05" value="{{changes.light.contrast}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.contrast" data-value-type="optional-number"></label>
-                      <label>Sombras <input type="number" step="0.05" value="{{changes.light.shadows}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.shadows" data-value-type="optional-number"></label>
+                      <label>Saturação <input type="text" inputmode="decimal" data-allow-variable="true" step="0.05" value="{{changes.light.saturation}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.saturation" data-value-type="optional-number"></label>
+                      <label>Contraste <input type="text" inputmode="decimal" data-allow-variable="true" step="0.05" value="{{changes.light.contrast}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.contrast" data-value-type="optional-number"></label>
+                      <label>Sombras <input type="text" inputmode="decimal" data-allow-variable="true" step="0.05" value="{{changes.light.shadows}}" placeholder="Não alterar" data-step-index="{{index}}" data-step-path="changes.light.shadows" data-value-type="optional-number"></label>
                       <label>Tipo de animação <input type="text" list="macro-maker-light-animations" value="{{changes.light.animation.type}}" placeholder="Não alterar (ex.: torch)" data-step-index="{{index}}" data-step-path="changes.light.animation.type" data-value-type="optional-string"></label>
                       <label>Velocidade da animação <input type="range" min="0" max="10" step="1" value="{{changes.light.animation.speed}}" data-range-output="light-speed-{{index}}" data-step-index="{{index}}" data-step-path="changes.light.animation.speed" data-value-type="optional-number"><output data-range-output-value="light-speed-{{index}}">{{changes.light.animation.speed}}</output></label>
                       <label>Intensidade da animação <input type="range" min="0" max="10" step="1" value="{{changes.light.animation.intensity}}" data-range-output="light-intensity-{{index}}" data-step-index="{{index}}" data-step-path="changes.light.animation.intensity" data-value-type="optional-number"><output data-range-output-value="light-intensity-{{index}}">{{changes.light.animation.intensity}}</output></label>

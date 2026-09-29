@@ -36,3 +36,10 @@ test("filtra aliados e inimigos e nunca inclui a origem", () => {
   assert.deepEqual(TargetGeometry.filterTokens(tokens, { source, filter: "enemy" }), [enemy]);
   assert.deepEqual(TargetGeometry.filterTokens(tokens, { source, filter: "all" }), [ally, enemy, neutral]);
 });
+
+test("inclui a origem somente quando o autoalvo é solicitado", () => {
+  const source = { id: "source", document: { disposition: 1 } };
+  const ally = { id: "ally", document: { disposition: 1 } };
+  assert.deepEqual(TargetGeometry.filterTokens([source, ally], { source, filter: "ally", includeSource: true }), [source, ally]);
+  assert.deepEqual(TargetGeometry.filterTokens([source, ally], { source, filter: "ally" }), [ally]);
+});

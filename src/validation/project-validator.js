@@ -18,6 +18,9 @@ function clone(value) {
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
+function isNumericReference(value) {
+  return typeof value === "string" && /^@?[A-Za-z_][A-Za-z0-9_]*$/.test(value.trim());
+}
 
 export class ProjectValidationError extends Error {
   constructor(issues) {
@@ -130,6 +133,7 @@ export class ProjectValidator {
     targeting.range ??= null;
     targeting.blockOutOfRange ??= false;
     targeting.clearTargetsAfterExecution ??= false;
+    targeting.includeSource ??= false;
     targeting.radius ??= 3;
     targeting.angle ??= 90;
     targeting.width ??= 1;
@@ -168,6 +172,9 @@ export class ProjectValidator {
     }
     if (typeof targeting.clearTargetsAfterExecution !== "boolean") {
       issues.push({ path: "targeting.clearTargetsAfterExecution", message: "clearTargetsAfterExecution precisa ser booleano." });
+    }
+    if (typeof targeting.includeSource !== "boolean") {
+      issues.push({ path: "targeting.includeSource", message: "includeSource precisa ser booleano." });
     }
     this.#normalizePositiveNumber(targeting, "radius", "targeting.radius", issues);
     this.#normalizePositiveNumber(targeting, "angle", "targeting.angle", issues, { maximum: 360 });
@@ -580,16 +587,16 @@ export class ProjectValidator {
         if (booleanPaths.has(current) && typeof next !== "boolean") {
           issues.push({ path: `${path}.changes.${current}`, message: "Este campo do token precisa ser verdadeiro ou falso." });
         }
-        if (numberPaths.has(current) && !Number.isFinite(Number(next))) {
+        if (numberPaths.has(current) && !Number.isFinite(Number(next)) && !isNumericReference(next)) {
           issues.push({ path: `${path}.changes.${current}`, message: "Este campo do token precisa ser numérico." });
-        } else if (numberPaths.has(current)) value[key] = Number(next);
-        if (["alpha", "light.alpha"].includes(current) && (Number(next) < 0 || Number(next) > 1)) {
+        } else if (numberPaths.has(current) && Number.isFinite(Number(next))) value[key] = Number(next);
+        if (["alpha", "light.alpha"].includes(current) && !isNumericReference(next) && (Number(next) < 0 || Number(next) > 1)) {
           issues.push({ path: `${path}.changes.${current}`, message: "Opacidade precisa ficar entre 0 e 1." });
         }
-        if (["width", "height"].includes(current) && Number(next) <= 0) {
+        if (["width", "height"].includes(current) && !isNumericReference(next) && Number(next) <= 0) {
           issues.push({ path: `${path}.changes.${current}`, message: "Largura e altura precisam ser maiores que zero." });
         }
-        if (["displayName", "displayBars"].includes(current) && (!Number.isInteger(Number(next)) || Number(next) < 0)) {
+        if (["displayName", "displayBars"].includes(current) && !isNumericReference(next) && (!Number.isInteger(Number(next)) || Number(next) < 0)) {
           issues.push({ path: `${path}.changes.${current}`, message: "O modo de exibição precisa ser um número inteiro não negativo." });
         }
       }
