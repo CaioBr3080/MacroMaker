@@ -19,3 +19,16 @@ test("duplicação regenera IDs internos e reescreve referências entre etapas",
   assert.equal(copy.steps[2].stepId, copy.steps[0].id);
   assert.equal(source.steps[1].targetId, "step-target");
 });
+
+test("duplicação reescreve conclusão em condições, grupos e ramificações", () => {
+  const condition = { type: "stepCompleted", stepId: "step-target" };
+  const original = { steps: [
+    { id: "step-target", type: "wait" },
+    { id: "step-branch", type: "branch", condition: { type: "group", operator: "not", children: [condition] },
+      then: [{ id: "step-child", type: "wait", conditions: [condition] }], else: [] }
+  ] };
+  const copy = regenerateProjectIds(original);
+  assert.equal(copy.steps[1].condition.children[0].stepId, copy.steps[0].id);
+  assert.equal(copy.steps[1].then[0].conditions[0].stepId, copy.steps[0].id);
+  assert.equal(original.steps[1].condition.children[0].stepId, "step-target");
+});

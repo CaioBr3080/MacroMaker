@@ -28,6 +28,7 @@ export class StepRunner {
       try {
         context.currentStep = step;
         await stepRegistry.execute(step, context);
+        if (!context.cancelled && step.id) (context.completedStepIds ??= new Set()).add(step.id);
         if (events) await events.afterStep(step);
       } catch (error) {
         const label = step.label || step.type || "sem nome";

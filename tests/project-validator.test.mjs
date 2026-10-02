@@ -11,6 +11,17 @@ function registry() {
   });
 }
 
+test("valida repetições inteiras e condição de conclusão de etapa", () => {
+  const animation = { type: "animation", file: "test.webm", repeatCount: "3", conditions: [{ type: "stepCompleted", stepId: "step-wait" }] };
+  const normalize = (step) => ProjectValidator.normalize({ name: "Repetições", steps: [{ id: "step-wait", type: "wait", ms: 1 }, step] });
+  assert.equal(normalize(animation).steps[1].repeatCount, 3);
+  assert.equal(normalize({ type: "animation", file: "test.webm" }).steps[1].repeatCount, 1);
+  for (const repeatCount of [0, -1, 1.5, "abc", Infinity]) {
+    assert.throws(() => normalize({ ...animation, repeatCount }), ProjectValidationError);
+  }
+  assert.throws(() => normalize({ ...animation, conditions: [{ type: "stepCompleted" }] }), /Escolha a etapa/);
+});
+
 test("valida estilos de mensagem e mantém variáveis numéricas do projeto", () => {
   const project = { name: "Força", variables: { FOR: 4 }, steps: [{ type: "roll", formula: "1d20 + FOR", messageStyle: { font: "Arial", size: "18", color: "#aabbcc", bold: true } }] };
   const normalized = ProjectValidator.normalize(project);

@@ -131,7 +131,9 @@ export class RollExecutor {
     if (typeof formula !== "string" || !formula.trim()) throw new Error("A fórmula da rolagem está vazia.");
     const RollClass = globalThis.CONFIG?.Dice?.rolls?.[0] ?? globalThis.Roll;
     if (!RollClass) throw new Error("A classe de rolagem do Foundry não está disponível.");
-    return new RollClass(resolveFormulaVariables(formula, context.variables), context.variables).evaluate();
+    // The formula is already configured by the macro. Systems must not try to
+    // derive its dice from actor attributes when reconstructing it for chat.
+    return new RollClass(resolveFormulaVariables(formula, context.variables), context.variables, { configured: true }).evaluate();
   }
 
   static async #resolveDefense(step, context) {

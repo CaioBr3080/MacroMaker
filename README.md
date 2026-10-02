@@ -4,7 +4,7 @@ Base funcional de um construtor visual de automações para Foundry VTT, com foc
 
 ## Estado atual
 
-Esta versão `0.9.30` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
+Esta versão `0.9.38` entrega a base do MVP até importação, compartilhamento e migrações. Ela já oferece:
 
 - botão próprio **Macro Maker** na barra esquerda do canvas, abrindo uma janela redimensionável de gerenciamento;
 - árvore de pastas e subpastas recolhível na janela do Macro Maker; o GM cria, renomeia, colore, atribui acesso e move projetos ou subpastas por arrastar-e-soltar sem sair dela;
@@ -87,6 +87,8 @@ macro-maker/
 - **Modificar token:** campos numéricos aceitam variáveis do projeto, como `FOR` ou `@FOR`, incluindo distância de visão e de luz. O valor é resolvido no momento da execução. Com o módulo Vision Edge Attenuation ativo, a etapa também configura atenuação da borda da visão/luz e se cada valor usa o padrão do mundo ou um valor personalizado.
 - **Mover token:** escolha o executante, alvo principal ou todos os alvos; mova para executante, alvo ou ponto escolhido. Teleporte altera a posição imediatamente; Movimento animado usa a animação nativa do Foundry. Para um ponto livre, configure o targeting do projeto como **Ponto no canvas**. Jogadores movem tokens editáveis diretamente; nos demais, o GM ativo valida e executa a solicitação.
 - **Etapas:** use a seta de recolher para deixar só o cabeçalho. Edite o número para mudar a posição; Enter ou sair do campo confirma. A lista lateral permite navegar pela sequência sem expandir todos os cartões.
+- **Etapa já concluída:** adicione essa condição e selecione a etapa pelo número/nome. Ela só passa depois que a etapa escolhida terminou nesta execução; etapas desativadas, ignoradas por condição, canceladas ou com erro não contam. Também funciona em decisões de ramificação e em grupos AND/OR/NOT. A referência acompanha a etapa ao reordenar ou duplicar o projeto.
+- **Repetir animação:** em Animação, use **Reproduzir animação (vezes)**. `1` toca uma vez; `3` toca três vezes seguidas. Se houver duração definida, ela vale para cada ciclo. Persistentes sem limite mantêm seu comportamento anterior; ao escolher mais de uma reprodução, o efeito encerra no último ciclo.
 - **Distâncias:** os campos cinza não se aplicam ao método selecionado. Seus valores são mantidos para quando você voltar àquele método. Passe o mouse sobre `?` para consultar exemplos e unidades.
 - **Imagens e cores:** o botão de pasta ao lado da imagem do Macro abre o seletor do Foundry. Cores aceitam o seletor RGB e valores `#RRGGBB`.
 - **Pastas da aba:** o GM cria e edita nome, cor, destino e permissões diretamente na aba. Arraste um projeto ou uma pasta para outra pasta; use “Solte aqui para mover à raiz” para remover o vínculo.

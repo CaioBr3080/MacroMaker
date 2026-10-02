@@ -39,6 +39,10 @@ export class ConditionEngine {
     const operator = condition.operator ?? "eq";
 
     switch (condition.type) {
+      case "stepCompleted":
+        actual = context.completedStepIds?.has(condition.stepId) === true;
+        matched = actual;
+        break;
       case "critical": {
         const isCritical = context.critical === true;
         const hasNaturalLimit = condition.value !== undefined && String(condition.value).trim() !== "";

@@ -27,6 +27,7 @@ export function createCoreStepRegistry() {
       target: "target",
       stretchTo: false,
       rotateTowardsTarget: false,
+      repeatCount: 1,
       persist: false,
       duplicatePolicy: "replace"
     },

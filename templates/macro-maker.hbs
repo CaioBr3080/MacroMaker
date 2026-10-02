@@ -243,14 +243,22 @@
                         <option value="hasEffect">Possui efeito</option><option value="hasTag">Possui tag</option>
                         <option value="targetCount">Quantidade de alvos</option><option value="variable">Variável</option>
                         <option value="menuOption">Opção de menu</option><option value="group">Grupo lógico</option>
+                        <option value="stepCompleted">Etapa já concluída</option>
                       </select>
                       {{#if isGroup}}
                         <select data-step-index="{{../index}}" data-step-path="{{path}}.operator" data-value="{{operator}}"><option value="and">AND</option><option value="or">OR</option><option value="not">NOT</option></select>
                         <button type="button" data-action="add-condition" data-index="{{../index}}" data-path="{{path}}.children"><i class="fas fa-plus"></i></button>
                       {{else}}
+                        {{#if isStepCompleted}}
+                          <select aria-label="Etapa que precisa ter sido concluída" data-step-index="{{../index}}" data-step-path="{{path}}.stepId" data-value="{{stepId}}">
+                            <option value="">Escolha uma etapa</option>
+                            {{#each completionStepChoices}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+                          </select>
+                        {{else}}
                         <select data-step-index="{{../index}}" data-step-path="{{path}}.operator" data-value="{{operator}}" data-value-type="optional-string"><option value="">Padrão</option><option value="eq">=</option><option value="neq">≠</option><option value="gt">&gt;</option><option value="gte">≥</option><option value="lt">&lt;</option><option value="lte">≤</option><option value="includes">Contém</option></select>
                         <input type="text" value="{{key}}" placeholder="Variável/chave" data-step-index="{{../index}}" data-step-path="{{path}}.key" data-value-type="optional-string">
                         <input type="text" value="{{value}}" placeholder="Valor" data-step-index="{{../index}}" data-step-path="{{path}}.value" data-value-type="optional-string">
+                        {{/if}}
                       {{/if}}
                       {{#if deletable}}<button type="button" data-action="delete-condition" data-index="{{../index}}" data-path="{{path}}"><i class="fas fa-trash"></i></button>{{/if}}
                     </div>
@@ -289,6 +297,7 @@
                   <label>Cor <input type="text" value="{{tint}}" placeholder="#ffffff" data-step-index="{{index}}" data-step-path="tint"></label>
                   <label>Ajuste de rotação (graus) <input type="number" step="1" value="{{rotation}}" data-step-index="{{index}}" data-step-path="rotation" data-value-type="optional-number"></label>
                   <label>Velocidade <input type="number" min="0.01" step="0.1" value="{{playbackRate}}" data-step-index="{{index}}" data-step-path="playbackRate" data-value-type="optional-number"></label>
+                  <label title="Quantidade total de reproduções seguidas: 1 toca uma vez, 3 toca três vezes. Com duração definida, ela vale para cada reprodução. Um persistente com mais de uma reprodução termina no último ciclo.">Reproduzir animação (vezes) <input type="number" min="1" step="1" value="{{repeatCount}}" data-step-index="{{index}}" data-step-path="repeatCount" data-value-type="number"></label>
                   <label>Fade in (ms) <input type="number" min="0" value="{{fadeIn}}" data-step-index="{{index}}" data-step-path="fadeIn" data-value-type="optional-number"></label>
                   <label>Fade out (ms) <input type="number" min="0" value="{{fadeOut}}" data-step-index="{{index}}" data-step-path="fadeOut" data-value-type="optional-number"></label>
                   <label>Esticar somente após distância <input type="number" min="0" step="any" value="{{distanceBehavior.stretchAfter}}" data-step-index="{{index}}" data-step-path="distanceBehavior.stretchAfter" data-value-type="optional-number"></label>
@@ -702,14 +711,21 @@
                     <header><strong>Decisão da ramificação</strong></header>
                     {{#each branchConditionNodes}}
                       <div class="macro-maker-condition-node" style="margin-left: {{indent}}px">
-                        <select data-condition-node-type data-step-index="{{../index}}" data-step-path="{{path}}.type" data-value="{{type}}"><option value="critical">Crítico</option><option value="hit">Acerto</option><option value="miss">Erro</option><option value="distance">Distância</option><option value="rollTotal">Rolagem</option><option value="damage">Dano</option><option value="naturalDie">Dado natural</option><option value="hpPercent">HP %</option><option value="hasItem">Item</option><option value="hasEffect">Efeito</option><option value="hasTag">Tag</option><option value="targetCount">Alvos</option><option value="variable">Variável</option><option value="menuOption">Opção de menu</option><option value="group">Grupo</option></select>
+                        <select data-condition-node-type data-step-index="{{../index}}" data-step-path="{{path}}.type" data-value="{{type}}"><option value="critical">Crítico</option><option value="hit">Acerto</option><option value="miss">Erro</option><option value="distance">Distância</option><option value="rollTotal">Rolagem</option><option value="damage">Dano</option><option value="naturalDie">Dado natural</option><option value="hpPercent">HP %</option><option value="hasItem">Item</option><option value="hasEffect">Efeito</option><option value="hasTag">Tag</option><option value="targetCount">Alvos</option><option value="variable">Variável</option><option value="menuOption">Opção de menu</option><option value="stepCompleted">Etapa já concluída</option><option value="group">Grupo</option></select>
                         {{#if isGroup}}
                           <select data-step-index="{{../index}}" data-step-path="{{path}}.operator" data-value="{{operator}}"><option value="and">AND</option><option value="or">OR</option><option value="not">NOT</option></select>
                           <button type="button" data-action="add-condition" data-index="{{../index}}" data-path="{{path}}.children"><i class="fas fa-plus"></i></button>
                         {{else}}
+                          {{#if isStepCompleted}}
+                            <select aria-label="Etapa que precisa ter sido concluída" data-step-index="{{../index}}" data-step-path="{{path}}.stepId" data-value="{{stepId}}">
+                              <option value="">Escolha uma etapa</option>
+                              {{#each completionStepChoices}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+                            </select>
+                          {{else}}
                           <select data-step-index="{{../index}}" data-step-path="{{path}}.operator" data-value="{{operator}}"><option value="eq">=</option><option value="neq">≠</option><option value="gt">&gt;</option><option value="gte">≥</option><option value="lt">&lt;</option><option value="lte">≤</option><option value="includes">Contém</option></select>
                           <input type="text" value="{{key}}" placeholder="Variável/chave" data-step-index="{{../index}}" data-step-path="{{path}}.key">
                           <input type="text" value="{{value}}" placeholder="Valor" data-step-index="{{../index}}" data-step-path="{{path}}.value">
+                          {{/if}}
                         {{/if}}
                         {{#if deletable}}<button type="button" data-action="delete-condition" data-index="{{../index}}" data-path="{{path}}"><i class="fas fa-trash"></i></button>{{/if}}
                       </div>

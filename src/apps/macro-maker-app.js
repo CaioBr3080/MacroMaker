@@ -140,7 +140,19 @@ function deletePath(object, path) {
   else if (parent) delete parent[last];
 }
 
-function flattenConditions(condition, path, { deletable = true, depth = 0 } = {}) {
+function completionStepChoices(steps, prefix = "") {
+  return (steps ?? []).flatMap((step, index) => {
+    const number = prefix ? `${prefix}.${index + 1}` : String(index + 1);
+    return [
+      { id: step.id, label: `${number} — ${step.label || step.type}` },
+      ...completionStepChoices(step.then, `${number} Então`),
+      ...completionStepChoices(step.else, `${number} Senão`),
+      ...completionStepChoices(step.step ? [step.step] : [], `${number} Inserida`)
+    ];
+  });
+}
+
+function flattenConditions(condition, path, { deletable = true, depth = 0, stepChoices = [] } = {}) {
   if (!condition) return [];
   const node = {
     ...condition,
@@ -148,10 +160,12 @@ function flattenConditions(condition, path, { deletable = true, depth = 0 } = {}
     depth,
     indent: depth * 18,
     isGroup: condition.type === "group",
+    isStepCompleted: condition.type === "stepCompleted",
+    completionStepChoices: stepChoices.map((choice) => ({ ...choice, selected: choice.id === condition.stepId })),
     deletable
   };
   const children = condition.type === "group"
-    ? (condition.children ?? []).flatMap((child, index) => flattenConditions(child, `${path}.children.${index}`, { depth: depth + 1 }))
+    ? (condition.children ?? []).flatMap((child, index) => flattenConditions(child, `${path}.children.${index}`, { depth: depth + 1, stepChoices }))
     : [];
   return [node, ...children];
 }
@@ -249,6 +263,7 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.history.reset(this.project);
     }
 
+    const stepChoices = completionStepChoices(this.project.steps);
     return foundry.utils.mergeObject(context, {
       project: this.project,
       variables: Object.entries(this.project.variables ?? {}).map(([name, value], index) => {
@@ -277,8 +292,9 @@ export class MacroMakerApp extends HandlebarsApplicationMixin(ApplicationV2) {
           const settings = step.columnSettings?.[number] ?? {};
           return { number, title: settings.title ?? "", textTransform: settings.textTransform ?? "none", titleStyle: { font: "inherit", size: 16, align: "left", ...settings.titleStyle } };
         }),
-        conditionNodes: (step.conditions ?? []).flatMap((condition, conditionIndex) => flattenConditions(condition, `conditions.${conditionIndex}`)),
-        branchConditionNodes: flattenConditions(step.condition, "condition", { deletable: false }),
+        conditionNodes: (step.conditions ?? []).flatMap((condition, conditionIndex) => flattenConditions(condition, `conditions.${conditionIndex}`, { stepChoices })),
+        branchConditionNodes: flattenConditions(step.condition, "condition", { deletable: false, stepChoices }),
+        repeatCount: step.repeatCount ?? 1,
         thenSteps: (step.then ?? []).map((child, branchIndex) => ({ ...child, branchIndex })),
         elseSteps: (step.else ?? []).map((child, branchIndex) => ({ ...child, branchIndex })),
         index,

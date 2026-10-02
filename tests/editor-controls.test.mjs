@@ -78,7 +78,12 @@ test("fórmulas guardadas em variáveis são expandidas na rolagem do Foundry", 
     DANO: createRollFormulaVariable("2d6 + @FOR")
   };
   assert.deepEqual(parseVariableValue("1d8 + FOR", "formula"), createRollFormulaVariable("1d8 + FOR"));
-  assert.equal(resolveFormulaVariables("ATAQUE + DANO", variables), "(1d20 + @FOR) + (2d6 + @FOR)");
-  assert.equal(resolveFormulaVariables("@DANO", variables), "(2d6 + @FOR)");
+  assert.equal(resolveFormulaVariables("ATAQUE + DANO", variables), "1d20 + @FOR + 2d6 + @FOR");
+  assert.equal(resolveFormulaVariables("@DANO", variables), "2d6 + @FOR");
+  assert.equal(resolveFormulaVariables("ATAQUE * 2", variables), "(1d20 + @FOR) * 2");
+  assert.equal(resolveFormulaVariables("20 - DANO", variables), "20 - (2d6 + @FOR)");
+  assert.equal(resolveFormulaVariables("floor(DANO / 2)", variables), "floor((2d6 + @FOR) / 2)");
+  assert.equal(resolveFormulaVariables("1d6 + DANO - 2", variables), "1d6 + 2d6 + @FOR - 2");
+  assert.throws(() => resolveFormulaVariables("A", { A: createRollFormulaVariable("B"), B: createRollFormulaVariable("A") }), /circular/);
   assert.throws(() => resolveFormulaVariables("TEXTO", { TEXTO: "não numérica" }), /numérica ou uma fórmula/);
 });

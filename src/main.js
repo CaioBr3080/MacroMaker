@@ -5,6 +5,7 @@ import { MacroMakerManager } from "./apps/macro-maker-manager.js";
 import { SummonExecutor } from "./execution/executors/summon-executor.js";
 import { VisageExecutor } from "./execution/executors/visage-executor.js";
 import { MoveTokenExecutor } from "./execution/executors/move-token-executor.js";
+import { installRollChatCompatibility } from "./integrations/roll-chat-compatibility.js";
 
 Hooks.once("init", () => {
   console.info("Macro Maker | inicializando");
@@ -48,6 +49,7 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
+  installRollChatCompatibility();
   SummonExecutor.registerSocket();
   VisageExecutor.registerSocket();
   MoveTokenExecutor.registerSocket();

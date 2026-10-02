@@ -7,6 +7,24 @@ export function resolveFormulaVariables(formula, variables = {}) {
   return expandFormula(String(formula ?? ""), variables, new Set());
 }
 
+function canInlineFormula(formula, token, offset) {
+  const before = formula.slice(0, offset).trim();
+  const after = formula.slice(offset + token.length).trim();
+  // A whole alias, or an additive term, needs no extra parentheses. Keeping
+  // those wrappers hides the primary d20 from systems that inspect terms[0]
+  // while rendering chat (e.g. Ordem Paranormal).
+  if ((!before || before.endsWith("+")) && (!after || /^[+-]/.test(after))) {
+    let depth = 0;
+    for (const char of formula.slice(0, offset)) {
+      if (char === '"' || char === "'") return false;
+      if ("([{".includes(char)) depth++;
+      else if (")]}".includes(char)) depth--;
+    }
+    return depth === 0;
+  }
+  return false;
+}
+
 function expandFormula(formula, variables, stack) {
   return formula.replace(/\[[^\]]*\]|@[A-Za-z_][\w.-]*|[A-Za-z_][A-Za-z0-9_]*/g,
     (token, offset) => {
@@ -26,7 +44,8 @@ function expandFormula(formula, variables, stack) {
         if (stack.has(name)) throw new Error("Referência circular entre fórmulas de variáveis: " + name + ".");
         const nextStack = new Set(stack);
         nextStack.add(name);
-        return "(" + expandFormula(nestedFormula, variables, nextStack) + ")";
+        const expanded = expandFormula(nestedFormula, variables, nextStack);
+        return canInlineFormula(formula, token, offset) ? expanded : "(" + expanded + ")";
       }
       if (typeof value === "number" && Number.isFinite(value)) return "@" + name;
       throw new Error("A variável " + name + " precisa ser numérica ou uma fórmula de rolagem para usar na fórmula.");

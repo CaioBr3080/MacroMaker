@@ -16,10 +16,17 @@ export function regenerateProjectIds(input) {
       if (step.step) assign([step.step]);
     }
   };
+  const rewriteCondition = (condition) => {
+    if (!condition) return;
+    if (replacements.has(condition.stepId)) condition.stepId = replacements.get(condition.stepId);
+    for (const child of condition.children ?? []) rewriteCondition(child);
+  };
   const rewrite = (steps) => {
     for (const step of steps ?? []) {
       if (replacements.has(step.targetId)) step.targetId = replacements.get(step.targetId);
       if (replacements.has(step.stepId)) step.stepId = replacements.get(step.stepId);
+      for (const condition of step.conditions ?? []) rewriteCondition(condition);
+      rewriteCondition(step.condition);
       rewrite(step.then);
       rewrite(step.else);
       if (step.step) rewrite([step.step]);

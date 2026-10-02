@@ -8,9 +8,10 @@ class MockRoll {
   static messages = [];
   static evaluations = [];
 
-  constructor(formula, data) {
+  constructor(formula, data, options = {}) {
     this.formula = formula;
     this.data = data;
+    this.options = options;
     this.total = formula.includes("1d20") ? 17 : formula.includes("1d8") ? 6 : 4;
     this.dice = formula.includes("1d20")
       ? [{ faces: 20, results: [{ result: 17, active: true }] }]
@@ -181,9 +182,36 @@ test("variáveis de fórmula funcionam nos campos de acerto e dano", async (t) =
   await RollExecutor.attack({ formula: "ATAQUE" }, execution);
   const damage = await RollExecutor.damage({ formula: "@DANO", damageType: "corte" }, execution);
 
-  assert.deepEqual(MockRoll.evaluations, ["(1d20 + @FOR)", "(2d6 + @FOR)"]);
-  assert.equal(execution.attack.formula, "(1d20 + @FOR)");
-  assert.equal(damage.parts[0].formula, "(2d6 + @FOR)");
+  assert.deepEqual(MockRoll.evaluations, ["1d20 + @FOR", "2d6 + @FOR"]);
+  assert.equal(execution.attack.formula, "1d20 + @FOR");
+  assert.equal(damage.parts[0].formula, "2d6 + @FOR");
+  assert.equal(MockRoll.messages.length, 2);
+  assert.equal(MockRoll.messages[0].formula, "1d20 + @FOR");
+});
+
+test("ataque por variável chega ao chat com d20 principal e sem configuração de ator", async (t) => {
+  class SystemChatRoll extends MockRoll {
+    async toMessage(data, options) {
+      // Reproduce the system's chat conversion: it needs a top-level d20,
+      // and an already-configured formula instead of data.attributes.
+      assert.ok(!this.formula.startsWith("("), "d20 deve estar no nível principal");
+      assert.equal(this.options.configured, true);
+      return super.toMessage(data, options);
+    }
+  }
+  globalThis.CONFIG = { Dice: { rolls: [SystemChatRoll] } };
+  globalThis.ChatMessage = { getSpeaker: () => ({}) };
+  MockRoll.messages = [];
+  MockRoll.evaluations = [];
+  t.after(() => { delete globalThis.CONFIG; delete globalThis.ChatMessage; });
+  const execution = context({ variables: { FOR: 4, ACERTO: createRollFormulaVariable("1d20 + FOR") } });
+  await RollExecutor.attack({ formula: "@ACERTO", criticalThreshold: 17, rollMode: "blindroll" }, execution);
+  assert.equal(MockRoll.messages.length, 1);
+  assert.equal(MockRoll.evaluations.length, 1);
+  assert.equal(MockRoll.messages[0].options.rollMode, "blindroll");
+  assert.equal(execution.critical, true);
+  await RollExecutor.attack({ formula: "ACERTO + 2" }, execution);
+  assert.equal(MockRoll.messages[1].formula, "1d20 + @FOR + 2");
 });
 test("limiar crítico do ataque aceita variável numérica", async (t) => {
   globalThis.CONFIG = { Dice: { rolls: [MockRoll] } };

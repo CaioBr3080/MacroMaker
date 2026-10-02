@@ -17,6 +17,7 @@ export class ExecutionContext {
       ? foundry.utils.deepClone(project.variables ?? {})
       : clone(project.variables ?? {});
     this.runtimeSteps = clone(project.steps ?? []);
+    this.completedStepIds = new Set();
     this.debugLog = [];
     this.branchStack = [];
     this.attack = null;

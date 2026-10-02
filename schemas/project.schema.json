@@ -134,6 +134,7 @@
           "scale": { "type": "number", "minimum": 0 },
           "scaleToObject": { "type": "number", "minimum": 0 },
           "rotation": { "type": "number" },
+          "repeatCount": { "type": "integer", "minimum": 1 },
           "durationSeconds": { "type": "number", "minimum": 0 },
           "durationRounds": { "type": "number", "minimum": 0 }
         },

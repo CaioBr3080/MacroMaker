@@ -64,6 +64,31 @@ function clearSequencerMock() {
   delete globalThis.Sequencer;
 }
 
+test("repete a animação por ciclos consecutivos e encerra no último, inclusive persistentes", async (t) => {
+  t.after(clearSequencerMock);
+  const context = { project: { id: "project-id" }, resolveLocation: () => null, distanceTo: () => 0 };
+  for (const persist of [false, true]) {
+    const calls = installSequencerMock();
+    await SequencerAdapter.playAnimation({ file: "test.webm", id: "step-id", repeatCount: 3, persist, durationSeconds: 2 }, context);
+    assert.deepEqual(calls.filter((call) => call[1] === "loopOptions"), [["effect", "loopOptions", { loops: 3, endOnLastLoop: true }]]);
+    assert.deepEqual(calls.find((call) => call[1] === "duration"), ["effect", "duration", 2000]);
+    assert.equal(calls.filter((call) => call[1] === "play").length, 1);
+  }
+});
+
+test("animações antigas continuam uma vez e repetição inválida é recusada", async (t) => {
+  t.after(clearSequencerMock);
+  const calls = installSequencerMock();
+  const context = { resolveLocation: () => null, distanceTo: () => 0 };
+  await SequencerAdapter.playAnimation({ file: "test.webm" }, context);
+  assert.ok(!calls.some((call) => call[1] === "loopOptions"));
+  await SequencerAdapter.playAnimation({ file: "test.webm", repeatCount: 4 }, context);
+  assert.deepEqual(calls.find((call) => call[1] === "loopOptions"), ["effect", "loopOptions", { loops: 4, endOnLastLoop: true }]);
+  for (const repeatCount of [0, -1, 1.5, Infinity, "abc"]) {
+    await assert.rejects(SequencerAdapter.playAnimation({ file: "test.webm", repeatCount }, context), /quantidade de reproduções/i);
+  }
+});
+
 test("encadeia animação persistente com a assinatura atual do Sequencer", async (t) => {
   t.after(clearSequencerMock);
   const calls = installSequencerMock();

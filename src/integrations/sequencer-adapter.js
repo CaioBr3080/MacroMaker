@@ -17,6 +17,10 @@ export class SequencerAdapter {
 
   static async playAnimation(step, context) {
     this.assertReady();
+    const repeatCount = Number(step.repeatCount ?? 1);
+    if (!Number.isSafeInteger(repeatCount) || repeatCount < 1) {
+      throw new Error("A quantidade de reproduções precisa ser um inteiro maior ou igual a 1.");
+    }
     const source = context.resolveLocation(step.source ?? "source");
     const target = context.resolveLocation(step.target ?? "target");
     const effectName = step.persist || step.name ? this.persistentName(step, context) : undefined;
@@ -70,7 +74,9 @@ export class SequencerAdapter {
     const duration = this.#durationMilliseconds(step);
     if (duration != null) {
       effect.duration(duration);
-      if (step.persist) effect.loopOptions({ loops: 1, endOnLastLoop: true });
+    }
+    if (repeatCount > 1 || (step.persist && duration != null)) {
+      effect.loopOptions({ loops: repeatCount, endOnLastLoop: true });
     }
     const origin = this.#origin(step, context);
     if (origin) effect.origin(origin);

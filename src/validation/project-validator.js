@@ -343,7 +343,7 @@ export class ProjectValidator {
     const types = [
       "always", "group", "critical", "notCritical", "hit", "miss", "distance", "distanceAbove",
       "distanceAtMost", "rollValue", "rollTotal", "damage", "damageValue", "naturalDie", "hpPercent",
-      "hasItem", "hasEffect", "hasTag", "targetCount", "variable", "variableEquals", "menuOption"
+      "hasItem", "hasEffect", "hasTag", "targetCount", "variable", "variableEquals", "menuOption", "stepCompleted"
     ];
     if (!types.includes(condition.type)) {
       issues.push({ path: `${path}.type`, message: `Tipo de condição desconhecido: ${condition.type}.` });
@@ -368,6 +368,9 @@ export class ProjectValidator {
     }
     if (["variable", "variableEquals", "menuOption"].includes(condition.type) && !safePath(condition.key)) {
       issues.push({ path: `${path}.key`, message: "A condição precisa de um nome de variável válido." });
+    }
+    if (condition.type === "stepCompleted" && !isSafeId(condition.stepId)) {
+      issues.push({ path: `${path}.stepId`, message: "Escolha a etapa que precisa ter sido concluída." });
     }
     if (condition.operator != null && !["eq", "neq", "gt", "gte", "lt", "lte", "includes", "and", "or", "not"].includes(condition.operator)) {
       issues.push({ path: `${path}.operator`, message: `Operador de condição inválido: ${condition.operator}.` });
@@ -489,6 +492,11 @@ export class ProjectValidator {
   }
 
   static #normalizePersistence(step, path, issues) {
+    step.repeatCount ??= 1;
+    this.#normalizeInteger(step, "repeatCount", `${path}.repeatCount`, issues, { minimum: 1 });
+    if (!Number.isSafeInteger(step.repeatCount)) {
+      issues.push({ path: `${path}.repeatCount`, message: "Quantidade de reproduções inválida." });
+    }
     if (step.duplicatePolicy != null && !["replace", "skip", "stack"].includes(step.duplicatePolicy)) {
       issues.push({ path: `${path}.duplicatePolicy`, message: "Política de duplicação inválida." });
     }

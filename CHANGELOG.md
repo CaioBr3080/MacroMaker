@@ -1,3 +1,10 @@
+## 0.9.38 - 2026-10-02
+
+- A etapa Animação permite escolher a quantidade total de reproduções consecutivas; ciclos finitos encerram no último, inclusive quando persistentes.
+- Nova condição Etapa já concluída, selecionável pelo número e nome. Conta apenas etapas concluídas nesta execução, inclusive em ramificações e eventos, preservando referências ao reordenar ou duplicar projetos.
+- Corrigida a expansão de variáveis de fórmula em ataques: parênteses desnecessários não ocultam mais o d20 principal do chat do Ordem Paranormal. As fórmulas são marcadas como já configuradas para impedir que o sistema tente derivar dados de atributos de um ator durante a exibição.
+- Fórmulas que precisam manter parênteses, como `ACERTO * 2`, também recebem proteção contra a falha do realce de críticos do chat do Ordem. Nesses casos, somente a decoração opcional do sistema é omitida; dados, resultado, visibilidade e condições de crítico do Macro Maker são preservados.
+
 ## 0.9.26 - 2026-09-24
 
 - Todos os campos de cor da etapa Menu agora recebem seletor RGB visual sincronizado ao valor #RRGGBB: título, descrição e títulos de coluna.

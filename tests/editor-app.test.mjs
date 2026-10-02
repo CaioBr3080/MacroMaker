@@ -18,6 +18,26 @@ function editor() {
   app.element = { querySelector: () => null, querySelectorAll: () => [] };
   return app;
 }
+
+test("seletor de conclusão usa IDs estáveis, nomes e inclui etapas de ramificação", async () => {
+  const app = editor();
+  app.project.steps = [
+    { id: "wait-step", type: "wait", label: "Espera" },
+    { id: "branch-step", type: "branch", label: "Decisão", condition: { type: "stepCompleted", stepId: "wait-step" }, then: [{ id: "child-step", type: "wait", label: "Espera interna" }], else: [] },
+    { id: "animation-step", type: "animation", conditions: [{ type: "group", operator: "and", children: [{ type: "stepCompleted", stepId: "child-step" }] }] }
+  ];
+  const context = await app._prepareContext({});
+  const node = context.steps[2].conditionNodes[1];
+  assert.equal(node.isStepCompleted, true);
+  assert.equal(node.path, "conditions.0.children.0");
+  assert.equal(node.completionStepChoices.find((choice) => choice.selected).id, "child-step");
+  assert.match(node.completionStepChoices.find((choice) => choice.id === "wait-step").label, /1 — Espera/);
+  assert.equal(context.steps[1].branchConditionNodes[0].completionStepChoices.find((choice) => choice.selected).id, "wait-step");
+  assert.equal(context.steps[2].repeatCount, 1);
+  await action(app, "move-step", { index: "0", offset: "1" });
+  const reordered = await app._prepareContext({});
+  assert.equal(reordered.steps[0].branchConditionNodes[0].completionStepChoices.find((choice) => choice.selected).id, "wait-step");
+});
 async function action(app, name, dataset, extra = {}) {
   return MacroMakerApp.DEFAULT_OPTIONS.actions[name].call(app, {}, { dataset, ...extra });
 }
